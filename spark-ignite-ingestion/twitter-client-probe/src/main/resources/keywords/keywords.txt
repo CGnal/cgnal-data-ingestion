@@ -1,0 +1,6 @@
+AAPL,AppleInc
+GOOGL,Google
+GOOG,Google
+MSFT,Microsoft
+AMZN,Amazon
+FB,Facebook

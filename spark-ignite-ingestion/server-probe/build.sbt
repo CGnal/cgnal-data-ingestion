@@ -15,6 +15,9 @@ libraryDependencies ++= {
   val scalaLoggingV     = "3.7.2"
   val logbackV          = "1.2.3"
   Seq(
+    "com.cgnal" %% "cgnal-core" % "1.0.0-SNAPSHOT",
+    "com.cgnal" %% "data-model" % "1.0.0-SNAPSHOT",
+    "com.cgnal" %% "data-access-ignite-mongo" % "1.0.0-SNAPSHOT",
     "org.apache.ignite" % "ignite-core" % igniteV ,
     "org.apache.ignite" % "ignite-spring" % igniteV ,
     "com.typesafe" % "config" % scalaConfigV ,
@@ -23,3 +26,4 @@ libraryDependencies ++= {
     "org.scalatest" %% "scalatest" % scalaTestV % "test"
   )
 }
+
