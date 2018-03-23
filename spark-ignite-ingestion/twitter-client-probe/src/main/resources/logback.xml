@@ -1,0 +1,19 @@
+<configuration>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender" >
+        <encoder>
+            <pattern>%date - [%level] - from %logger[15] - %message%n%xException[5]</pattern>
+        </encoder>
+    </appender>
+
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT" />
+    </root>
+
+    <logger name="org.springframework" level="WARN"/>
+    <logger name="org.spark" level="WARN"/>
+    <logger name="org.apache.spark" level="ERROR"/>
+    <logger name="org.spark_project" level="ERROR" />
+
+</configuration>
