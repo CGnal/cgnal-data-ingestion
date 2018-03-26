@@ -8,7 +8,7 @@ case class Document(id: String, properties: Properties, body: DocumentBody){
 
   def withBlob(blob: Array[Byte]): Document = copy(body = DocumentBody(body.mimeType, blob))
 
-  def withMimeType(mimeType: MimeTypes): Document = copy(body = DocumentBody(Some(mimeType) , body.blob))
+  def withMimeType(mimeType: MimeType): Document = copy(body = DocumentBody(Some(mimeType) , body.blob))
 
   def withProperty(key: String, property: DocumentProperty) : Document = copy(properties = properties + (key -> property))
 }
