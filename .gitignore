@@ -49,3 +49,9 @@ buildNumber.properties
 /.ensime_cache/
 /.ensime
 
+# Python
+*.pyc
+build
+dist
+.ipynb_checkpoints
+*egg-info
