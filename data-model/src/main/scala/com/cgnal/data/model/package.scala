@@ -12,7 +12,7 @@ package object model {
   type Properties = Map[String, DocumentProperty]
 
   type DocumentProperty =
-    List[String]                             :+:
+      List[String]                             :+:
       Int                                      :+:
       Long                                     :+:
       Float                                    :+:
@@ -21,7 +21,6 @@ package object model {
       String                                   :+:
       LocalDate                                :+:
       LocalDateTime                            :+:
-      //List[String]                             :+:
       CNil
 
   case class Reducer[A](forInt: Int => A,
