@@ -2,6 +2,7 @@ from itertools import islice, tee, izip
 
 from copy import deepcopy as copy
 from collections import Mapping
+from operator import add
 
 
 def groupIterable(iterable, batch_size=10000):
@@ -38,6 +39,21 @@ def union(*dicts):
     return reduce(__dict_merge, dicts)
 
 
+def flattenKeys(input_dict, sep = "."):
+    def _flatten_(key, value):
+        if isinstance(value, dict):
+            return reduce(add, [_flatten_(sep.join([key, name]), item) for name, item in value.items()])
+        else:
+            return [(key, value)]
+    return union(*[dict(_flatten_(key, value)) for key, value in input_dict.items()])
 
 
+def unflattenKeys(input_dict, sep="."):
+    def __translate(key, value):
+        levels = key.split(sep)
+        out = value
+        for level in reversed(levels):
+            out = {level: out}
+        return out
+    return union(*[__translate(key, value) for key, value in input_dict.items()])
 

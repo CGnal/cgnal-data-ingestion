@@ -11,18 +11,6 @@ from cgnal.data.model.core import IterGenerator
 class MongoDAO(object):
     __metaclass__ = ABCMeta
 
-    mapping = {}
-
-    @property
-    def inverse_mapping(self):
-        return {v: k for k, v in self.mapping.items()}
-
-    def translate(self, d):
-        return {self.mapping.get(k, k): v for k, v in d.items()}
-
-    def conversion(self, d):
-        return {self.inverse_mapping.get(k, k): v for k, v in d.items()}
-
     @abstractmethod
     def computeKey(self, obj):
         raise NotImplementedError
@@ -58,11 +46,14 @@ class MongoArchiver(Archiver):
         return IterGenerator( __iterator__ )
 
     def archiveOne(self, obj):
-        json = self.dao.json(obj)
-        return self.collection.insert_one(json)
+        return self.__insert__(obj)
+
+    def __insert__(self, obj):
+        return self.collection.update_one(self.dao.computeKey( obj ),
+                                          {"$set": self.dao.json(obj)}, upsert=True)
 
     def archiveMany(self, objs):
-        return [self.collection.insert_one(self.dao.json(obj)) for obj in objs]
+        return [self.__insert__(obj) for obj in objs]
 
     def archive(self, objs):
         if isinstance(objs, Iterable):

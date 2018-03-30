@@ -1,7 +1,12 @@
 import pandas as pd
 
-from cgnal.utils.dict import union
+import uuid
+
+from cgnal.utils.dict import union, unflattenKeys
 from cgnal.data.model.core import Iterable, LazyIterable, CachedIterable
+
+def generate_random_uuid():
+    return uuid.uuid1().bytes[:12]
 
 class Document(object):
     def __init__(self, uuid, data):
@@ -20,16 +25,8 @@ class Document(object):
             else:
                 raise e
 
-    @staticmethod
-    def fromKeyValueToDict(key, value):
-        levels = key.split(".")
-        out = value
-        for level in reversed(levels):
-            out = {level: out}
-        return out
-
     def addProperty(self, key, value):
-        return Document(self.uuid, union(self.data, self.fromKeyValueToDict(key, value)))
+        return Document(self.uuid, union(self.data, unflattenKeys({key: value})))
 
     @property
     def author(self):
