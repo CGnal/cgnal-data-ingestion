@@ -1,8 +1,11 @@
 package com.cgnal.data.access.ignite.mongo
 
+import java.util
+
 import com.cgnal.core.logging.BaseLogging
 import com.cgnal.data.access.ignite.mongo.config.MongoStorageConfig
 import com.cgnal.data.model.{Document => CgnalDocument, _}
+import com.mongodb.client.model.UpdateOptions
 import javax.cache.Cache
 import org.apache.ignite.cache.store.CacheStoreAdapter
 import org.apache.ignite.lifecycle.LifecycleAware
@@ -10,6 +13,7 @@ import org.mongodb.scala.bson.collection.immutable.Document
 import org.mongodb.scala.model.Filters.equal
 import org.mongodb.scala.{MongoClient, MongoCollection, MongoDatabase}
 
+import scala.collection.JavaConversions._
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Awaitable}
 import scala.language.postfixOps
@@ -45,16 +49,19 @@ class DocumentMongoStorageAdapter
   }
 
   override def delete(key: Any): Unit = {
-    mongoCollection.deleteOne(equal("tweetId", key))
+    mongoCollection.deleteOne(equal("documentId", key))
   }
 
   override def write(entry: Cache.Entry[_ <: String, _ <: CgnalDocument]): Unit = {
     logger.debug(s"Inserting record key: ${entry.getKey} value: ${entry.getValue}")
-    val inserted = execute(mongoCollection.insertOne(toDocument(entry.getValue)).toFuture())
+
+    val options = new UpdateOptions
+    options.upsert(true)
+
+    val inserted = execute(mongoCollection.replaceOne(equal("documentId", entry.getValue.id), toDocument(entry.getValue) , options ).toFuture())
     logger.debug(s"Inserting result [ $inserted ]")
 
   }
-
 
   override def load(key: String): CgnalDocument = {
     logger.debug(s"Loading record with key : $key")
@@ -85,20 +92,20 @@ class DocumentMongoStorageAdapter
     val text: String = document.getString(DocumentMongoStoreAdapter.Text)
 
     CgnalDocument(document.getString(DocumentMongoStoreAdapter.DocumentId), Map.empty, DocumentBody(Some(MimeTypes.applicationJson), text.getBytes("UTF-8")))
-      .withProperty(DocumentProperties.PublishDay, document.getString(DocumentMongoStoreAdapter.PublishDay).toLong)
+      .withProperty(DocumentProperties.PublishDay, document.getLong(DocumentMongoStoreAdapter.PublishDay).toLong)
       .withProperty(DocumentProperties.PublishDate, document.getString(DocumentMongoStoreAdapter.PublishDate))
       .withProperty(DocumentProperties.Language, document.getString(DocumentMongoStoreAdapter.Language))
       .withProperty(DocumentProperties.SourceType, document.getString(DocumentMongoStoreAdapter.SourceType))
       .withProperty(DocumentProperties.SourceName, document.getString(DocumentMongoStoreAdapter.SourceName))
       .withProperty(DocumentProperties.Text, text)
-      .withProperty("UserId", document.getString(DocumentMongoStoreAdapter.UserId).toLong)
-      .withProperty("Symbols", document.getOrDefault(DocumentMongoStoreAdapter.Symbols, List.empty[String]).asInstanceOf[List[String]])
-      .withProperty("HashTags", document.getOrDefault(DocumentMongoStoreAdapter.HashTags, List.empty[String]).asInstanceOf[List[String]])
+      .withProperty("UserId", document.getLong(DocumentMongoStoreAdapter.UserId).toLong)
+      .withProperty("Symbols", document.getOrDefault(DocumentMongoStoreAdapter.Symbols, new util.ArrayList[String]()).asInstanceOf[util.ArrayList[String]].toList)
+      .withProperty("HashTags", document.getOrDefault(DocumentMongoStoreAdapter.HashTags, new util.ArrayList[String]()).asInstanceOf[util.ArrayList[String]].toList)
       .withProperty("Status", document.getOrDefault(DocumentMongoStoreAdapter.Status, "{}").asInstanceOf[String])
 
   }
 
-  private def execute[A](await: Awaitable[A]): A = Await.result[A](await, 500 milliseconds)
+  private def execute[A](await: Awaitable[A]): A = Await.result[A](await, 2000 milliseconds)
 
 
 }

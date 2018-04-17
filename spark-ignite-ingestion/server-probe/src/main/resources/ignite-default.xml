@@ -37,6 +37,10 @@
                     <bean class="org.apache.ignite.configuration.DataRegionConfiguration">
                         <!-- Setting the size of the default region to 8GB. -->
                         <property name="maxSize" value="#{8L * 1024 * 1024 * 1024}"/>
+
+                        <!-- memory metrics -->
+                        <property name="metricsEnabled" value="true"/>
+
                     </bean>
                 </property>
             </bean>

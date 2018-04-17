@@ -1,0 +1,1 @@
+name-1,$AAPL OR #AppleInc OR $GOOGL OR #Google OR $GOOG OR $MSFT OR #Microsoft OR $AMZN OR #Amazon OR $FB OR #Facebook

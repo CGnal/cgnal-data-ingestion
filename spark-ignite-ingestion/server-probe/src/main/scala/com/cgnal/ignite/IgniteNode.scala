@@ -19,7 +19,7 @@ class IgniteNode
 
     vertx.deployVerticle(new IgniteNodeRest("Ignite Server Node", configuration.get[Int]("rest.port"), RestMetadata("Ignite Server Node",RestStatus.OK) , configuration.flattenToMap))
 
-    ignite = Ignition.start("ignite-config.xml")
+    ignite = Ignition.start(configuration.get[String]("ignite.configFilename"))
 
   }
 

@@ -17,6 +17,7 @@ libraryDependencies <++= libraryVersions { v => Seq(
   "com.cgnal" %% "cgnal-rest-vertx" % "1.0.0-SNAPSHOT",
   "com.cgnal" %% "data-model" % "1.0.0-SNAPSHOT",
   "com.cgnal" %% "data-layer-ignite-mongo" % "1.0.0-SNAPSHOT",
+  "com.cgnal" %% "twitter-model-probe" % "1.0.0-SNAPSHOT",
   "com.fasterxml.jackson.module" %% "jackson-module-scala" % v('jackson),
   "org.twitter4j" % "twitter4j-core" % v('twitter4j) ,
   "org.twitter4j" % "twitter4j-stream" % v('twitter4j) ,
