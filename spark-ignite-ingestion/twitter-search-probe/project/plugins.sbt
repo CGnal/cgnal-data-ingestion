@@ -1,0 +1,1 @@
+addSbtPlugin("com.cgnal" % "cgnal-core-plugin" % "1.0.0-SNAPSHOT")

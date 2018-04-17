@@ -12,10 +12,10 @@ trait KeywordsLoader {
   self : BaseLogging =>
 
   protected def keywordsFilter( keywords : Seq[String]): FilterQuery = new FilterQuery()
-    .language("en")
+    .language(TwitterProbeConfig.documentsLanguage)
     .track(keywords : _*)
 
-  private lazy val allLines: Seq[String] = {
+  private  lazy val allLines: Seq[String] = {
     val keywordsFile = new File(TwitterProbeConfig.keywordsFilename)
     if (keywordsFile.exists()) {
       logger.info(s"Loading keywords file $keywordsFile ..")
@@ -26,6 +26,14 @@ trait KeywordsLoader {
       Seq("APPL,apple", "FB,facebook")
     }
   }
+
+  protected def allQueriesFromKeywords : Seq[NamedSearchQuery] = {
+    allLines.map(line => {
+      val Array(key: String, name: String, _*) = line.split(",")
+      NamedSearchQuery("search-" + name.toLowerCase,"$" + key.toLowerCase + " OR " + "#" + name.toLowerCase)
+    })
+  }
+
 
   protected def allSymbols: Seq[String] = {
     allLines.map(line => {

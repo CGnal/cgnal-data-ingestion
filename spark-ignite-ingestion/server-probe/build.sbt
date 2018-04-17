@@ -9,7 +9,8 @@ resolvers ++= Seq(
 
 libraryVersions ++= Map(
   'vertx -> "3.5.0",
-  'ignite -> "2.4.0"
+  'ignite -> "2.4.0",
+  'mongoscaladriver -> "1.2.1"
 )
 
 libraryDependencies <++= libraryVersions { v => Seq(
@@ -18,9 +19,11 @@ libraryDependencies <++= libraryVersions { v => Seq(
   "com.cgnal" %% "cgnal-rest-vertx" % "1.0.0-SNAPSHOT",
   "com.cgnal" %% "data-model" % "1.0.0-SNAPSHOT",
   "com.cgnal" %% "data-layer-ignite-mongo" % "1.0.0-SNAPSHOT",
+  "org.mongodb.scala" %% "mongo-scala-driver" % v('mongoscaladriver) ,
   "io.vertx" % "vertx-web" % v('vertx),
   "org.apache.ignite" % "ignite-core" % v('ignite) ,
   "org.apache.ignite" % "ignite-spring" % v('ignite) ,
+  "org.apache.ignite" % "ignite-indexing" % v('ignite) ,
   "org.scalatest" %% "scalatest" %  v('scalatest) % "test"
 )}
 

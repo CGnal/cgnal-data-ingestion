@@ -9,11 +9,13 @@ resolvers ++= Seq(
 libraryVersions ++= Map(
   'jackson -> "2.9.0",
   'ignite -> "2.4.0",
-  'spark -> "2.2.0"
+  'spark -> "2.2.0",
+  'twitter4j -> "4.0.4"
 )
 
 libraryDependencies <++= libraryVersions { v => Seq(
   "com.cgnal" %% "twitter-common-probe" % "1.0.0-SNAPSHOT",
+  "com.cgnal" %% "twitter-model-probe" % "1.0.0-SNAPSHOT",
   "com.cgnal" %% "cgnal-core-config" % "1.0.0-SNAPSHOT",
   "com.cgnal" %% "cgnal-core-logging" % "1.0.0-SNAPSHOT",
   "com.cgnal" %% "cgnal-core-utility" % "1.0.0-SNAPSHOT",
@@ -27,6 +29,7 @@ libraryDependencies <++= libraryVersions { v => Seq(
   "org.apache.spark" %% "spark-streaming" % v('spark) excludeAll ( ExclusionRule("log4j"), ExclusionRule("slf4j-log4j12") ),
   "org.apache.bahir" %% "spark-streaming-twitter" % v('spark) excludeAll ( ExclusionRule("log4j"), ExclusionRule("slf4j-log4j12") ),
   "org.apache.spark" %% "spark-sql" % v('spark) excludeAll ( ExclusionRule("log4j"), ExclusionRule("slf4j-log4j12") ),
+  "org.twitter4j" % "twitter4j-core" % v('twitter4j) ,
   "org.scalatest" %% "scalatest" %  v('scalatest) % "test"
 )}
 

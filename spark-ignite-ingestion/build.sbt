@@ -1,9 +1,15 @@
 name := "spark-ignite-ingestion"
 
-lazy val `spark-ignite-ingestion` = (project in file(".")).aggregate(`twitter-client-probe`, `twitter-common-probe`, `server-probe`).disablePlugins(sbtassembly.AssemblyPlugin)
+lazy val `spark-ignite-ingestion` = (project in file(".")).aggregate(`server-probe`, `twitter-client-probe`, `twitter-common-probe`, `twitter-model-probe`,`twitter-recovery-probe`,`twitter-search-probe` ).disablePlugins(sbtassembly.AssemblyPlugin)
+
+
+lazy val `server-probe`           = project in file("server-probe")
 
 lazy val `twitter-client-probe`   = project in file("twitter-client-probe")
 lazy val `twitter-common-probe`   = project in file("twitter-common-probe")
-lazy val `server-probe`           = project in file("server-probe")
+lazy val `twitter-model-probe`    = project in file("twitter-model-probe")
+lazy val `twitter-recovery-probe` = project in file("twitter-recovery-probe")
+lazy val `twitter-search-probe`   = project in file("twitter-search-probe")
+
 
 

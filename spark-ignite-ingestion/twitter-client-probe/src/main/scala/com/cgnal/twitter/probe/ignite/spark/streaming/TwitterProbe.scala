@@ -1,10 +1,13 @@
 package com.cgnal.twitter.probe.ignite.spark.streaming
 
+import java.util.UUID
+
 import com.cgnal.core.logging.BaseLogging
 import com.cgnal.data.model.Document
 import com.cgnal.twitter.probe.common.cache.CacheConfig
 import com.cgnal.twitter.probe.common.config.TwitterProbeConfig
-import com.cgnal.twitter.probe.common.{KeywordsLoader, TwitterProbeRest, TwitterProbeRuntime}
+import com.cgnal.twitter.probe.common.{KeywordsLoader, SearchQueryLoader, TwitterProbeRest, TwitterProbeRuntime}
+import com.cgnal.twitter.probe.model.TwitterProbeIteration
 import com.cgnal.web.rest.{HasVertx, RestMetadata, RestStatus}
 import org.apache.ignite.configuration.CacheConfiguration
 import org.apache.ignite.spark.{IgniteContext, IgniteRDD}
@@ -18,6 +21,7 @@ class TwitterProbe
   extends CacheConfig
     with HasVertx
     with KeywordsLoader
+    with SearchQueryLoader
     with BaseLogging {
 
   type SparkStreamingIgniteContext = (StreamingContext , IgniteContext )
@@ -36,7 +40,7 @@ class TwitterProbe
     val sparkContext = new SparkContext(sparkConfiguration)
 
     // Now let's wrap the context in a streaming one, passing along the window size
-    (new StreamingContext(sparkContext, Seconds(TwitterProbeConfig.streamingProcessingWindow)) , new IgniteContext(sparkContext, "ignite-config.xml"))
+    (new StreamingContext(sparkContext, Seconds(TwitterProbeConfig.streamingProcessingWindow)) , new IgniteContext(sparkContext, TwitterProbeConfig.igniteConfigFilename))
   }
 
   protected val runtime : TwitterProbeRuntime = new TwitterProbeRuntime()
@@ -67,18 +71,34 @@ class TwitterProbe
     logger.info("Starting Twitter Probe ...")
     runtime.updateKeywords(allKeywords)
 
+
     val documentCacheCfg : CacheConfiguration[String, Document] = createDocumentCacheConfig
 
-    // Saving to cache
+    tweets.cache()
+
+    // Saving tweets to cache
     val documentCacheRdd : IgniteRDD[String,Document] = igniteContext.fromCache(documentCacheCfg)
+
     tweets
       .filter( containsSymbolsOrHashTags(allSymbols , allHashTags , TwitterProbeConfig.withoutSymbolsAndHashTags) )
       .map( tweet => (tweet.getId.toString, toDocument(tweet)))
       .foreachRDD( rdd => documentCacheRdd.savePairs(rdd, overwrite = true) )
 
-    val tweetPairs : DStream[(Long, TTweetText)] =
-    tweets.
-      map( tweet => (tweet.getId ,tweet.getText))
+
+    // Recovery stuff
+    if (TwitterProbeConfig.recoveryEnabled) {
+      val queries = allQueries
+
+      val iterationCache = igniteContext.ignite().getOrCreateCache(createIterationCacheConfig)
+      tweets.foreachRDD(rdd => {
+        val minMax = rdd.aggregate(MinMax[Long](Long.MaxValue, Long.MinValue))((mm, t) => ProbeUtils.seq(mm, t), (l, r) => ProbeUtils.comb(l, r))
+        queries.foreach(query => {
+          val currentTime = System.currentTimeMillis
+          val uuid = UUID.randomUUID()
+          iterationCache.put(uuid, TwitterProbeIteration(uuid, query.name, currentTime, minMax.min, minMax.max, 0))
+        })
+      })
+    }
 
     streamingContext.addStreamingListener(new TwitterProbeListener(runtime))
 
@@ -97,4 +117,18 @@ class TwitterProbe
     vertx.close()
   }
 
+
 }
+
+object ProbeUtils {
+  def comb(left: MinMax[Long], right: MinMax[Long])(implicit ordering: Ordering[Long]): MinMax[Long] = {
+    MinMax(min = ordering.min(left.min, right.min), max = ordering.max(left.max, right.max))
+  }
+
+  def seq(minMax: MinMax[Long], value: Status)(implicit ordering: Ordering[Long]): MinMax[Long] = {
+    comb(minMax, MinMax(value.getId, value.getId))
+  }
+}
+
+case class Stats(minStatus : Status, maxStatus : Status, count : Int)
+case class MinMax[T](min: T, max: T)
