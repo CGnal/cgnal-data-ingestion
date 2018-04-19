@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 import uuid
@@ -28,6 +29,9 @@ class Document(object):
     def addProperty(self, key, value):
         return Document(self.uuid, union(self.data, unflattenKeys({key: value})))
 
+    def setRandomUUID(self):
+        return Document(generate_random_uuid(), self.data)
+
     @property
     def author(self):
         return self.getOrThrow('author')
@@ -51,10 +55,13 @@ class CachedDocuments(CachedIterable, Documents):
 
     @staticmethod
     def __get_key__(key, dict):
-        out = dict
-        for level in key.split("."):
-            out = out[level]
-        return out
+        try:
+            out = dict
+            for level in key.split("."):
+                out = out[level]
+            return out
+        except:
+            return np.nan
 
     def to_df(self, fields=[]):
         return pd.DataFrame.from_dict({doc.uuid: {field: self.__get_key__(field, doc.data)

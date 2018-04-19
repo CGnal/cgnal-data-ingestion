@@ -1,4 +1,4 @@
-from itertools import islice
+from itertools import islice, ifilter
 import numpy as np
 
 from abc import ABCMeta, abstractproperty, abstractmethod
@@ -29,6 +29,9 @@ class Iterable(object):
 
     @abstractmethod
     def take(self, size):
+        raise NotImplementedError
+
+    def filter(self, f):
         raise NotImplementedError
 
     @abstractproperty
@@ -99,6 +102,11 @@ class LazyIterable(Iterable):
             return islice(self.items, size)
         return self.__create_instance__( IterGenerator( generator ) )
 
+    def filter(self, f):
+        def generator():
+            return ifilter(self.items, f)
+        return self.__create_instance__(IterGenerator(generator))
+
     def kfold(self, folds=3):
         """
         Kfold iterator of Train, Test Dataset split over the folds
@@ -146,6 +154,8 @@ class CachedIterable(Iterable):
         for batch in super(CachedIterable, self).batch(size=size):
             yield self.__create_instance__(batch)
 
+    def filter(self, f):
+        return self.__create_instance__(filter(f, self.items))
 
     def kfold(self, folds=3):
         array = np.array(self.items)

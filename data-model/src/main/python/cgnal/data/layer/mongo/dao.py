@@ -20,7 +20,7 @@ class DocumentDAO(MongoDAO):
         return {self.inverse_mapping.get(k, k): v for k, v in d.items()}
 
 
-    def __init__(self, uuid = "uuid"):
+    def __init__(self, uuid = "_id"):
         self.uuid = uuid
 
     def computeKey(self, obj):
