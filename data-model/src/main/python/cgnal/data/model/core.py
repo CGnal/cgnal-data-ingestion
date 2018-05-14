@@ -1,4 +1,4 @@
-from itertools import islice, ifilter
+from itertools import islice
 import numpy as np
 
 from abc import ABCMeta, abstractproperty, abstractmethod
@@ -104,7 +104,7 @@ class LazyIterable(Iterable):
 
     def filter(self, f):
         def generator():
-            return ifilter(self.items, f)
+            return filter(self.items, f)
         return self.__create_instance__(IterGenerator(generator))
 
     def kfold(self, folds=3):

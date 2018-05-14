@@ -1,4 +1,5 @@
-from itertools import islice, tee, izip
+from itertools import islice, tee
+from functools import reduce
 
 from copy import deepcopy as copy
 from collections import Mapping
@@ -14,7 +15,7 @@ def pairwise(iterable):
     "s -> (s0,s1), (s1,s2), (s2, s3), ..."
     a, b = tee(iterable)
     next(b, None)
-    return izip(a, b)
+    return zip(a, b)
 
 
 def union(*dicts):
@@ -28,7 +29,7 @@ def union(*dicts):
         :return: None
         """
         merged = copy(dct)
-        for k, v in merge_dct.iteritems():
+        for k, v in merge_dct.items():
             if (k in dct and isinstance(dct[k], dict)
                 and isinstance(merge_dct[k], Mapping)):
                 merged[k] = __dict_merge(dct[k], merge_dct[k])
