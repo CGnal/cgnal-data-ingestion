@@ -1,7 +1,7 @@
 from logging import getLogger, basicConfig, config
 
-from . import WithLoggingABC
-from . import DEFAULT_LOG_LEVEL as LOG_LEVEL
+from cgnal.logging import WithLoggingABC
+from cgnal.logging import DEFAULT_LOG_LEVEL as LOG_LEVEL
 
 levels = {
     "CRITICAL"	: 50 ,

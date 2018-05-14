@@ -109,7 +109,7 @@ class TestDocumentArchivers(unittest.TestCase):
 
         docs = list(archiver.retrieve())
 
-        self.assertEquals(len(docs), 20)
+        self.assertEqual(len(docs), 20)
 
     def test_csv(self):
         dao = DocumentDAO()
@@ -118,7 +118,7 @@ class TestDocumentArchivers(unittest.TestCase):
 
         docs = list(archiver.retrieve())
 
-        self.assertEquals(len(docs), 20)
+        self.assertEqual(len(docs), 20)
 
     def test_retrieveById(self):
         dao = DocumentDAO()
@@ -129,7 +129,7 @@ class TestDocumentArchivers(unittest.TestCase):
 
         doc2 = archiver.retrieveById(doc.uuid)
 
-        self.assertEquals(doc.data, doc2.data)
+        self.assertEqual(doc.data, doc2.data)
 
     def test_update(self):
         dao = DocumentDAO()
@@ -144,7 +144,7 @@ class TestDocumentArchivers(unittest.TestCase):
 
         doc2 = archiver.retrieveById(doc.uuid)
 
-        self.assertEquals(doc2.data["symbols"], ["enrico"])
+        self.assertEqual(doc2.data["symbols"], ["enrico"])
 
 
 if __name__ == "__main__":

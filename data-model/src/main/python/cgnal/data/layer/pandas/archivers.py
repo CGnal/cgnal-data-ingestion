@@ -30,9 +30,9 @@ class PandasArchiver(Archiver):
     @property
     def data(self):
         if self.__data__ is None:
-            return self.__read__()
-        else:
-            return self.__data__
+            self.data = self.__read__()
+
+        return self.__data__
 
     @data.setter
     def data(self, value):

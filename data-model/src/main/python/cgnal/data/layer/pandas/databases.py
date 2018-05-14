@@ -48,7 +48,7 @@ class Database(WithLogging, DatabaseABC):
         if table_name in self.tables:
             return Table(self, table_name)
         else:
-            self.logger.warn("Table %s not found in database %s" % (table_name, self.name))
+            self.logger.warning("Table %s not found in database %s" % (table_name, self.name))
             return Table(self, table_name)
 
 

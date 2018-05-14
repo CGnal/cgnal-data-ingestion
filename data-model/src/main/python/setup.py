@@ -1,5 +1,10 @@
 from setuptools import setup, find_packages
 
+version = '1.2.0'
+
+with open("requirements.txt", "r") as fid:
+    reqs = [line.replace("\n", "") for line in fid.readlines()]
+
 
 def readme():
     with open('README.md') as f:
@@ -8,10 +13,11 @@ def readme():
 
 setup(
     name='cgnal-core',
-    version='1.0.2',
+    version=version,
     description='Python Analytics Package Core Functionalities',
     long_description=readme(),
     packages=find_packages(exclude=['contrib', 'docs', 'tests']),
+    install_requires=reqs,
     test_suite='nose.collector',
     tests_require=['nose'],
     classifiers=[

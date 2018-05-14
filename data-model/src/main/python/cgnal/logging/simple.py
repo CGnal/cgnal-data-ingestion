@@ -45,6 +45,13 @@ class Logger(object):
         """
         self.__printer__(msg, "WARN")
 
+    def warning(self, msg):
+        """
+        :param msg: the output message to report
+        :type msg: str
+        """
+        self.__printer__(msg, "WARN")
+
     def error(self, msg):
         """
         :param msg: the output message to report

@@ -113,8 +113,8 @@ class Dataset(object):
     def union(self, other):
         raise NotImplementedError
 
-    @abstractmethod
-    def createObject(self, features, labels):
+    @staticmethod
+    def createObject(features, labels):
         raise NotImplementedError
 
     def write(self, filename):
@@ -214,7 +214,7 @@ class IterableDataset(Iterable, Dataset):
         else:
             raise ValueError('Type %s not allowed' % type)
 
-    def createObject(self, features, labels):
+    def createObject(features, labels):
         raise NotImplementedError
 
 
@@ -300,7 +300,8 @@ class PandasDataset(Dataset):
     def __check_none__(lab):
         return lab if lab is not None else None
 
-    def createObject(self, features, labels):
+    @staticmethod
+    def createObject(features, labels):
         return PandasDataset(features, labels)
 
     def __len__(self):
@@ -353,9 +354,10 @@ class PandasDataset(Dataset):
             labels_cols: self.getLabelsAs("pandas")
         }, axis=1).to_pickle(filename)
 
-    def read(self, filename, features_cols="features", labels_cols="labels"):
+    @staticmethod
+    def read(filename, features_cols="features", labels_cols="labels"):
         _in = pd.read_pickle(filename)
-        return self.createObject(_in[features_cols], _in[labels_cols])
+        return PandasDataset.createObject(_in[features_cols], _in[labels_cols])
 
     def union(self, other):
         if isinstance(other, PandasDataset):
@@ -373,6 +375,13 @@ class PandasTimeIndexedDataset(PandasDataset):
         if self.labels is not None:
             self.__labels__.index = pd.to_datetime(self.__labels__.index)
 
-    def createObject(self, features, labels):
+    @staticmethod
+    def createObject(features, labels):
         return PandasTimeIndexedDataset(features, labels)
+
+    @staticmethod
+    def read(filename, features_cols="features", labels_cols="labels"):
+        _in = pd.read_pickle(filename)
+        return PandasTimeIndexedDataset.createObject(_in[features_cols], _in[labels_cols])
+
 
