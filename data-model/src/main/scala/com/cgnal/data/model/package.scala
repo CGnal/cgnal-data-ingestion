@@ -76,4 +76,17 @@ package object model {
     def property[A](key: String)(implicit es: Selector[DocumentProperty, A]): Option[A] = properties.get(key).flatMap(_.select)
   }
 
+  /**
+    * safely extracts a property out of a map
+    */
+  def safeGetOrElse[A](documentProperties: Properties, key: String, default: A)(implicit sel: Selector[DocumentProperty, A]): A = {
+    documentProperties.get(key) match {
+      case Some(p) => p.select[A] match {
+        case Some(x) => x
+        case None => default
+      }
+      case None => default
+    }
+  }
+
 }
