@@ -28,15 +28,17 @@ class TwitterProbeIterationMongoStorageAdapter extends CacheStoreAdapter[UUID, T
   protected var mongoCollection: MongoCollection[Document] = _
 
   override def start(): Unit = {
-    logger.info(s"Starting Mongo Probe Iteration Adapter")
 
     val connectionString: String = s"mongodb://${MongoStorageConfig.mongoUser}:${MongoStorageConfig.mongoPassword}@${MongoStorageConfig.mongoHost}:${MongoStorageConfig.mongoPort}/?authSource=${MongoStorageConfig.documentsDbName}"
+
+    logger.info(s"Starting Mongo Probe Iteration Adapter with $connectionString")
+
 
     mongoClient = MongoClient(connectionString)
     mongoDatabase = mongoClient.getDatabase(MongoStorageConfig.documentsDbName)
     mongoCollection = mongoDatabase.getCollection(defaultCollectionName)
 
-    logger.info(s"Mongo Document Adapter Successful Started")
+    logger.info(s"Mongo Probe Iteration Adapter Successful Started")
 
   }
 

@@ -9,6 +9,7 @@ resolvers ++= Seq(
 libraryVersions ++= Map(
   'jackson -> "2.9.0",
   'ignite -> "2.4.0",
+  'twitter4j -> "4.0.4",
   'mongoscaladriver -> "1.2.1"
 )
 
@@ -25,6 +26,7 @@ libraryDependencies <++= libraryVersions { v => Seq(
   "org.apache.ignite" % "ignite-core" % v('ignite) excludeAll ( ExclusionRule("log4j"), ExclusionRule("slf4j-log4j12") ),
   "org.apache.ignite" % "ignite-spring" % v('ignite) excludeAll ( ExclusionRule("log4j"), ExclusionRule("slf4j-log4j12") ),
   "org.apache.ignite" % "ignite-indexing" % v('ignite) excludeAll ( ExclusionRule("log4j"), ExclusionRule("slf4j-log4j12") ),
+  "org.twitter4j" % "twitter4j-core" % v('twitter4j) ,
   "org.scalatest" %% "scalatest" %  v('scalatest) % "test"
 )}
 

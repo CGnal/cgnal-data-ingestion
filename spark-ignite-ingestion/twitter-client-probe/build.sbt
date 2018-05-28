@@ -26,9 +26,9 @@ libraryDependencies <++= libraryVersions { v => Seq(
   "org.apache.ignite" % "ignite-core" % v('ignite) excludeAll ( ExclusionRule("log4j"), ExclusionRule("slf4j-log4j12") ),
   "org.apache.ignite" % "ignite-spring" % v('ignite) excludeAll ( ExclusionRule("log4j"), ExclusionRule("slf4j-log4j12") ),
   "org.apache.ignite" % "ignite-spark" % v('ignite) excludeAll ExclusionRule("org.apache.spark"),
+  "org.apache.spark" %% "spark-sql" % v('spark) excludeAll ( ExclusionRule("log4j"), ExclusionRule("slf4j-log4j12") ),
   "org.apache.spark" %% "spark-streaming" % v('spark) excludeAll ( ExclusionRule("log4j"), ExclusionRule("slf4j-log4j12") ),
   "org.apache.bahir" %% "spark-streaming-twitter" % v('spark) excludeAll ( ExclusionRule("log4j"), ExclusionRule("slf4j-log4j12") ),
-  "org.apache.spark" %% "spark-sql" % v('spark) excludeAll ( ExclusionRule("log4j"), ExclusionRule("slf4j-log4j12") ),
   "org.twitter4j" % "twitter4j-core" % v('twitter4j) ,
   "org.scalatest" %% "scalatest" %  v('scalatest) % "test"
 )}

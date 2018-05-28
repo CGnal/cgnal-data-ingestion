@@ -7,7 +7,7 @@ import com.cgnal.twitter.probe.common.NamedSearchQuery
 
 import scala.io.Source
 
-object TwitterSearchQueryGeneratorApp
+class TwitterSearchQueryGeneratorApp
   extends App with BaseLogging {
 
   private  lazy val allLines: Seq[String] = {

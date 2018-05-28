@@ -30,9 +30,10 @@ class DocumentMongoStorageAdapter
   protected var mongoCollection: MongoCollection[Document] = _
 
   override def start(): Unit = {
-    logger.info(s"Starting Mongo Document Adapter")
 
     val connectionString: String = s"mongodb://${MongoStorageConfig.mongoUser}:${MongoStorageConfig.mongoPassword}@${MongoStorageConfig.mongoHost}:${MongoStorageConfig.mongoPort}/?authSource=${MongoStorageConfig.documentsDbName}"
+
+    logger.info(s"Starting Mongo Document Adapter with $connectionString")
 
     mongoClient = MongoClient(connectionString)
     mongoDatabase = mongoClient.getDatabase(MongoStorageConfig.documentsDbName)
