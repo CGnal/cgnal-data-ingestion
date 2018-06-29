@@ -26,13 +26,7 @@ class DocumentDAO(MongoDAO):
     def computeKey(self, obj):
         return {"_id": ObjectId(obj.uuid)}
 
-    # mapping = {
-    #     "userId"   : "author",
-    #     "createdAt": "timestamp",
-    #     "_id"      : "uuid"
-    # }
-
-    def json(self, obj):
+    def get(self, obj):
         return self.conversion(union(obj.data, self.computeKey(obj)))
 
     def parse(self, json):

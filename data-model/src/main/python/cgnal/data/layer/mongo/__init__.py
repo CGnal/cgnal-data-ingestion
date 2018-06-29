@@ -16,7 +16,7 @@ class MongoDAO(object):
         raise NotImplementedError
 
     @abstractmethod
-    def json(self, obj):
+    def get(self, obj):
         raise NotImplementedError
 
     @abstractmethod
@@ -52,7 +52,7 @@ class MongoArchiver(Archiver):
 
     def __insert__(self, obj):
         return self.collection.update_one(self.dao.computeKey( obj ),
-                                          {"$set": self.dao.json(obj)}, upsert=True)
+                                          {"$set": self.dao.get(obj)}, upsert=True)
 
     def archiveMany(self, objs):
         return [self.__insert__(obj) for obj in objs]
@@ -62,14 +62,6 @@ class MongoArchiver(Archiver):
             return self.archiveMany(objs)
         else:
             return self.archiveOne(objs)
-
-    def map(self, f, condition={}):
-        for obj in self.retrieve(condition):
-            yield f(obj)
-
-    def foreach(self, f, condition={}):
-        for obj in self.retrieve(condition):
-            f(obj)
 
     def first(self):
         json = self.collection.find_one()

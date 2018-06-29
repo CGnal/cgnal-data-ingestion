@@ -1,46 +1,57 @@
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import abstractmethod
 
 from collections import Iterable
 
+import pandas as pd
+
+import json
+
+from cgnal.data.layer import DAO
 from cgnal.data.layer import Archiver
 from cgnal.data.model.core import IterGenerator
 
-class DataFrameDAO(object):
-    __metaclass__ = ABCMeta
+from cgnal.data.layer.pandas.databases import Table
 
-    @abstractmethod
-    def computeKey(self, obj):
-        raise NotImplementedError
-
-    @abstractmethod
-    def getRow(self, obj):
-        raise NotImplementedError
-
-    @abstractmethod
-    def parseRow(self, row):
-        raise NotImplementedError
-
-
-import pandas as pd
 
 class PandasArchiver(Archiver):
 
+    @abstractmethod
+    def __read__(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    def __write__(self):
+        raise NotImplementedError
+
     def __init__(self, dao):
-        if not isinstance(dao, DataFrameDAO):
-            raise TypeError("Given DAO is not an instance of a CSV Dao")
+        if not isinstance(dao, DAO):
+            raise TypeError("Given DAO is not an instance of %s" % str(type(DAO)))
         self.dao = dao
 
-    @abstractproperty
+        self.__data__ = None
+
+    @property
     def data(self):
-        raise NotImplementedError
+        if self.__data__ is None:
+            return self.__read__()
+        else:
+            return self.__data__
+
+    @data.setter
+    def data(self, value):
+        self.__data__ = value
+
+    def commit(self):
+        self.__write__()
+        return self
 
     def retrieveById(self, uuid):
         row = self.data.loc[uuid]
-        return self.dao.parseRow(row)
+        return uuid, self.dao.parse(row)
 
     def retrieve(self, condition = None):
         rows = self.data if condition is None else condition(self.data)
-        return (self.dao.parseRow(row) for _, row in rows.iterrows())
+        return ( (index, self.dao.parse(row)) for index, row in rows.iterrows())
 
     def retrieveGenerator(self, condition=None):
         def __iterator__():
@@ -48,27 +59,26 @@ class PandasArchiver(Archiver):
         return IterGenerator( __iterator__ )
 
     def archiveOne(self, obj):
-        return self.__insert__(obj)
-
-    def __insert__(self, obj):
-        self.data.loc[self.dao.computeKey( obj )] = self.dao.getRow(obj)
+        return self.archiveMany([obj])
 
     def archiveMany(self, objs):
-        return [self.__insert__(obj) for obj in objs]
+        def create_df(obj):
+            s = self.dao.get(obj)
+            s.name = self.dao.computeKey(obj)
+            return s.to_frame().T
+
+        new = pd.concat( [create_df(obj) for obj in objs] )
+        # print("here")
+        # print(self.data.loc[set(self.data.index).difference(new.index)])
+        # print(new)
+        self.data = pd.concat( [self.data.loc[set(self.data.index).difference(new.index)], new] )
+        return self
 
     def archive(self, objs):
         if isinstance(objs, Iterable):
             return self.archiveMany(objs)
         else:
             return self.archiveOne(objs)
-
-    def map(self, f, condition={}):
-        for obj in self.retrieve(condition):
-            yield f(obj)
-
-    def foreach(self, f, condition={}):
-        for obj in self.retrieve(condition):
-            f(obj)
 
 
 class CsvArchiver(PandasArchiver):
@@ -83,13 +93,11 @@ class CsvArchiver(PandasArchiver):
         self.filename = filename
         self.sep = sep
 
-    __data__ = None
+    def __write__(self):
+        self.data.to_csv(self.filename, sep=self.sep)
 
-    @property
-    def data(self):
-        if self.__data__ is None:
-            self.__data__ = pd.read_csv(self.filename, sep=self.sep)
-        return self.__data__
+    def __read__(self):
+        return pd.read_csv(self.filename, sep=self.sep)
 
 
 class PickleArchiver(PandasArchiver):
@@ -103,15 +111,57 @@ class PickleArchiver(PandasArchiver):
 
         self.filename = filename
 
-    __data__ = None
+    def __write__(self):
+        self.data.to_pickle(self.filename)
 
-    @property
-    def data(self):
-        if self.__data__ is None:
-            self.__data__ = pd.read_pickle(self.filename)
-        return self.__data__
+    def __read__(self):
+        return pd.read_pickle(self.filename)
 
 
+class TableArchiver(PandasArchiver):
+
+    def __init__(self, dao, table):
+        super(TableArchiver, self).__init__(dao)
+
+        assert isinstance(table, Table)
+        self.table = table
+
+    def __write__(self):
+        self.table.write( self.data, overwrite=True )
+
+    def __read__(self):
+        try:
+            return self.table.data
+        except (IOError):
+            return pd.DataFrame()
 
 
+class DataFrameDAO(DAO):
 
+    def computeKey(self, df):
+        try:
+            return df.name
+        except (AttributeError):
+            return hash(json.dumps({str(k): str(v) for k, v in df.to_dict().items()}))
+
+    def get(self, df):
+        return pd.concat({k: df[k] for k in df})
+
+    def parse(self, row):
+        return pd.concat({c: row[c] for c in row.index.levels[0]}, axis=1)
+
+    @staticmethod
+    def addName(df, name):
+        df.name = name
+        return df
+
+class SeriesDAO(DAO):
+
+    def computeKey(self, df):
+        return df.name
+
+    def get(self, s):
+        return s
+
+    def parse(self, row):
+        return row
