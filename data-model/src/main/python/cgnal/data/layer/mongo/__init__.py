@@ -36,13 +36,15 @@ class MongoArchiver(Archiver):
         json = self.collection.find_one({"_id": ObjectId(uuid)})
         return self.dao.parse(json)
 
-    def retrieve(self, condition={}):
+    def retrieve(self, condition={}, sort_by=None):
         jsons = self.collection.find(condition)
+        if sort_by is not None:
+            jsons = jsons.sort(sort_by)
         return (self.dao.parse(json) for json in jsons)
 
-    def retrieveGenerator(self, condition={}):
+    def retrieveGenerator(self, condition={}, sort_by=None):
         def __iterator__():
-            return self.retrieve(condition=condition)
+            return self.retrieve(condition=condition, sort_by=sort_by)
         return IterGenerator( __iterator__ )
 
     def archiveOne(self, obj):
