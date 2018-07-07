@@ -41,7 +41,7 @@ def union(*dicts):
 
 def flattenKeys(input_dict, sep = "."):
     def _flatten_(key, value):
-        if isinstance(value, dict):
+        if isinstance(value, dict) and (len(value) > 0):
             return reduce(add, [_flatten_(sep.join([key, name]), item) for name, item in value.items()])
         else:
             return [(key, value)]
