@@ -3,7 +3,7 @@ import os
 
 from cgnal.tests import DATA_FOLDER
 
-from cgnal.data.layer.pandas import PickleArchiver, CsvArchiver
+from cgnal.data.layer.pandas.archivers import PickleArchiver, CsvArchiver
 from cgnal.data.layer.pandas.dao import DocumentDAO
 
 TEST_DATA_PATH = DATA_FOLDER
@@ -13,7 +13,7 @@ class TestDocumentArchivers(unittest.TestCase):
     def test_pickle(self):
         dao = DocumentDAO()
 
-        archiver = PickleArchiver(dao, os.path.join(DATA_FOLDER, 'test.pkl'))
+        archiver = PickleArchiver(os.path.join(DATA_FOLDER, 'test.pkl'), dao)
 
         docs = list(archiver.retrieve())
 
@@ -22,7 +22,7 @@ class TestDocumentArchivers(unittest.TestCase):
     def test_csv(self):
         dao = DocumentDAO()
 
-        archiver = CsvArchiver(dao, os.path.join(DATA_FOLDER, 'test.csv'))
+        archiver = CsvArchiver(os.path.join(DATA_FOLDER, 'test.csv'), dao)
 
         docs = list(archiver.retrieve())
 
@@ -32,7 +32,7 @@ class TestDocumentArchivers(unittest.TestCase):
     def test_retrieveById(self):
         dao = DocumentDAO()
 
-        archiver = CsvArchiver(dao, os.path.join(DATA_FOLDER, 'test.csv'))
+        archiver = CsvArchiver(os.path.join(DATA_FOLDER, 'test.csv'), dao)
 
         _, doc = archiver.retrieve().next()
 
@@ -43,7 +43,7 @@ class TestDocumentArchivers(unittest.TestCase):
     def test_update(self):
         dao = DocumentDAO()
 
-        archiver = CsvArchiver(dao, os.path.join(DATA_FOLDER, 'test.csv'))
+        archiver = CsvArchiver(os.path.join(DATA_FOLDER, 'test.csv'), dao)
 
         _, doc = archiver.retrieve().next()
 

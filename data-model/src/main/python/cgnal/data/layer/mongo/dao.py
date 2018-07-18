@@ -1,11 +1,11 @@
-from cgnal.data.layer.mongo import MongoDAO
+from cgnal.data.layer import DAO
 
 from cgnal.utils.dict import union
 from cgnal.data.model.text import Document
 
 from bson.objectid import ObjectId
 
-class DocumentDAO(MongoDAO):
+class DocumentDAO(DAO):
 
     mapping = {}
 

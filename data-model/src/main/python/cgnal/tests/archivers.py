@@ -7,9 +7,9 @@ from cgnal.tests import TMP_FOLDER
 
 from cgnal.logging.defaults import getDefaultLogger
 
-from cgnal.data.layer.pandas import DataFrameDAO, SeriesDAO
+from cgnal.data.layer.pandas.dao import DataFrameDAO, SeriesDAO
 from cgnal.data.layer.pandas.databases import Database
-from cgnal.data.layer.pandas import TableArchiver
+from cgnal.data.layer.pandas.archivers import TableArchiver
 
 logger = getDefaultLogger()
 
@@ -53,7 +53,7 @@ class BaseArchiverTests(unittest.TestCase):
 
             dao = DataFrameDAO()
 
-            a = TableArchiver(dao, table)
+            a = TableArchiver(table, dao)
 
             a.archiveMany([df1, df2]).commit()
 
@@ -66,7 +66,7 @@ class BaseArchiverTests(unittest.TestCase):
 
             a.archiveOne(df3).commit()
 
-            b = TableArchiver(dao, table)
+            b = TableArchiver(table, dao)
 
             df4 = df1 * 10
             df4.name = "row3"
@@ -86,11 +86,11 @@ class BaseArchiverTests(unittest.TestCase):
 
             s1 = pd.Series(np.ones(10), index=np.arange(0,20,2))
 
-            a = TableArchiver(dao, table)
+            a = TableArchiver(table, dao)
 
             a.archiveOne(s1).commit()
 
-            b = TableArchiver(dao, table)
+            b = TableArchiver(table, dao)
 
             s2 = [obj for _, obj in b.retrieve()][0]
 
