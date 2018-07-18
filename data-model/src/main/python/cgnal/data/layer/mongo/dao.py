@@ -1,11 +1,11 @@
-from cgnal.data.layer.mongo import MongoDAO
+from cgnal.data.layer import DAO
 
 from cgnal.utils.dict import union
 from cgnal.data.model.text import Document
 
 from bson.objectid import ObjectId
 
-class DocumentDAO(MongoDAO):
+class DocumentDAO(DAO):
 
     mapping = {}
 
@@ -26,13 +26,7 @@ class DocumentDAO(MongoDAO):
     def computeKey(self, obj):
         return {"_id": ObjectId(obj.uuid)}
 
-    # mapping = {
-    #     "userId"   : "author",
-    #     "createdAt": "timestamp",
-    #     "_id"      : "uuid"
-    # }
-
-    def json(self, obj):
+    def get(self, obj):
         return self.conversion(union(obj.data, self.computeKey(obj)))
 
     def parse(self, json):
