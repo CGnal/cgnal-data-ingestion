@@ -181,3 +181,48 @@ class CachedIterable(Iterable):
 
 
 
+import pandas as pd
+
+class Range(object):
+    def __init__(self, start, end):
+        """
+        Data Range Class
+
+        :param start: starting datetime for the range
+        :param end: ending datetime for the range
+        """
+        self.start = pd.to_datetime(start)
+        self.end = pd.to_datetime(end)
+
+    def range(self, freq="H"):
+        """
+        Compute date range with given frequency
+
+        :param freq: frequency
+
+        :type: str
+
+        :return: pd.date_range from start to end with given frequency
+        """
+        return pd.date_range(self.start, self.end, freq=freq)
+
+    @property
+    def days(self):
+        """
+        Create date range with daily frequency
+
+        :return: pd.date_range from start to end with daily frequency
+        """
+        return self.range(freq="1D")
+
+
+    @property
+    def business_days(self):
+        """
+        Create date range with daily frequency
+
+        :return: pd.date_range from start to end with daily frequency
+        """
+        return self.range(freq="1B")
+
+

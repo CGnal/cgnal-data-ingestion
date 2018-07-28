@@ -34,9 +34,9 @@ class TestDocumentArchivers(unittest.TestCase):
 
         archiver = CsvArchiver(os.path.join(DATA_FOLDER, 'test.csv'), dao)
 
-        _, doc = archiver.retrieve().next()
+        doc = archiver.retrieve().next()
 
-        _, doc2 = archiver.retrieveById(doc.uuid)
+        doc2 = archiver.retrieveById(doc.uuid)
 
         self.assertEquals(doc.data, doc2.data)
 
@@ -45,13 +45,13 @@ class TestDocumentArchivers(unittest.TestCase):
 
         archiver = CsvArchiver(os.path.join(DATA_FOLDER, 'test.csv'), dao)
 
-        _, doc = archiver.retrieve().next()
+        doc = archiver.retrieve().next()
 
         doc.data.update({'symbols': ["enrico"]})
 
         archiver.archive(doc)
 
-        _, doc2 = archiver.retrieveById(doc.uuid)
+        doc2 = archiver.retrieveById(doc.uuid)
 
         self.assertEquals(doc2.data["symbols"], ["enrico"])
 

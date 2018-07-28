@@ -44,11 +44,11 @@ class PandasArchiver(Archiver):
 
     def retrieveById(self, uuid):
         row = self.data.loc[uuid]
-        return uuid, self.dao.parse(row)
+        return self.dao.parse(row)
 
     def retrieve(self, condition = None):
         rows = self.data if condition is None else condition(self.data)
-        return ( (index, self.dao.parse(row)) for index, row in rows.iterrows())
+        return ( self.dao.parse(row) for _, row in rows.iterrows())
 
     def retrieveGenerator(self, condition=None):
         def __iterator__():

@@ -4,6 +4,8 @@ import pandas as pd
 from abc import ABCMeta, abstractmethod, abstractproperty
 from cgnal.data.model.core import Iterable, LazyIterable, CachedIterable, IterGenerator
 
+import pickle
+
 def features_and_labels_to_dataset(X, y=None):
 
     if (y is not None):
@@ -68,6 +70,10 @@ class Dataset(object):
     @abstractmethod
     def getLabelsAs(self, type='array'):
         raise NotImplementedError
+
+    def write(self, filename):
+        with open(filename, 'w') as fid:
+            pickle.dump(self.samples, fid)
 
 
 class IterableDataset(Iterable, Dataset):
@@ -174,6 +180,13 @@ class PandasDataset(Dataset):
         for index, row in self.__to_dict__(self.__features__).items():
             yield Sample(name=index, features=row, label=self.__labels__.loc[index])
 
+    def intersection(self):
+        idx = pd.to_datetime(self.features.index.intersection(self.labels.index))
+        return PandasDataset(self.features.loc[idx], self.labels.loc[idx])
+
+    def loc(self, idx):
+        return PandasDataset(self.features.loc[idx], self.labels.loc[idx])
+
     def getFeaturesAs(self, type='array'):
         if type is 'array':
             return np.array(self.__features__)
@@ -190,3 +203,13 @@ class PandasDataset(Dataset):
         elif type is 'dict':
             return self.__to_dict__( self.__labels__ )
 
+    def write(self, filename):
+        pd.concat({
+            "features": self.getFeaturesAs("pandas"),
+            "labels": self.getLabelsAs("pandas")
+        }, axis=1).to_pickle(filename)
+
+    @staticmethod
+    def read(filename):
+        _in = pd.read_pickle(filename)
+        return PandasDataset(_in["features"], _in["labels"])

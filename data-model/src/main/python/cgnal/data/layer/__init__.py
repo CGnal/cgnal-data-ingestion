@@ -17,11 +17,11 @@ class Archiver(object):
         raise NotImplementedError
 
     def map(self, f, condition={}):
-        for index, obj in self.retrieve(condition):
-            yield index, f(obj)
+        for obj in self.retrieve(condition):
+            yield f(obj)
 
     def foreach(self, f, condition={}):
-        for _, obj in self.retrieve(condition):
+        for obj in self.retrieve(condition):
             f(obj)
 
 

@@ -1,9 +1,10 @@
+from bson.objectid import ObjectId
+import pandas as pd
+
 from cgnal.data.layer import DAO
 
 from cgnal.utils.dict import union
 from cgnal.data.model.text import Document
-
-from bson.objectid import ObjectId
 
 class DocumentDAO(DAO):
 
@@ -32,3 +33,19 @@ class DocumentDAO(DAO):
     def parse(self, json):
         translated = self.translate(json)
         return Document(str(translated[self.uuid]), self.translate(json))
+
+
+class SeriesDAO(DAO):
+    def __init__(self, key_field="_id"):
+        self.key_field = key_field
+
+    def computeKey(self, serie):
+        return  {self.key_field: ObjectId(serie.name)}
+
+    def get(self, serie):
+        return serie.to_dict()
+
+    def parse(self, json):
+        s = pd.Series(json)
+        s.name = s.pop(self.key_field)
+        return s

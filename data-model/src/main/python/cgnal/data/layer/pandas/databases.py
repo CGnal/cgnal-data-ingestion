@@ -10,7 +10,7 @@ from cgnal.logging.defaults import WithLogging
 
 class Database(WithLogging, DatabaseABC):
 
-    def __init__(self, name, extension="p"):
+    def __init__(self, name, extension=".p"):
         """
         Class implementing standard read and write methods to pickle data sources
 

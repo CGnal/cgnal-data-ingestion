@@ -57,7 +57,7 @@ class BaseArchiverTests(unittest.TestCase):
 
             a.archiveMany([df1, df2]).commit()
 
-            _, df3 = a.retrieveById(df2.name)
+            df3 = a.retrieveById(df2.name)
 
             self.is_equal_dataframe(df2, df3)
 
@@ -92,7 +92,7 @@ class BaseArchiverTests(unittest.TestCase):
 
             b = TableArchiver(table, dao)
 
-            s2 = [obj for _, obj in b.retrieve()][0]
+            s2 = [obj for obj in b.retrieve()][0]
 
             self.is_equal_series(s1, s2)
 
