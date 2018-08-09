@@ -97,11 +97,11 @@ class IterableDataset(Iterable, Dataset):
             df = pd.DataFrame( dataset.features ).T
             s  = pd.Series( dataset.features )
         """
-        if type is 'array':
+        if type == 'array':
             return np.array([sample.features for sample in self.samples])
-        elif type is 'dict':
+        elif type == 'dict':
             return {sample.name: sample.features for sample in self.samples}
-        elif type is 'pandas':
+        elif type == 'pandas':
             features = self.getFeaturesAs('dict')
             try:
                 return pd.DataFrame(features).T
@@ -120,11 +120,11 @@ class IterableDataset(Iterable, Dataset):
 
             s  = pd.Series( dataset.labels )
         """
-        if type is 'array':
+        if type == 'array':
             return np.array([sample.label for sample in self.samples])
-        elif type is 'dict':
+        elif type == 'dict':
             return {sample.name: sample.label for sample in self.samples}
-        elif type is 'pandas':
+        elif type == 'pandas':
             return pd.Series(self.getLabelsAs('dict'))
         else:
             raise ValueError('Type %s not allowed' % type)
@@ -187,29 +187,32 @@ class PandasDataset(Dataset):
     def loc(self, idx):
         return PandasDataset(self.features.loc[idx], self.labels.loc[idx])
 
+    def dropna(self, **kwargs):
+        return PandasDataset(self.features.dropna(**kwargs), self.labels.dropna(**kwargs))
+
     def getFeaturesAs(self, type='array'):
-        if type is 'array':
+        if type == 'array':
             return np.array(self.__features__)
-        elif type is 'pandas':
+        elif type == 'pandas':
             return self.__features__
-        elif type is 'dict':
+        elif type == 'dict':
             return self.__to_dict__( self.__features__ )
 
     def getLabelsAs(self, type='array'):
-        if type is 'array':
+        if type == 'array':
             return np.array(self.__labels__)
-        elif type is 'pandas':
+        elif type == 'pandas':
             return self.__labels__
-        elif type is 'dict':
+        elif type == 'dict':
             return self.__to_dict__( self.__labels__ )
 
-    def write(self, filename):
+    def write(self, filename, features_cols="features", labels_cols="labels"):
         pd.concat({
-            "features": self.getFeaturesAs("pandas"),
-            "labels": self.getLabelsAs("pandas")
+            features_cols: self.getFeaturesAs("pandas"),
+            labels_cols: self.getLabelsAs("pandas")
         }, axis=1).to_pickle(filename)
 
     @staticmethod
-    def read(filename):
+    def read(filename, features_cols="features", labels_cols="labels"):
         _in = pd.read_pickle(filename)
-        return PandasDataset(_in["features"], _in["labels"])
+        return PandasDataset(_in[features_cols], _in[labels_cols])
