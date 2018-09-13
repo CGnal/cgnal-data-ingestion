@@ -25,7 +25,8 @@ class WithLogging(WithLoggingABC):
         nameLogger = str(self.__class__).replace("<class '", "").replace("'>", "")
         return getLogger(nameLogger)
 
-def getDefaultLogger(level = levels[LOG_LEVEL]):
+
+def getDefaultLogger(level=levels[LOG_LEVEL]):
     """
     Create default logger
 

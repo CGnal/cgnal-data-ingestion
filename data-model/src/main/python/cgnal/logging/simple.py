@@ -1,9 +1,8 @@
 from datetime import datetime as dt
-
-from . import WithLoggingABC
 from . import DEFAULT_LOG_LEVEL as LOG_LEVEL
 
 levels = {"ERROR": 0, "WARN": 1, "INFO": 2, "DEBUG": 3}
+
 
 class Logger(object):
     """
@@ -62,15 +61,3 @@ def logger():
     :return: default logger
     """
     return _logger
-
-
-class WithLogging(WithLoggingABC):
-
-    @property
-    def logger(self):
-        """
-        Initialize default logger
-
-        :return: default logger
-        """
-        return logger

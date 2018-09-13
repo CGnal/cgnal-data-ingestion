@@ -6,9 +6,10 @@ from cgnal.data.model.core import Iterable, LazyIterable, CachedIterable, IterGe
 
 import pickle
 
+
 def features_and_labels_to_dataset(X, y=None):
 
-    if (y is not None):
+    if y is not None:
         df = pd.concat({"features": X, "labels": y}, axis=1)
     else:
         df = pd.concat({"features": X}, axis=1)
@@ -23,13 +24,17 @@ class Sample(object):
     Object representing a single sample of a training or test set
     """
 
-    def __init__(self, features, label, name=None):
+    def __init__(self, features, label=None, name=None):
         """
         Object representing a single sample of a training or test set
 
-        :param features: List(object), features of the sample
-        :param label: List(object), label of the sample
-        :param name: object, id of the sample (optional)
+        :param features: features of the sample
+        :param label: labels of the sample (optional)
+        :param name: id of the sample (optional)
+
+        :type features: list
+        :type label: list or None
+        :type name: object
         """
         self.features = features
         self.label = label
@@ -44,7 +49,6 @@ class Dataset(object):
     def samples(self):
         raise NotImplementedError
 
-
     __default_type__ = 'pandas'
 
     @property
@@ -58,6 +62,16 @@ class Dataset(object):
     @property
     def features(self):
         return self.getFeaturesAs(self.default_type)
+
+    # features e labels non hanno un setter. Questo torna un po' scomodo nei transformers
+    #
+    # @property
+    # def features(self):
+    #     return self.__features__
+    #
+    # @features.setter
+    # def features(self, value=None):
+    #     self.__features__ = value if value is not None else self.getFeaturesAs(self.default_type)
 
     @property
     def labels(self):
@@ -87,16 +101,13 @@ class IterableDataset(Iterable, Dataset):
 
     def getFeaturesAs(self, type='array'):
         """
-        Dictionary with key name of the sample and value the associated features
+        Object of the specified type containing the feature space
 
-        :return: dict, Dictionary with key name of the sample and value the associated features
-
-        This can easily be turned into a DataFrame or a Serie (when the sample are not a size-fixed
-        number of features) using the following commands:
-
-            df = pd.DataFrame( dataset.features ).T
-            s  = pd.Series( dataset.features )
+        :param type: type of return. Can be one of "pandas", "dict" or "array
+        :return: an object of the specified type containing the features
+        :rtype: np.array/dict/pd.DataFrame
         """
+
         if type == 'array':
             return np.array([sample.features for sample in self.samples])
         elif type == 'dict':
@@ -105,27 +116,29 @@ class IterableDataset(Iterable, Dataset):
             features = self.getFeaturesAs('dict')
             try:
                 return pd.DataFrame(features).T
-            except(ValueError):
-                return pd.Series(features)
+            except ValueError:
+                return pd.Series(features).to_frame("features")
         else:
             raise ValueError('Type %s not allowed' % type)
 
     def getLabelsAs(self, type='array'):
         """
-        Dictionary with key name of the sample and value the associated label
+        Object of the specified type containing the labels
 
-        :return: dict, Dictionary with key name of the sample and value the associated label
-
-        This can easily be turned into a Serie using the following commands:
-
-            s  = pd.Series( dataset.labels )
+        :param type: type of return. Can be one of "pandas", "dict" or "array
+        :return: an object of the specified type containing the features
+        :rtype: np.array/dict/pd.DataFrame
         """
         if type == 'array':
             return np.array([sample.label for sample in self.samples])
         elif type == 'dict':
             return {sample.name: sample.label for sample in self.samples}
         elif type == 'pandas':
-            return pd.Series(self.getLabelsAs('dict'))
+            labels = self.getLabelsAs('dict')
+            try:
+                return pd.DataFrame(labels).T
+            except ValueError:
+                return pd.Series(labels).to_frame("labels")
         else:
             raise ValueError('Type %s not allowed' % type)
 
@@ -143,7 +156,6 @@ class CachedDataset(CachedIterable, IterableDataset):
             "labels": self.getLabelsAs('pandas')}, axis=1)
 
 
-
 class LazyDataset(LazyIterable, IterableDataset):
 
     @staticmethod
@@ -155,7 +167,7 @@ class LazyDataset(LazyIterable, IterableDataset):
             for sample in self.samples:
                 p = prob.get(sample.label, 1)
                 _p = np.random.uniform()
-                if (_p > p):
+                if _p > p:
                     continue
                 yield sample
 
@@ -165,20 +177,28 @@ class LazyDataset(LazyIterable, IterableDataset):
 class PandasDataset(Dataset):
 
     def __init__(self, features, labels):
-        self.__features__ = features
-        self.__labels__ = labels
 
-    @staticmethod
-    def __to_dict__(df):
-        if isinstance(df, pd.Series):
-            return df.to_dict()
-        elif isinstance(df, pd.DataFrame):
-            return df.to_dict(orient='index')
+        if isinstance(features, pd.Series):
+            self.__features__ = features.to_frame()
+        elif isinstance(features, pd.DataFrame):
+            self.__features__ = features
+        else:
+            raise ValueError("Features must be of type pandas.Series or pandas.DataFrame")
+
+        if isinstance(labels, pd.Series):
+            self.__labels__ = labels.to_frame()
+        elif isinstance(labels, pd.DataFrame):
+            self.__labels__ = labels
+        else:
+            raise ValueError("Labels must be of type pandas.Series or pandas.DataFrame")
 
     @property
     def samples(self):
-        for index, row in self.__to_dict__(self.__features__).items():
-            yield Sample(name=index, features=row, label=self.__labels__.loc[index])
+        for index, row in self.__features__.to_dict(orient="index").items():
+            try:
+                yield Sample(name=index, features=row, label=self.__labels__.loc[index])
+            except KeyError:
+                yield Sample(name=index, features=row, label=None)
 
     def intersection(self):
         idx = list(self.features.index.intersection(self.labels.index))
@@ -196,7 +216,7 @@ class PandasDataset(Dataset):
         elif type == 'pandas':
             return self.__features__
         elif type == 'dict':
-            return self.__to_dict__( self.__features__ )
+            return self.__features__.to_dict(orient="index")
 
     def getLabelsAs(self, type='array'):
         if type == 'array':
@@ -204,7 +224,7 @@ class PandasDataset(Dataset):
         elif type == 'pandas':
             return self.__labels__
         elif type == 'dict':
-            return self.__to_dict__( self.__labels__ )
+            return self.__labels__.to_dict(orient="index")
 
     def write(self, filename, features_cols="features", labels_cols="labels"):
         pd.concat({
@@ -216,3 +236,11 @@ class PandasDataset(Dataset):
     def read(filename, features_cols="features", labels_cols="labels"):
         _in = pd.read_pickle(filename)
         return PandasDataset(_in[features_cols], _in[labels_cols])
+
+
+class PandasTimeIndexedDataset(PandasDataset):
+
+    def __init__(self, features, labels):
+        super(PandasTimeIndexedDataset, self).__init__(features, labels)
+        self.__features__.index = pd.to_datetime(self.__features__.index)
+        self.__labels__.index = pd.to_datetime(self.__labels__.index)

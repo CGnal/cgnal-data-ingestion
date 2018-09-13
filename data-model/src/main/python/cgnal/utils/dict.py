@@ -1,4 +1,9 @@
-from itertools import islice, tee, izip
+try:
+    from itertools import izip as zip
+except ImportError:  # will be 3.x series
+    pass
+
+from itertools import islice, tee
 
 from copy import deepcopy as copy
 from collections import Mapping
@@ -14,7 +19,7 @@ def pairwise(iterable):
     "s -> (s0,s1), (s1,s2), (s2, s3), ..."
     a, b = tee(iterable)
     next(b, None)
-    return izip(a, b)
+    return zip(a, b)
 
 
 def union(*dicts):

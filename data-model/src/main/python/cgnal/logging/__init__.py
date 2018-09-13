@@ -1,6 +1,8 @@
 from abc import ABCMeta, abstractproperty
 
-DEFAULT_LOG_LEVEL="INFO"
+
+DEFAULT_LOG_LEVEL = "INFO"
+
 
 class WithLoggingABC(object):
 
@@ -13,5 +15,3 @@ class WithLoggingABC(object):
         :return: None, outputs logs
         """
         pass
-
-

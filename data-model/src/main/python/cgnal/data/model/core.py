@@ -1,10 +1,18 @@
-from itertools import islice, ifilter
+from itertools import islice
 import numpy as np
+
+try:
+    # Python 2
+    from future_builtins import filter
+except ImportError:
+    # Python 3
+    pass
 
 from abc import ABCMeta, abstractproperty, abstractmethod
 import pickle
 
 from cgnal.utils.dict import groupIterable
+
 
 class IterGenerator(object):
     def __init__(self, generator_function):
@@ -67,7 +75,6 @@ class Iterable(object):
         return self.kfold(fold).next()
 
 
-
 class LazyIterable(Iterable):
 
     def __init__(self, items):
@@ -104,7 +111,7 @@ class LazyIterable(Iterable):
 
     def filter(self, f):
         def generator():
-            return ifilter(self.items, f)
+            return filter(self.items, f)
         return self.__create_instance__(IterGenerator(generator))
 
     def kfold(self, folds=3):
@@ -178,7 +185,6 @@ class CachedIterable(Iterable):
         with open(filename, 'r') as fid:
             items = pickle.load(fid)
         return CachedIterable(items)
-
 
 
 import pandas as pd
