@@ -1,5 +1,5 @@
 
-name := "server-probe"
+name := "twitter-server-probe"
 
 version := "1.0.0-SNAPSHOT"
 

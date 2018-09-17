@@ -1,8 +1,8 @@
 package com.cgnal.ignite
 
-object IgniteNodeApp extends App {
+object IgniteTwitterServerNodeApp extends App {
 
-  val node = new IgniteNode
+  val node = new IgniteTwitterServerNode
 
   Runtime.getRuntime.addShutdownHook( new Thread(new Runnable {
     override def run(): Unit = node.stop()

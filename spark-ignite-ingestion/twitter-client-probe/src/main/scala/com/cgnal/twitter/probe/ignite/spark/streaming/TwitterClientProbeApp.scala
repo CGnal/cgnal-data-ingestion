@@ -1,6 +1,6 @@
 package com.cgnal.twitter.probe.ignite.spark.streaming
 
-object TwitterProbeApp extends App {
+object TwitterClientProbeApp extends App {
 
   val probe = new TwitterProbe
 

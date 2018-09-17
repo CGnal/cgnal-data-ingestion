@@ -6,10 +6,13 @@ import com.cgnal.core.logging.BaseLogging
 import com.cgnal.data.model.Document
 import com.cgnal.twitter.probe.common.cache.CacheConfig
 import com.cgnal.twitter.probe.common.config.TwitterProbeConfig
-import com.cgnal.twitter.probe.common.{KeywordsLoader, SearchQueryLoader, TwitterProbeRest, TwitterProbeRuntime}
+import com.cgnal.twitter.probe.common.loader.{KeywordsLoader, SearchQueryLoader}
+import com.cgnal.twitter.probe.common.{TwitterProbeRest, TwitterProbeRuntime}
 import com.cgnal.twitter.probe.model.TwitterProbeIteration
 import com.cgnal.web.rest.{HasVertx, RestMetadata, RestStatus}
 import org.apache.ignite.configuration.CacheConfiguration
+import org.apache.ignite.events.{CacheEvent, EventType}
+import org.apache.ignite.lang.IgnitePredicate
 import org.apache.ignite.spark.{IgniteContext, IgniteRDD}
 import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.twitter.TwitterUtils
@@ -71,6 +74,23 @@ class TwitterProbe
     logger.info("Starting Twitter Probe ...")
     runtime.updateKeywords(allKeywords)
 
+    val ignite = igniteContext.ignite()
+
+    // Local listener that listens to local events.
+    val eventsListener : IgnitePredicate[CacheEvent] = new IgnitePredicate[CacheEvent] {
+      override def apply(evt : CacheEvent): Boolean = {
+        //logger.info("Received event [evt=" + evt.name() + ", key=" + evt.key() +
+        //  ", oldVal=" + evt.oldValue() + ", newVal=" + evt.newValue())
+        logger.debug("Received event [evt=" + evt.name() + ", key=" + evt.key())
+        true
+      }
+    }
+
+    // Subscribe to specified cache events occurring on local node.
+    ignite.events().localListen(eventsListener,
+      EventType.EVT_CACHE_OBJECT_REMOVED,
+      EventType.EVT_CACHE_OBJECT_EXPIRED,
+      EventType.EVT_CACHE_ENTRY_EVICTED)
 
     val documentCacheCfg : CacheConfiguration[String, Document] = createDocumentCacheConfig
 
@@ -89,7 +109,7 @@ class TwitterProbe
     if (TwitterProbeConfig.recoveryEnabled) {
       val queries = allQueries
 
-      val iterationCache = igniteContext.ignite().getOrCreateCache(createIterationCacheConfig)
+      val iterationCache = ignite.getOrCreateCache(createIterationCacheConfig)
       tweets.foreachRDD(rdd => {
         val minMax = rdd.aggregate(MinMax[Long](Long.MaxValue, Long.MinValue))((mm, t) => ProbeUtils.seq(mm, t), (l, r) => ProbeUtils.comb(l, r))
         queries.foreach(query => {
@@ -100,7 +120,7 @@ class TwitterProbe
       })
     }
 
-    streamingContext.addStreamingListener(new TwitterProbeListener(runtime))
+    streamingContext.addStreamingListener(new TwitterClientProbeListener(runtime, ignite))
 
     // Now that the streaming is defined, start it
     streamingContext.start()

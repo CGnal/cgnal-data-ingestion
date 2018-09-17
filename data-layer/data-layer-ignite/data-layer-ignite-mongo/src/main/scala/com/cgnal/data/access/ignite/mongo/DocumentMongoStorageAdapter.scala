@@ -71,6 +71,8 @@ class DocumentMongoStorageAdapter
       .map(toCgnalDocument)
       .toFuture())
 
+    logger.debug(s"Loaded document [ ${loaded.head} ]")
+
     loaded.head
   }
 
@@ -106,7 +108,7 @@ class DocumentMongoStorageAdapter
 
   }
 
-  private def execute[A](await: Awaitable[A]): A = Await.result[A](await, 2000 milliseconds)
+  private def execute[A](await: Awaitable[A]): A = Await.result[A](await, 5000 milliseconds)
 
 
 }

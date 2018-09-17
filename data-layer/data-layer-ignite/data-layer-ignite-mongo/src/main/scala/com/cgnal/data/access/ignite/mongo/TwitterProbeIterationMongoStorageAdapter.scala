@@ -1,6 +1,6 @@
 package com.cgnal.data.access.ignite.mongo
 
-import java.util.UUID
+import java.util.{Date, UUID}
 
 import com.cgnal.core.logging.BaseLogging
 import com.cgnal.data.access.ignite.mongo.config.MongoStorageConfig
@@ -13,8 +13,8 @@ import org.mongodb.scala.bson.collection.immutable.Document
 import org.mongodb.scala.model.Filters.equal
 import org.mongodb.scala.{MongoClient, MongoCollection, MongoDatabase}
 
-import scala.concurrent.{Await, Awaitable}
 import scala.concurrent.duration._
+import scala.concurrent.{Await, Awaitable}
 import scala.language.postfixOps
 
 class TwitterProbeIterationMongoStorageAdapter extends CacheStoreAdapter[UUID, TwitterProbeIteration]
@@ -71,16 +71,19 @@ class TwitterProbeIterationMongoStorageAdapter extends CacheStoreAdapter[UUID, T
       .map(toIteration)
       .toFuture())
 
+    logger.debug(s"Loaded iteration [ ${loaded.head} ]")
+
     loaded.head
   }
 
-  private def execute[A](await: Awaitable[A]): A = Await.result[A](await, 2000 milliseconds)
+  private def execute[A](await: Awaitable[A]): A = Await.result[A](await, 5000 milliseconds)
 
 
   private def toDocument: TwitterProbeIteration => Document = iteration =>
     Document(
       "uuid" -> iteration.id.toString,
       "name" -> iteration.name,
+      "creationDate" -> new Date(iteration.lastUpdateTime),
       "lastUpdateTime" -> iteration.lastUpdateTime,
       "minTweetId" -> iteration.minTweetID,
       "maxTweetId" -> iteration.maxTweetID,

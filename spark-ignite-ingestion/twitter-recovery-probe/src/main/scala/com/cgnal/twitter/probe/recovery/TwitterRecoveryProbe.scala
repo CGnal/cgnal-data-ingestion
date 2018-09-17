@@ -7,7 +7,7 @@ import com.cgnal.core.logging.BaseLogging
 import com.cgnal.data.model._
 import com.cgnal.twitter.probe.common.cache.CacheConfig
 import com.cgnal.twitter.probe.common.config.TwitterProbeConfig
-import com.cgnal.twitter.probe.common.{KeywordsLoader, SearchQueryLoader}
+import com.cgnal.twitter.probe.common.loader.{KeywordsLoader, SearchQueryLoader}
 import com.cgnal.twitter.probe.model.TwitterProbeIteration
 import com.cgnal.web.rest.HasVertx
 import org.apache.ignite.cache.query.ScanQuery
@@ -18,12 +18,11 @@ import twitter4j.{Query, Twitter, TwitterFactory}
 
 import scala.collection.JavaConversions._
 
-class TwitterRecoveryProbe
-  extends CacheConfig
-    with HasVertx
-    with KeywordsLoader
-    with SearchQueryLoader
-    with BaseLogging {
+class RecoveryProbe extends CacheConfig
+  with HasVertx
+  with KeywordsLoader
+  with SearchQueryLoader
+  with BaseLogging {
 
 
   protected var ignite : Ignite = _
@@ -51,16 +50,16 @@ class TwitterRecoveryProbe
     val documentsCache : IgniteCache[String,Document] = ignite.getOrCreateCache(documentCacheCfg)
 
     val iterationCacheCfg : CacheConfiguration[UUID, TwitterProbeIteration] = createIterationCacheConfig
-    val iterationsCache : IgniteCache[UUID,TwitterProbeIteration] = ignite.getOrCreateCache(iterationCacheCfg)
+    val iterationsCache : IgniteCache[UUID, TwitterProbeIteration] = ignite.getOrCreateCache(iterationCacheCfg)
 
 
-    def predicate(timeRef : Long) : IgniteBiPredicate[UUID,TwitterProbeIteration] = new IgniteBiPredicate[UUID,TwitterProbeIteration] {
+    def predicate(timeRef : Long) : IgniteBiPredicate[UUID, TwitterProbeIteration] = new IgniteBiPredicate[UUID,TwitterProbeIteration] {
       override def apply(e1: UUID, e2: TwitterProbeIteration): Boolean = {
         e2.lastUpdateTime < timeRef //&& e2.lastUpdateTime < (timeRef - 3600000)
       }
     }
 
-    val checkTime = TwitterProbeConfig.streamingProcessingWindow + (5 * TwitterProbeConfig.streamingProcessingWindow / 100)
+    val checkTime = (TwitterProbeConfig.streamingProcessingWindow + (5 * TwitterProbeConfig.streamingProcessingWindow / 100)) * 1000
 
     // Consumer
     val consumer = new TwitterRecoveryRequestConsumer(twitter, requests, documentsCache , iterationsCache)
@@ -68,46 +67,55 @@ class TwitterRecoveryProbe
 
     // Producer
     while(true) {
-      val currentTime  = System.currentTimeMillis
+      try {
+        val currentTime = System.currentTimeMillis
 
-      logger.info(s"Executing check on time $currentTime")
+        logger.info(s"Executing check on time $currentTime")
 
-      val q = new ScanQuery[UUID, TwitterProbeIteration](predicate(currentTime))
-      val results = iterationsCache.query(q).getAll
+        val q = new ScanQuery[UUID, TwitterProbeIteration](predicate(currentTime))
+        val results = iterationsCache.query(q).getAll
+        logger.info(s"Executing check on total results ${results.size}")
 
-      results.toList
-        .sortBy(- _.getValue.lastUpdateTime)
-/*       .map( x => {
-          logger.info(s"Time : ${x.getValue.lastUpdateTime} ID ${x.getKey} min : ${x.getValue.minTweetID} and max : ${x.getValue.maxTweetID}")
-          x
-        })*/
-        .foldLeft(Sequence(Seq.empty[Slide], null ,currentTime))((s : Sequence, i) => s.copy(slices = s.slices :+ Slide(i.getKey , s.lastRefId , i.getValue.name ,s.lastTimeRef - i.getValue.lastUpdateTime), lastRefId = i.getKey ,lastTimeRef = i.getValue.lastUpdateTime))
-        .slices
-//        .map( x => {
-//            logger.info(s"Slice : $x")
-//            x
-//          }
-//        )
-        .filter(s => s.time > checkTime && s.refId != null)
-        .foreach(s => {
-          logger.debug(s"Slides : [${s.id} - ${s.refId}] at time ${s.time}")
+        allQueries.foreach { query =>
+          logger.info(s"Processing query ${query.name}")
 
-          val upperIteration  = iterationsCache.get(s.id)
-          val startSlide      = upperIteration.maxTweetID
-          val bottomIteration = iterationsCache.get(s.refId)
-          val endSlide        = bottomIteration.minTweetID - 1
+          results
+            .filter(r => r.getValue.name.toLowerCase.equals(query.name.toLowerCase) && r.getValue.maxTweetID != Long.MinValue.toLong && r.getValue.minTweetID != Long.MaxValue.toLong)
+            .toList
+            .sortBy(-_.getValue.lastUpdateTime)
+            .foldLeft(Sequence(Seq.empty[Slide], null, currentTime))((s: Sequence, i) => s.copy(slices = s.slices :+ Slide(i.getKey, s.lastRefId, i.getValue.name, s.lastTimeRef - i.getValue.lastUpdateTime, i.getValue.lastUpdateTime), lastRefId = i.getKey, lastTimeRef = i.getValue.lastUpdateTime))
+            .slices
+            .filter(s => {
+              logger.debug(s"Filter ${s.refId} and ${s.name} with ${s.time} and checkTime $checkTime")
+              s.time > checkTime && s.refId != null
+            })
+            .foreach(s => {
+              logger.debug(s"Slides : [${s.id} - ${s.refId}] with time ${s.time} [$checkTime] with ref ${s.timeRef}")
 
-          logger.debug(s"Tweet search by keywords for window $startSlide - $endSlide with reference time ${upperIteration.lastUpdateTime}")
+              val upperIteration = iterationsCache.get(s.id)
+              val startSlide = upperIteration.maxTweetID
+              val bottomIteration = iterationsCache.get(s.refId)
+              val endSlide = bottomIteration.minTweetID - 1
 
-          val query = allQueriesMap.get(s.name)
+              logger.info(s"Tweet search by keywords ${s.name} for window $startSlide - $endSlide with reference time ${s.timeRef}")
 
-          if (query.isDefined) {
-            requests.put(forgeQuery(s.name, query.get , upperIteration.lastUpdateTime, startSlide, endSlide))
-          }
+              val query = allQueriesMap.get(s.name)
 
-        })
+              if (query.isDefined) {
+                val forged = forgeQuery(s.name, query.get, s.timeRef, startSlide, endSlide)
+                if (!requests.contains(forged))
+                  requests.put(forgeQuery(s.name, query.get, s.timeRef, startSlide, endSlide))
+              }
 
-      Thread.sleep(TwitterProbeConfig.recoveryProcessingWindow)
+            })
+        }
+
+        Thread.sleep(TwitterProbeConfig.recoveryProcessingWindow)
+
+      } catch {
+        case t : Throwable => logger.error(t.getMessage)
+      }
+
     }
 
   }
@@ -135,8 +143,6 @@ class TwitterRecoveryProbe
 
 }
 
-
-
-case class Slide(id : UUID, refId : UUID, name : String , time : Long )
+case class Slide(id : UUID, refId : UUID, name : String , time : Long , timeRef : Long)
 case class Sequence(slices : Seq[Slide], lastRefId : UUID , lastTimeRef : Long)
 

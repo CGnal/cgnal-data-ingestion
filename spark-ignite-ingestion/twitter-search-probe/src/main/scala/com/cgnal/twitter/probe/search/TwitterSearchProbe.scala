@@ -4,9 +4,9 @@ import java.util.concurrent.LinkedBlockingQueue
 
 import com.cgnal.core.logging.BaseLogging
 import com.cgnal.data.model.Document
-import com.cgnal.twitter.probe.common.{KeywordsLoader, SearchQueryLoader}
 import com.cgnal.twitter.probe.common.cache.CacheConfig
 import com.cgnal.twitter.probe.common.config.TwitterProbeConfig
+import com.cgnal.twitter.probe.common.loader.{KeywordsLoader, SearchQueryLoader}
 import org.apache.ignite.configuration.CacheConfiguration
 import org.apache.ignite.{Ignite, IgniteCache, Ignition}
 import twitter4j.Query.ResultType

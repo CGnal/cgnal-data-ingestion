@@ -1,4 +1,4 @@
-package com.cgnal.twitter.probe.common
+package com.cgnal.twitter.probe.common.loader
 
 import java.io.File
 
