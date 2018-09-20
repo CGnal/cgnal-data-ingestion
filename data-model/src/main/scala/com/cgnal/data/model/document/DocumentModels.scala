@@ -1,6 +1,10 @@
-package com.cgnal.data.model
+package com.cgnal.data.model.document
 
 import shapeless.ops.coproduct.Selector
+
+case class MimeType(primary : String, secondary : String)
+
+case class DocumentBody(mimeType: Option[MimeType], blob: Array[Byte])
 
 case class Document(id: String, properties: Properties, body: DocumentBody){
 

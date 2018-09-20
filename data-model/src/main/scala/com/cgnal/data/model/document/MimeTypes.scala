@@ -1,7 +1,4 @@
-package com.cgnal.data.model
-
-case class MimeType(primary : String, secondary : String)
-
+package com.cgnal.data.model.document
 
 object MimeTypes {
 

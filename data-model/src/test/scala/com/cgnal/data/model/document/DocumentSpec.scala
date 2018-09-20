@@ -1,4 +1,4 @@
-package com.cgnal.data.model
+package com.cgnal.data.model.document
 
 import org.scalatest.FunSuite
 

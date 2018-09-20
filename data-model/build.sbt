@@ -1,6 +1,6 @@
 name := "data-model"
 
-version := "1.0.0-SNAPSHOT"
+version := "1.0.1"
 
 organization := "com.cgnal"
 

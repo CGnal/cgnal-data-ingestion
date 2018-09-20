@@ -1,13 +1,11 @@
-package com.cgnal.data
+package com.cgnal.data.model
 
 import java.time.{LocalDate, LocalDateTime}
 
 import shapeless.ops.coproduct.Selector
 import shapeless.{:+:, CNil, Coproduct}
 
-import scala.language.implicitConversions
-
-package object model {
+package object document {
 
   type Properties = Map[String, DocumentProperty]
 
