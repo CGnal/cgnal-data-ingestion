@@ -1,5 +1,10 @@
-from itertools import islice
+import pickle
 import numpy as np
+import pandas as pd
+
+from itertools import islice
+from abc import ABCMeta, abstractproperty, abstractmethod
+from cgnal.utils.dict import groupIterable
 
 try:
     # Python 2
@@ -7,11 +12,6 @@ try:
 except ImportError:
     # Python 3
     pass
-
-from abc import ABCMeta, abstractproperty, abstractmethod
-import pickle
-
-from cgnal.utils.dict import groupIterable
 
 
 class IterGenerator(object):
@@ -67,10 +67,10 @@ class Iterable(object):
         Train, Test Dataset split
 
         :param ratio: Int, ratio for splitting
-        :return: (Dataset, Dataset), Train and Test Dataset
+        :return: (Dataset, Dataset), Train and Test Datasets
         """
         fold = int(round(1.0 / ratio))
-        if (fold * ratio - 1.0 > 1E-1):
+        if fold * ratio - 1.0 > 1E-1:
             print(' Approximating ratio of %f to %f' % (ratio, 1.0 / fold))
         return self.kfold(fold).next()
 
@@ -79,9 +79,8 @@ class LazyIterable(Iterable):
 
     def __init__(self, items):
         if not isinstance(items, IterGenerator):
-            raise TypeError("For lazy documents the input must be an IterGenerator(object). Input of type %s passed"
+            raise TypeError("For lazy iterables the input must be an IterGenerator(object). Input of type %s passed"
                             % type(items))
-
         self.__items__ = items
 
     @property
@@ -94,10 +93,9 @@ class LazyIterable(Iterable):
 
     @staticmethod
     def toCached(items):
-        raise CachedIterable(items)
+        return CachedIterable(items)
 
-
-    def batch(self, size = 100):
+    def batch(self, size=100):
         for batch in super(LazyIterable, self).batch(size=size):
             yield self.toCached(batch)
 
@@ -107,7 +105,7 @@ class LazyIterable(Iterable):
     def take(self, size):
         def generator():
             return islice(self.items, size)
-        return self.__create_instance__( IterGenerator( generator ) )
+        return self.__create_instance__(IterGenerator(generator))
 
     def filter(self, f):
         def generator():
@@ -125,20 +123,19 @@ class LazyIterable(Iterable):
 
             def test():
                 for istory, story in enumerate(self.items):
-                    if ((istory + fold) % folds == 0):
+                    if (istory + fold) % folds == 0:
                         yield story
                     else:
                         pass
 
             def train():
                 for istory, story in enumerate(self.items):
-                    if ((istory + fold) % folds != 0):
+                    if (istory + fold) % folds != 0:
                         yield story
                     else:
                         pass
 
-            yield self.__create_instance__(IterGenerator(train)), \
-                  self.__create_instance__(IterGenerator(test))
+            yield self.__create_instance__(IterGenerator(train)), self.__create_instance__(IterGenerator(test))
 
 
 class CachedIterable(Iterable):
@@ -186,8 +183,6 @@ class CachedIterable(Iterable):
             items = pickle.load(fid)
         return CachedIterable(items)
 
-
-import pandas as pd
 
 class Range(object):
     def __init__(self, start, end):

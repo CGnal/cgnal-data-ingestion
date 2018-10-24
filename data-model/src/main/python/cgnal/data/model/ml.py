@@ -1,10 +1,10 @@
+import pickle
 import numpy as np
 import pandas as pd
 
+from itertools import islice, izip
 from abc import ABCMeta, abstractmethod, abstractproperty
 from cgnal.data.model.core import Iterable, LazyIterable, CachedIterable, IterGenerator
-
-import pickle
 
 
 def features_and_labels_to_dataset(X, y=None):
@@ -20,9 +20,39 @@ def features_and_labels_to_dataset(X, y=None):
 
 
 class Sample(object):
-    """
-    Object representing a single sample of a training or test set
-    """
+    def __init__(self, features, label=None, name=None):
+        """
+        Object representing a single sample of a training or test set
+
+        :param features: features of the sample
+        :param label: labels of the sample (optional)
+        :param name: id of the sample (optional)
+
+        :type features: list or couple
+        :type label: float, int or None
+        :type name: object
+        """
+        self.features = features
+        self.label = label
+        self.name = name
+
+
+class MultiFeatureSample(Sample):
+    @staticmethod
+    def __check_features__(features):
+        """
+        Check that features is list of lists
+
+        :param features: list of lists
+        :return: None
+        """
+
+        if not isinstance(features, list):
+            raise TypeError("features must be a list")
+
+        for f in features:
+            if not isinstance(f, np.ndarray):
+                raise TypeError("all features elements must be np.ndarrays")
 
     def __init__(self, features, label=None, name=None):
         """
@@ -32,13 +62,12 @@ class Sample(object):
         :param label: labels of the sample (optional)
         :param name: id of the sample (optional)
 
-        :type features: list
-        :type label: list or None
+        :type features: list of lists
+        :type label: float, int or None
         :type name: object
         """
-        self.features = features
-        self.label = label
-        self.name = name
+        self.__check_features__(features)
+        super(MultiFeatureSample, self).__init__(features, label, name)
 
 
 class Dataset(object):
@@ -63,16 +92,6 @@ class Dataset(object):
     def features(self):
         return self.getFeaturesAs(self.default_type)
 
-    # features e labels non hanno un setter. Questo torna un po' scomodo nei transformers
-    #
-    # @property
-    # def features(self):
-    #     return self.__features__
-    #
-    # @features.setter
-    # def features(self, value=None):
-    #     self.__features__ = value if value is not None else self.getFeaturesAs(self.default_type)
-
     @property
     def labels(self):
         return self.getLabelsAs(self.default_type)
@@ -92,18 +111,25 @@ class Dataset(object):
 
 class IterableDataset(Iterable, Dataset):
     """
-    Collection of Samples object to be used
+    Collection of Sample objects to be used
     """
 
     @property
     def samples(self):
         return self.items
 
+    @staticmethod
+    def checkNames(x):
+        if x is None:
+            raise AttributeError("With type 'dict' all samples must have a name")
+        else:
+            return x
+
     def getFeaturesAs(self, type='array'):
         """
         Object of the specified type containing the feature space
 
-        :param type: type of return. Can be one of "pandas", "dict" or "array
+        :param type: type of return. Can be one of "pandas", "dict", "list" or "array
         :return: an object of the specified type containing the features
         :rtype: np.array/dict/pd.DataFrame
         """
@@ -111,9 +137,14 @@ class IterableDataset(Iterable, Dataset):
         if type == 'array':
             return np.array([sample.features for sample in self.samples])
         elif type == 'dict':
-            return {sample.name: sample.features for sample in self.samples}
+            return {self.checkNames(sample.name): sample.features for sample in self.samples}
+        elif type == 'list':
+            return [sample.features for sample in self.samples]
         elif type == 'pandas':
-            features = self.getFeaturesAs('dict')
+            try:
+                features = self.getFeaturesAs('dict')
+            except AttributeError:
+                features = self.getFeaturesAs('list')
             try:
                 return pd.DataFrame(features).T
             except ValueError:
@@ -125,16 +156,21 @@ class IterableDataset(Iterable, Dataset):
         """
         Object of the specified type containing the labels
 
-        :param type: type of return. Can be one of "pandas", "dict" or "array
+        :param type: type of return. Can be one of "pandas", "dict", "list" or "array
         :return: an object of the specified type containing the features
         :rtype: np.array/dict/pd.DataFrame
         """
         if type == 'array':
             return np.array([sample.label for sample in self.samples])
         elif type == 'dict':
-            return {sample.name: sample.label for sample in self.samples}
+            return {self.checkNames(sample.name): sample.label for sample in self.samples}
+        elif type == 'list':
+            return [sample.label for sample in self.samples]
         elif type == 'pandas':
-            labels = self.getLabelsAs('dict')
+            try:
+                labels = self.getLabelsAs('dict')
+            except AttributeError:
+                labels = self.getLabelsAs('list')
             try:
                 return pd.DataFrame(labels).T
             except ValueError:
@@ -170,8 +206,23 @@ class LazyDataset(LazyIterable, IterableDataset):
                 if _p > p:
                     continue
                 yield sample
+        return LazyDataset(IterGenerator(__generator__))
 
-        return LazyDataset( IterGenerator(__generator__) )
+    def withLookback(self, lookback):
+        """
+        Create a LazyDataset with features that are an array of lookback lists of samples' features.
+
+        :param lookback: number of samples' features to look at
+        :type lookback: int
+        :return: Dataset with changed samples
+        :rtype: LazyDataset
+        """
+
+        def __transformed_sample_generator__():
+            slices = [islice(self.samples, n, None) for n in np.arange(lookback)]
+            for ss in izip(*slices):
+                yield Sample(features=(np.array([s.features for s in ss])), label=ss[-1].label)
+        return LazyDataset(IterGenerator(__transformed_sample_generator__))
 
 
 class PandasDataset(Dataset):
