@@ -2,7 +2,12 @@ import pickle
 import numpy as np
 import pandas as pd
 
-from itertools import islice, izip
+try:
+    from itertools import izip as zip
+except ImportError:  # will be 3.x series
+    pass
+
+from itertools import islice
 from abc import ABCMeta, abstractmethod, abstractproperty
 from cgnal.data.model.core import Iterable, LazyIterable, CachedIterable, IterGenerator
 
@@ -143,12 +148,17 @@ class IterableDataset(Iterable, Dataset):
         elif type == 'pandas':
             try:
                 features = self.getFeaturesAs('dict')
+                try:
+                    return pd.DataFrame(features).T
+                except ValueError:
+                    return pd.Series(features).to_frame("features")
             except AttributeError:
                 features = self.getFeaturesAs('list')
-            try:
-                return pd.DataFrame(features).T
-            except ValueError:
-                return pd.Series(features).to_frame("features")
+                try:
+                    return pd.DataFrame(features)
+                except ValueError:
+                    return pd.Series(features).to_frame("features")
+
         else:
             raise ValueError('Type %s not allowed' % type)
 
@@ -169,12 +179,17 @@ class IterableDataset(Iterable, Dataset):
         elif type == 'pandas':
             try:
                 labels = self.getLabelsAs('dict')
+                try:
+                    return pd.DataFrame(labels).T
+                except ValueError:
+                    return pd.Series(labels).to_frame("labels")
             except AttributeError:
                 labels = self.getLabelsAs('list')
-            try:
-                return pd.DataFrame(labels).T
-            except ValueError:
-                return pd.Series(labels).to_frame("labels")
+                try:
+                    return pd.DataFrame(labels)
+                except ValueError:
+                    return pd.Series(labels).to_frame("labels")
+
         else:
             raise ValueError('Type %s not allowed' % type)
 
@@ -219,8 +234,8 @@ class LazyDataset(LazyIterable, IterableDataset):
         """
 
         def __transformed_sample_generator__():
-            slices = [islice(self.samples, n, None) for n in np.arange(lookback)]
-            for ss in izip(*slices):
+            slices = [islice(self.samples, n, None) for n in range(lookback)]
+            for ss in zip(*slices):
                 yield Sample(features=(np.array([s.features for s in ss])), label=ss[-1].label)
         return LazyDataset(IterGenerator(__transformed_sample_generator__))
 

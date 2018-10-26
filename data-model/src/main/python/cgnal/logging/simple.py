@@ -1,4 +1,6 @@
 from datetime import datetime as dt
+
+from . import WithLoggingABC
 from . import DEFAULT_LOG_LEVEL as LOG_LEVEL
 
 levels = {"ERROR": 0, "WARN": 1, "INFO": 2, "DEBUG": 3}

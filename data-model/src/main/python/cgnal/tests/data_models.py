@@ -34,7 +34,7 @@ class TestDocumentArchivers(unittest.TestCase):
 
         archiver = CsvArchiver(os.path.join(DATA_FOLDER, 'test.csv'), dao)
 
-        doc = archiver.retrieve().next()
+        doc = next(archiver.retrieve())
 
         doc2 = archiver.retrieveById(doc.uuid)
 
@@ -45,7 +45,7 @@ class TestDocumentArchivers(unittest.TestCase):
 
         archiver = CsvArchiver(os.path.join(DATA_FOLDER, 'test.csv'), dao)
 
-        doc = archiver.retrieve().next()
+        doc = next(archiver.retrieve())
 
         doc.data.update({'symbols': ["enrico"]})
 

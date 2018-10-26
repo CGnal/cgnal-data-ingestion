@@ -72,7 +72,7 @@ class Iterable(object):
         fold = int(round(1.0 / ratio))
         if fold * ratio - 1.0 > 1E-1:
             print(' Approximating ratio of %f to %f' % (ratio, 1.0 / fold))
-        return self.kfold(fold).next()
+        return next(self.kfold(fold))
 
 
 class LazyIterable(Iterable):

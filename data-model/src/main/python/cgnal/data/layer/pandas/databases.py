@@ -32,8 +32,8 @@ class Database(WithLogging, DatabaseABC):
 
         :return: pickle names with appropriate extensions
         """
-        return map(lambda x: basename(x)[:-len(self.extenstion)],
-                   glob(os.path.join(self.name, "*%s" % self.extenstion)))
+        return list(map(lambda x: basename(x)[:-len(self.extenstion)],
+                        glob(os.path.join(self.name, "*%s" % self.extenstion))))
 
     def table(self, table_name):
         """
