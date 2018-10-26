@@ -181,7 +181,7 @@ class PandasDataset(Dataset):
             yield Sample(name=index, features=row, label=self.__labels__.loc[index])
 
     def intersection(self):
-        idx = pd.to_datetime(self.features.index.intersection(self.labels.index))
+        idx = list(self.features.index.intersection(self.labels.index))
         return PandasDataset(self.features.loc[idx], self.labels.loc[idx])
 
     def loc(self, idx):
