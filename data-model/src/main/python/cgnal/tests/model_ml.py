@@ -2,6 +2,7 @@ import numpy as np
 import unittest
 from cgnal.data.model.ml import LazyDataset, IterGenerator, MultiFeatureSample, Sample
 
+
 class LazyDatasetTests(unittest.TestCase):
 
     def test_withLookback_MultiFeatureSample(self):

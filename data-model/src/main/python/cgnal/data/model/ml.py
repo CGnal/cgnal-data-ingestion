@@ -270,6 +270,10 @@ class PandasDataset(Dataset):
         idx = list(self.features.index.intersection(self.labels.index))
         return PandasDataset(self.features.loc[idx], self.labels.loc[idx])
 
+    @property
+    def index(self):
+        return self.intersection().features.index
+
     def loc(self, idx):
         return PandasDataset(self.features.loc[idx], self.labels.loc[idx])
 
@@ -310,3 +314,4 @@ class PandasTimeIndexedDataset(PandasDataset):
         super(PandasTimeIndexedDataset, self).__init__(features, labels)
         self.__features__.index = pd.to_datetime(self.__features__.index)
         self.__labels__.index = pd.to_datetime(self.__labels__.index)
+
