@@ -315,3 +315,19 @@ class PandasTimeIndexedDataset(PandasDataset):
         self.__features__.index = pd.to_datetime(self.__features__.index)
         self.__labels__.index = pd.to_datetime(self.__labels__.index)
 
+    def intersection(self):
+        idx = list(self.features.index.intersection(self.labels.index))
+        return PandasTimeIndexedDataset(self.features.loc[idx], self.labels.loc[idx])
+
+    def loc(self, idx):
+        return PandasTimeIndexedDataset(self.features.loc[idx], self.labels.loc[idx])
+
+    def dropna(self, **kwargs):
+        return PandasTimeIndexedDataset(self.features.dropna(**kwargs), self.labels.dropna(**kwargs))
+
+    @staticmethod
+    def read(filename, features_cols="features", labels_cols="labels"):
+        _in = pd.read_pickle(filename)
+        return PandasTimeIndexedDataset(_in[features_cols], _in[labels_cols])
+
+
