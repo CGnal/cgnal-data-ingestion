@@ -25,6 +25,15 @@ class WithLogging(WithLoggingABC):
         nameLogger = str(self.__class__).replace("<class '", "").replace("'>", "")
         return getLogger(nameLogger)
 
+    def logResult(self, msg, level="INFO"):
+        def wrap(x):
+            if isinstance(msg, str):
+                self.logger.log(levels[level], msg)
+            else:
+                self.logger.log(levels[level], msg(x))
+            return x
+        return wrap
+
 
 def getDefaultLogger(level=levels[LOG_LEVEL]):
     """

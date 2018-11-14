@@ -274,6 +274,9 @@ class PandasDataset(Dataset):
     def index(self):
         return self.intersection().features.index
 
+    def __len__(self):
+        return len(self.index)
+
     def loc(self, idx):
         return PandasDataset(self.features.loc[idx], self.labels.loc[idx])
 
