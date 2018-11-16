@@ -109,6 +109,10 @@ class Dataset(object):
     def getLabelsAs(self, type='array'):
         raise NotImplementedError
 
+    @abstractmethod
+    def union(self, other):
+        raise NotImplementedError
+
     def write(self, filename):
         with open(filename, 'w') as fid:
             pickle.dump(self.samples, fid)
@@ -129,6 +133,20 @@ class IterableDataset(Iterable, Dataset):
             raise AttributeError("With type 'dict' all samples must have a name")
         else:
             return x
+
+    def union(self, other):
+
+        if not isinstance(other, Dataset):
+            raise ValueError("Union can only be done between Datasets. Found %s" % str(type(other)) )
+
+        def __generator__():
+            for sample in self.samples:
+                yield sample
+            for sample in other.samples:
+                yield sample
+
+        return LazyDataset(IterGenerator(__generator__))
+
 
     def getFeaturesAs(self, type='array'):
         """
@@ -309,6 +327,13 @@ class PandasDataset(Dataset):
     def read(filename, features_cols="features", labels_cols="labels"):
         _in = pd.read_pickle(filename)
         return PandasDataset(_in[features_cols], _in[labels_cols])
+
+    def union(self, other):
+        if isinstance(other, PandasDataset):
+            return PandasDataset(pd.concat([self.features, other.features]),
+                                 pd.concat([self.labels, other.labels]))
+        else:
+            return Dataset.union(self, other)
 
 
 class PandasTimeIndexedDataset(PandasDataset):
