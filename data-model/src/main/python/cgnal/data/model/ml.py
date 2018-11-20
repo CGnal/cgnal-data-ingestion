@@ -273,7 +273,7 @@ class PandasDataset(Dataset):
             self.__labels__ = labels.to_frame()
         elif isinstance(labels, pd.DataFrame):
             self.__labels__ = labels
-        elif isinstance(labels, None):
+        elif labels is None:
             self.__labels__ = labels
         else:
             raise ValueError("Labels must be of type pandas.Series or pandas.DataFrame")
