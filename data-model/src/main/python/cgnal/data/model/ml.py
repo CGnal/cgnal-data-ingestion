@@ -260,7 +260,7 @@ class LazyDataset(LazyIterable, IterableDataset):
 
 class PandasDataset(Dataset):
 
-    def __init__(self, features, labels):
+    def __init__(self, features, labels=None):
 
         if isinstance(features, pd.Series):
             self.__features__ = features.to_frame()
@@ -272,6 +272,8 @@ class PandasDataset(Dataset):
         if isinstance(labels, pd.Series):
             self.__labels__ = labels.to_frame()
         elif isinstance(labels, pd.DataFrame):
+            self.__labels__ = labels
+        elif isinstance(labels, None):
             self.__labels__ = labels
         else:
             raise ValueError("Labels must be of type pandas.Series or pandas.DataFrame")
