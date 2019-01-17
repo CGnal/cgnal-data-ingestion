@@ -8,8 +8,39 @@ except ImportError:  # will be 3.x series
     pass
 
 from itertools import islice
+from functools import wraps
 from abc import ABCMeta, abstractmethod, abstractproperty
 from cgnal.data.model.core import Iterable, LazyIterable, CachedIterable, IterGenerator
+
+
+def pandasDatasetWrapper(func):
+    """
+    Wrap given function, originally returning a couple (features, labels), to return a PandasDataset
+
+    :param func: function to be wrapped
+    """
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        features, labels = func(*args, **kwargs)
+        return PandasDataset(features=features, labels=labels)
+
+    return wrapper
+
+
+def pandasTimeIndexedDatasetWrapper(func):
+    """
+    Wrap given function, originally returning a couple (features, labels), to return a PandasTimeIndexedDataset
+
+    :param func: function to be wrapped
+    """
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        features, labels = func(*args, **kwargs)
+        return PandasTimeIndexedDataset(features=features, labels=labels)
+
+    return wrapper
 
 
 def features_and_labels_to_dataset(X, y=None):
@@ -111,6 +142,10 @@ class Dataset(object):
 
     @abstractmethod
     def union(self, other):
+        raise NotImplementedError
+
+    @abstractmethod
+    def createObject(self, features, labels):
         raise NotImplementedError
 
     def write(self, filename):
@@ -286,22 +321,44 @@ class PandasDataset(Dataset):
             except KeyError:
                 yield Sample(name=index, features=row, label=None)
 
-    def intersection(self):
-        idx = list(self.features.index.intersection(self.labels.index))
-        return PandasDataset(self.features.loc[idx], self.labels.loc[idx])
-
     @property
     def index(self):
         return self.intersection().features.index
+
+    @staticmethod
+    def __check_none__(lab):
+        return lab if lab is not None else None
+
+    def createObject(self, features, labels):
+        return PandasDataset(features, labels)
 
     def __len__(self):
         return len(self.index)
 
     def loc(self, idx):
-        return PandasDataset(self.features.loc[idx], self.labels.loc[idx])
+        """
+        Find given indices in features and labels
+
+        :param idx: input indices
+        :return: PandasDataset with features and labels filtered on input indices
+        """
+        return self.createObject(self.features.loc[idx], self.__check_none__(self.labels.loc[idx]))
 
     def dropna(self, **kwargs):
-        return PandasDataset(self.features.dropna(**kwargs), self.labels.dropna(**kwargs))
+        """
+        Drop NAs from feature and labels
+
+        :return: PandasDataset with features and labels without NAs
+        """
+        return self.createObject(self.features.dropna(**kwargs), self.__check_none__(self.labels.dropna(**kwargs)))
+
+    def intersection(self):
+        """
+        Intersect feature and labels indices
+
+        :return: PandasDataset with features and labels with intersected indices
+        """
+        return self.loc(list(self.features.index.intersection(self.labels.index)))
 
     def getFeaturesAs(self, type='array'):
         if type == 'array':
@@ -325,10 +382,9 @@ class PandasDataset(Dataset):
             labels_cols: self.getLabelsAs("pandas")
         }, axis=1).to_pickle(filename)
 
-    @staticmethod
-    def read(filename, features_cols="features", labels_cols="labels"):
+    def read(self, filename, features_cols="features", labels_cols="labels"):
         _in = pd.read_pickle(filename)
-        return PandasDataset(_in[features_cols], _in[labels_cols])
+        return self.createObject(_in[features_cols], _in[labels_cols])
 
     def union(self, other):
         if isinstance(other, PandasDataset):
@@ -340,24 +396,12 @@ class PandasDataset(Dataset):
 
 class PandasTimeIndexedDataset(PandasDataset):
 
-    def __init__(self, features, labels):
+    def __init__(self, features, labels=None):
         super(PandasTimeIndexedDataset, self).__init__(features, labels)
         self.__features__.index = pd.to_datetime(self.__features__.index)
-        self.__labels__.index = pd.to_datetime(self.__labels__.index)
+        if self.labels is not None:
+            self.__labels__.index = pd.to_datetime(self.__labels__.index)
 
-    def intersection(self):
-        idx = list(self.features.index.intersection(self.labels.index))
-        return PandasTimeIndexedDataset(self.features.loc[idx], self.labels.loc[idx])
-
-    def loc(self, idx):
-        return PandasTimeIndexedDataset(self.features.loc[idx], self.labels.loc[idx])
-
-    def dropna(self, **kwargs):
-        return PandasTimeIndexedDataset(self.features.dropna(**kwargs), self.labels.dropna(**kwargs))
-
-    @staticmethod
-    def read(filename, features_cols="features", labels_cols="labels"):
-        _in = pd.read_pickle(filename)
-        return PandasTimeIndexedDataset(_in[features_cols], _in[labels_cols])
-
+    def createObject(self, features, labels):
+        return PandasTimeIndexedDataset(features, labels)
 
