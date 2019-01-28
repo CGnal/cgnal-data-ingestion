@@ -1,2 +1,14 @@
+# tests:
 cgnal/resources/tests/tmp
+
+# Python
+*.pyc
+dist
+.ipynb_checkpoints
+*egg-info
 *.orig
+
+# documentation
+docs/build
+docs/cgnal
+
