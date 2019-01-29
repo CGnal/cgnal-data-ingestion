@@ -64,11 +64,11 @@ class PandasArchiver(Archiver):
             s.name = self.dao.computeKey(obj)
             return s.to_frame().T
 
-        new = pd.concat( [create_df(obj) for obj in objs] )
+        new = pd.concat([create_df(obj) for obj in objs], sort=True)
         # print("here")
         # print(self.data.loc[set(self.data.index).difference(new.index)])
         # print(new)
-        self.data = pd.concat( [self.data.loc[set(self.data.index).difference(new.index)], new] )
+        self.data = pd.concat([self.data.loc[set(self.data.index).difference(new.index)], new], sort=True)
         return self
 
     def archive(self, objs):

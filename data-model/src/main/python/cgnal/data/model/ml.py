@@ -8,39 +8,8 @@ except ImportError:  # will be 3.x series
     pass
 
 from itertools import islice
-from functools import wraps
 from abc import ABCMeta, abstractmethod, abstractproperty
 from cgnal.data.model.core import Iterable, LazyIterable, CachedIterable, IterGenerator
-
-
-def pandasDatasetWrapper(func):
-    """
-    Wrap given function, originally returning a couple (features, labels), to return a PandasDataset
-
-    :param func: function to be wrapped
-    """
-
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        features, labels = func(*args, **kwargs)
-        return PandasDataset(features=features, labels=labels)
-
-    return wrapper
-
-
-def pandasTimeIndexedDatasetWrapper(func):
-    """
-    Wrap given function, originally returning a couple (features, labels), to return a PandasTimeIndexedDataset
-
-    :param func: function to be wrapped
-    """
-
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        features, labels = func(*args, **kwargs)
-        return PandasTimeIndexedDataset(features=features, labels=labels)
-
-    return wrapper
 
 
 def features_and_labels_to_dataset(X, y=None):
@@ -182,7 +151,6 @@ class IterableDataset(Iterable, Dataset):
 
         return LazyDataset(IterGenerator(__generator__))
 
-
     def getFeaturesAs(self, type='array'):
         """
         Object of the specified type containing the feature space
@@ -245,6 +213,9 @@ class IterableDataset(Iterable, Dataset):
 
         else:
             raise ValueError('Type %s not allowed' % type)
+
+    def createObject(self, features, labels):
+        raise NotImplementedError
 
 
 class CachedDataset(CachedIterable, IterableDataset):

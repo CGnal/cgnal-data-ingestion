@@ -1,17 +1,20 @@
 import unittest
-
+import os
 import numpy as np
 import pandas as pd
 
-from cgnal.tests import TMP_FOLDER
+from cgnal.tests import TMP_FOLDER, DATA_FOLDER
 
 from cgnal.logging.defaults import getDefaultLogger
 
-from cgnal.data.layer.pandas.dao import DataFrameDAO, SeriesDAO
+from cgnal.data.layer.pandas.dao import DataFrameDAO, SeriesDAO, DocumentDAO
 from cgnal.data.layer.pandas.databases import Database
-from cgnal.data.layer.pandas.archivers import TableArchiver
+from cgnal.data.layer.pandas.archivers import TableArchiver, PickleArchiver, CsvArchiver
 
+
+TEST_DATA_PATH = DATA_FOLDER
 logger = getDefaultLogger()
+
 
 class BaseArchiverTests(unittest.TestCase):
 
@@ -97,6 +100,51 @@ class BaseArchiverTests(unittest.TestCase):
             self.is_equal_series(s1, s2)
 
 
+class TestDocumentArchivers(unittest.TestCase):
+
+    def test_pickle(self):
+        dao = DocumentDAO()
+
+        archiver = PickleArchiver(os.path.join(DATA_FOLDER, 'test.pkl'), dao)
+
+        docs = list(archiver.retrieve())
+
+        self.assertEquals(len(docs), 20)
+
+    def test_csv(self):
+        dao = DocumentDAO()
+
+        archiver = CsvArchiver(os.path.join(DATA_FOLDER, 'test.csv'), dao)
+
+        docs = list(archiver.retrieve())
+
+        self.assertEquals(len(docs), 20)
+
+    def test_retrieveById(self):
+        dao = DocumentDAO()
+
+        archiver = CsvArchiver(os.path.join(DATA_FOLDER, 'test.csv'), dao)
+
+        doc = next(archiver.retrieve())
+
+        doc2 = archiver.retrieveById(doc.uuid)
+
+        self.assertEquals(doc.data, doc2.data)
+
+    def test_update(self):
+        dao = DocumentDAO()
+
+        archiver = CsvArchiver(os.path.join(DATA_FOLDER, 'test.csv'), dao)
+
+        doc = next(archiver.retrieve())
+
+        doc.data.update({'symbols': ["enrico"]})
+
+        archiver.archive(doc)
+
+        doc2 = archiver.retrieveById(doc.uuid)
+
+        self.assertEquals(doc2.data["symbols"], ["enrico"])
 
 
 if __name__ == "__main__":
