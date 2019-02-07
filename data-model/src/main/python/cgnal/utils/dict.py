@@ -1,6 +1,7 @@
 try:
     from itertools import izip as zip
 except ImportError:  # will be 3.x series
+    from functools import reduce
     pass
 
 from itertools import islice, tee
