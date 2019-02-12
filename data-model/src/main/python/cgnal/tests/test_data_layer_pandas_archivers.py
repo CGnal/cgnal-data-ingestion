@@ -83,7 +83,7 @@ class BaseArchiverTests(unittest.TestCase):
 
             db = Database(self.tmp_folder)
 
-            table = db.table("my_table_series")
+            table = db["my_table_series"]
 
             dao = SeriesDAO()
 

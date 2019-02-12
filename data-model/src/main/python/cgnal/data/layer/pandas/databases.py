@@ -35,6 +35,18 @@ class Database(WithLogging, DatabaseABC):
         return list(map(lambda x: basename(x)[:-len(self.extenstion)],
                         glob(os.path.join(self.name, "*%s" % self.extenstion))))
 
+
+    def __getitem__(self, table_name):
+        """
+        Return table from the database
+
+        :param table_name: Name of the table
+        :type table_name: str
+
+        :return: object of class PickleTable
+        """
+        return self.table(table_name)
+
     def table(self, table_name):
         """
         Table selector
