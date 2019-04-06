@@ -108,6 +108,10 @@ class PickleArchiver(PandasArchiver):
         return pd.read_pickle(self.filename)
 
 
+# Si sarebbe potuto fare un table archiver che andasse bene per tutte le strutture tabellari pandabili, e non solo i pickle
+# Per farlo però occorre rendere l'oggetto Table coerente con TableABC (e.g. la property 'data' può diventare 'to_df')
+# Inoltre, dal momento che questo funziona solo con le tabelle pickle sarebbe il caso di chiamarlo PickleTableArchiver
+
 class TableArchiver(PandasArchiver):
 
     def __init__(self, table, dao):
