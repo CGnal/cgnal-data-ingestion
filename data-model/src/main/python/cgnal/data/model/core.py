@@ -227,3 +227,11 @@ class Range(object):
         return self.range(freq="1B")
 
 
+    @property
+    def minutes_15(self):
+        """
+        Create date range with daily frequency
+
+        :return: pd.date_range from start to end with daily frequency
+        """
+        return self.range(freq="15T")
