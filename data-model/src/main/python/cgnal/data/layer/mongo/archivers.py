@@ -19,10 +19,12 @@ class MongoArchiver(Archiver):
         return self.dao.parse(json)
 
     def retrieve(self, condition={}, sort_by=None):
-        jsons = self.collection.find(condition)
+        jsons = self.collection.find(condition, no_cursor_timeout=True)
         if sort_by is not None:
             jsons = jsons.sort(sort_by)
-        return (self.dao.parse(json) for json in jsons)
+        for json in jsons:
+            yield self.dao.parse(json)
+        jsons.close()
 
     def retrieveGenerator(self, condition={}, sort_by=None):
         def __iterator__():

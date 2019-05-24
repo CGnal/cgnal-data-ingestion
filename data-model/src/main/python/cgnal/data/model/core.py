@@ -50,6 +50,10 @@ class Iterable(object):
     def kfold(self, int):
         raise NotImplementedError
 
+    def __iter__(self):
+        for item in self.items:
+            yield item
+
     def batch(self, size=100):
         for batch in groupIterable(self.items, batch_size=size):
             yield batch
@@ -149,6 +153,9 @@ class CachedIterable(Iterable):
     @property
     def items(self):
         return self.__items__
+
+    def __getitem__(self, item):
+        return self.items[item]
 
     @property
     def cached(self):
