@@ -26,6 +26,9 @@ class Document(object):
             else:
                 raise e
 
+    def removeProperty(self, key):
+        return Document(self.uuid, {k: v for k, v in self.data.items() if k != key})
+
     def addProperty(self, key, value):
         return Document(self.uuid, union(self.data, unflattenKeys({key: value})))
 
