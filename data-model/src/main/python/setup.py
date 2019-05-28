@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '1.2.1'
+version = '1.2.2dev'
 
 with open("requirements.txt", "r") as fid:
     reqs = [line.replace("\n", "") for line in fid.readlines()]
