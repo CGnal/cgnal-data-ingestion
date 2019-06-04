@@ -322,7 +322,8 @@ class PandasDataset(Dataset):
 
         :return: PandasDataset with features and labels without NAs
         """
-        return self.createObject(self.features.dropna(**kwargs), self.__check_none__(self.labels.dropna(**kwargs)))
+        return self.createObject(self.features.dropna(**kwargs),
+                                 self.__check_none__(self.labels.dropna(**kwargs) if self.labels is not None else None))
 
     def intersection(self):
         """

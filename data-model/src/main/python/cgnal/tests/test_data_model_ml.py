@@ -1,6 +1,7 @@
 import numpy as np
+import pandas as pd
 import unittest
-from cgnal.data.model.ml import LazyDataset, IterGenerator, MultiFeatureSample, Sample
+from cgnal.data.model.ml import LazyDataset, IterGenerator, MultiFeatureSample, Sample, PandasDataset
 
 
 class LazyDatasetTests(unittest.TestCase):
@@ -146,6 +147,16 @@ class LazyDatasetTests(unittest.TestCase):
         res = res + [np.array_equal(tmp2, X2), np.array_equal(tmp2lab, lab2)]
 
         self.assertTrue(all(res))
+
+
+class PandasDatasetTests(unittest.TestCase):
+
+    def test_dropna_none_labels(self):
+        dataset = PandasDataset(features=pd.concat([pd.Series([1, np.nan, 2, 3], name="feat1"),
+                                                    pd.Series([1, 2, 3, 4], name="feat2")], axis=1))
+
+        res = pd.concat([pd.Series([1, 2, 3], name="feat1"), pd.Series([1, 3, 4], name="feat2")], axis=1)
+        self.assertTrue((dataset.dropna(subset=["feat1"]).features.reset_index(drop=True) == res).all().all())
 
 
 if __name__ == "__main__":
