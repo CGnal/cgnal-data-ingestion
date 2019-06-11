@@ -47,3 +47,8 @@ class MongoArchiver(Archiver):
         json = self.collection.find_one()
         return self.dao.parse(json)
 
+    def aggregate(self, pipeline, allowDiskUse=True):
+        jsons = self.collection.aggregate(pipeline, allowDiskUse=allowDiskUse)
+        for json in jsons:
+            yield self.dao.parse(json)
+        jsons.close()
