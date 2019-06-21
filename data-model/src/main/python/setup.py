@@ -1,20 +1,26 @@
 from setuptools import setup, find_packages
 
-version = '1.2.2dev'
-
 with open("requirements.txt", "r") as fid:
     reqs = [line.replace("\n", "") for line in fid.readlines()]
-
 
 def readme():
     with open('README.md') as f:
         return f.read()
 
+def get_version(VERSIONFILE="cgnal/_version.py"):
+    import re
+    verstrline = open(VERSIONFILE, "rt").read()
+    VSRE = r"^__version__ = ['\"]([^'\"]*)['\"]"
+    mo = re.search(VSRE, verstrline, re.M)
+    if mo:
+        return mo.group(1)
+    else:
+        raise RuntimeError("Unable to find version string in %s." % (VERSIONFILE,))
 
 setup(
     name='cgnal-core',
-    version=version,
-    description='Python Analytics Package Core Functionalities',
+    version=get_version(),
+    description='Python Core Functionalities Package',
     long_description=readme(),
     packages=find_packages(exclude=['contrib', 'docs', 'tests']),
     install_requires=reqs,
