@@ -1,0 +1,13 @@
+test:
+
+  logging:
+    level: "DEBUG"
+
+  fs:
+    root: &root "/this/is/a/folder"
+    folders:
+      python: &python myfolder
+    files:
+      credentials: !joinPath [*root, *python, "credentials.p"]
+
+# More on YAML (and other configuration formats) can be found at: https://martin-thoma.com/configuration-files-in-python

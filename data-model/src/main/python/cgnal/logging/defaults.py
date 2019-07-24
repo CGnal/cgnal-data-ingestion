@@ -96,11 +96,15 @@ def configFromFile(path_to_file):
     import os
 
     readers = {
+        ".yml": configFromYaml,
         ".yaml": configFromYaml,
         ".json": configFromJson
     }
 
     _, file_extension = os.path.splitext(path_to_file)
+
+    if file_extension not in readers.keys():
+        raise NotImplementedError(f"Reader for file extention {file_extension} is not supported")
 
     return readers[file_extension](path_to_file)
 
