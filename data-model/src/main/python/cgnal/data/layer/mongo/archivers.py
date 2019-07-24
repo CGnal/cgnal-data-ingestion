@@ -4,7 +4,6 @@ from pymongo.collection import Collection
 from bson.objectid import ObjectId
 
 from cgnal.data.layer import Archiver
-from cgnal.data.model.core import IterGenerator
 
 class MongoArchiver(Archiver):
     def __init__(self, collection, dao):
@@ -26,10 +25,6 @@ class MongoArchiver(Archiver):
             yield self.dao.parse(json)
         jsons.close()
 
-    def retrieveGenerator(self, condition={}, sort_by=None):
-        def __iterator__():
-            return self.retrieve(condition=condition, sort_by=sort_by)
-        return IterGenerator( __iterator__ )
 
     def archiveOne(self, obj):
         return self.__insert__(obj)

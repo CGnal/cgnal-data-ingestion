@@ -1,5 +1,6 @@
 from abc import abstractmethod, ABCMeta
 
+from cgnal.data.model.core import IterGenerator
 from cgnal.data.exceptions import NoTableException
 
 class Archiver(object):
@@ -9,20 +10,26 @@ class Archiver(object):
         raise NotImplementedError
 
     @abstractmethod
-    def retrieve(self, obj):
+    def retrieve(self, *args, **kwargs):
         raise NotImplementedError
 
     @abstractmethod
     def archive(self, obj):
         raise NotImplementedError
 
-    def map(self, f, condition={}):
-        for obj in self.retrieve(condition):
+    def map(self, f, *args, **kwargs):
+        for obj in self.retrieve(*args, **kwargs):
             yield f(obj)
 
-    def foreach(self, f, condition={}):
-        for obj in self.retrieve(condition):
+    def foreach(self, f, *args, **kwargs):
+        for obj in self.retrieve(*args, **kwargs):
             f(obj)
+
+    def retrieveGenerator(self, *args, **kwargs):
+        def __iterator__():
+            return self.retrieve(*args, **kwargs)
+        return IterGenerator( __iterator__ )
+
 
 
 class DAO(object):
