@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractproperty
-
+from cgnal.config import BaseConfig
 
 DEFAULT_LOG_LEVEL = "INFO"
 
@@ -15,3 +15,9 @@ class WithLoggingABC(object):
         :return: None, outputs logs
         """
         pass
+
+
+class LoggingConfig(BaseConfig):
+    @property
+    def level(self):
+        return self.getValue("level")
