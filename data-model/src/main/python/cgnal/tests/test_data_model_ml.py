@@ -1,11 +1,14 @@
 import numpy as np
 import pandas as pd
 import unittest
+
+from cgnal.tests.core import TestCase, logTest
 from cgnal.data.model.ml import LazyDataset, IterGenerator, MultiFeatureSample, Sample, PandasDataset
 
 
-class LazyDatasetTests(unittest.TestCase):
+class LazyDatasetTests(TestCase):
 
+    @logTest
     def test_withLookback_MultiFeatureSample(self):
         samples = [MultiFeatureSample(features=[np.array([100., 101.]), np.array([np.NaN])], label=1.),
                    MultiFeatureSample(features=[np.array([102., 103.]), np.array([1.])], label=2.),
@@ -56,6 +59,7 @@ class LazyDatasetTests(unittest.TestCase):
         
         self.assertTrue(all(res))
 
+    @logTest
     def test_withLookback_ArrayFeatureSample(self):
         
         samples = [Sample(features=np.array([100, 101]), label=1),
@@ -102,6 +106,7 @@ class LazyDatasetTests(unittest.TestCase):
 
         self.assertTrue(all(res))
 
+    @logTest
     def test_withLookback_ListFeatureSample(self):
 
         samples = [Sample(features=[100, 101], label=1),
@@ -149,8 +154,9 @@ class LazyDatasetTests(unittest.TestCase):
         self.assertTrue(all(res))
 
 
-class PandasDatasetTests(unittest.TestCase):
+class PandasDatasetTests(TestCase):
 
+    @logTest
     def test_dropna_none_labels(self):
         dataset = PandasDataset(features=pd.concat([pd.Series([1, np.nan, 2, 3], name="feat1"),
                                                     pd.Series([1, 2, 3, 4], name="feat2")], axis=1))

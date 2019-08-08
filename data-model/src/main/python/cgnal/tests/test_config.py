@@ -4,6 +4,7 @@ import os
 from cgnal.logging import LoggingConfig
 from cgnal.logging.defaults import getDefaultLogger, configFromFile
 from cgnal.tests import DATA_FOLDER
+from cgnal.tests.core import TestCase, logTest
 from cgnal.config import get_all_configuration_file, __this_dir__ as config_dir, merge_confs, \
     BaseConfig, FileSystemConfig
 
@@ -22,9 +23,9 @@ class TestConfig(BaseConfig):
         return FileSystemConfig(self.sublevel("fs"))
 
 
-class TestDocumentArchivers(unittest.TestCase):
+class TestDocumentArchivers(TestCase):
 
-
+    @logTest
     def test_config(self):
         test_file = "defaults.yml"
 
@@ -41,6 +42,8 @@ class TestDocumentArchivers(unittest.TestCase):
         logger.info(f"Get File: {config.fs.getFile('credentials')}")
         self.assertEqual(config.fs.getFile("credentials"), os.path.join("/this/is/a/folder","myfolder","credentials.p"))
 
+
+    @logTest
     def test_read_logging_config(self):
         config_file = "logging.yml"
 
