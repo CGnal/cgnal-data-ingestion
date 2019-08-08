@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 
 from cgnal.tests import TMP_FOLDER, DATA_FOLDER
+from cgnal.tests.core import TestCase, logTest
 
 from cgnal.logging.defaults import getDefaultLogger
 
@@ -16,7 +17,7 @@ TEST_DATA_PATH = DATA_FOLDER
 logger = getDefaultLogger()
 
 
-class BaseArchiverTests(unittest.TestCase):
+class BaseArchiverTests(TestCase):
 
     ############################
     #### setup and teardown ####
@@ -42,6 +43,7 @@ class BaseArchiverTests(unittest.TestCase):
                BaseArchiverTests.is_equal_dataframe_one_way(df2, df1)
 
 
+    @logTest
     def test_pickle_archiver_with_dataframes(self):
 
             db = Database(self.tmp_folder)
@@ -79,6 +81,7 @@ class BaseArchiverTests(unittest.TestCase):
             self.assertEqual(len(list(b.retrieve())), 3)
 
 
+    @logTest
     def test_pickle_archiver_with_series(self):
 
             db = Database(self.tmp_folder)
@@ -100,8 +103,9 @@ class BaseArchiverTests(unittest.TestCase):
             self.is_equal_series(s1, s2)
 
 
-class TestDocumentArchivers(unittest.TestCase):
+class TestDocumentArchivers(TestCase):
 
+    @logTest
     def test_pickle(self):
         dao = DocumentDAO()
 
@@ -111,6 +115,7 @@ class TestDocumentArchivers(unittest.TestCase):
 
         self.assertEqual(len(docs), 20)
 
+    @logTest
     def test_csv(self):
         dao = DocumentDAO()
 
@@ -120,6 +125,7 @@ class TestDocumentArchivers(unittest.TestCase):
 
         self.assertEqual(len(docs), 20)
 
+    @logTest
     def test_retrieveById(self):
         dao = DocumentDAO()
 
@@ -131,6 +137,7 @@ class TestDocumentArchivers(unittest.TestCase):
 
         self.assertEqual(doc.data, doc2.data)
 
+    @logTest
     def test_update(self):
         dao = DocumentDAO()
 

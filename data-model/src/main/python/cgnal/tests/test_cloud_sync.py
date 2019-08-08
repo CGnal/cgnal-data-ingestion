@@ -3,17 +3,19 @@ import os
 from time import sleep
 
 from cgnal.tests import TMP_FOLDER
+from cgnal.tests.core import TestCase, logTest
 from cgnal.logging.defaults import getDefaultLogger
 from cgnal.utils.cloud import CloudSync
 
 logger = getDefaultLogger()
 
-class TestDocumentArchivers(unittest.TestCase):
+class TestDocumentArchivers(TestCase):
 
     url = "http://192.168.2.110:8686"
 
     test_file = "tests/test.txt"
 
+    @logTest
     def test_base_function(self):
         sync = CloudSync(self.url, TMP_FOLDER)
 
@@ -24,6 +26,7 @@ class TestDocumentArchivers(unittest.TestCase):
         os.remove( namefile )
 
 
+    @logTest
     def test_decorator(self):
 
         sync = CloudSync(self.url, TMP_FOLDER)
@@ -38,6 +41,7 @@ class TestDocumentArchivers(unittest.TestCase):
 
         os.remove( namefile )
 
+    @logTest
     def test_multiple(self):
         sync = CloudSync(self.url, TMP_FOLDER)
 
@@ -58,6 +62,7 @@ class TestDocumentArchivers(unittest.TestCase):
         os.remove(namefile)
 
 
+    @logTest
     def test_upload(self):
 
         sync = CloudSync(self.url, TMP_FOLDER)
