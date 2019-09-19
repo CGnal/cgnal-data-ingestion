@@ -63,3 +63,16 @@ def unflattenKeys(input_dict, sep="."):
         return out
     return union(*[__translate(key, value) for key, value in input_dict.items()])
 
+
+def __check(value):
+    return False if value is None else True
+
+def filterNones(_dict):
+    agg = {}
+    for k, v in _dict.items():
+        if isinstance(v, dict):
+            agg[k] = filterNones(v)
+        elif __check(v):
+            agg[k] = v
+    return agg
+
