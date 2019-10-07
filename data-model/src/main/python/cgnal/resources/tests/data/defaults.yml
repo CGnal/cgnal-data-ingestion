@@ -10,4 +10,6 @@ test:
     files:
       credentials: !joinPath [*root, *python, "credentials.p"]
 
+  user: ${USER}
+
 # More on YAML (and other configuration formats) can be found at: https://martin-thoma.com/configuration-files-in-python

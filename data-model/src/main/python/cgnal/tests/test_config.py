@@ -51,7 +51,19 @@ class TestDocumentArchivers(TestCase):
 
         logger.info("Example of logging!")
 
+    @logTest
+    def test_environ_variable(self):
+        test_file = "defaults.yml"
 
+        os.environ["CONFIG_FILE"] = os.path.join(TEST_DATA_PATH, test_file)
+
+        config = TestConfig(BaseConfig(merge_confs(
+            get_all_configuration_file(),
+            os.path.join(config_dir, "defaults.yml")
+        )).sublevel("test"))
+
+        user = config.getValue("user")
+        self.assertEqual(user, os.environ["USER"])
 
 
 if __name__ == "__main__":
