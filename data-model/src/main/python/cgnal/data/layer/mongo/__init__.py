@@ -1,4 +1,4 @@
-from cgnal.config import BaseConfig
+from cgnal.config import BaseConfig, AuthConfig
 
 class MongoConfig(BaseConfig):
     @property
@@ -12,3 +12,12 @@ class MongoConfig(BaseConfig):
         return self.getValue("db_name")
     def getCollection(self, name):
         return self.config["collections"][name]
+    @property
+    def auth(self):
+        return AuthConfig(self.sublevel("auth"))
+    @property
+    def admin(self):
+        return AuthConfig(self.sublevel("admin"))
+    @property
+    def authSource(self):
+        return self.safeGetValue("authSource")
