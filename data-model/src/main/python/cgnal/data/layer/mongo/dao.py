@@ -6,6 +6,7 @@ from cgnal.data.layer import DAO
 from cgnal.utils.dict import union
 from cgnal.data.model.text import Document
 
+
 class DocumentDAO(DAO):
 
     mapping = {}
@@ -20,8 +21,7 @@ class DocumentDAO(DAO):
     def conversion(self, d):
         return {self.inverse_mapping.get(k, k): v for k, v in d.items()}
 
-
-    def __init__(self, uuid = "_id"):
+    def __init__(self, uuid="_id"):
         self.uuid = uuid
 
     def computeKey(self, obj):
@@ -40,7 +40,7 @@ class SeriesDAO(DAO):
         self.key_field = key_field
 
     def computeKey(self, serie):
-        return  {self.key_field: ObjectId(serie.name)}
+        return {self.key_field: ObjectId(serie.name)}
 
     def get(self, serie):
         return serie.to_dict()

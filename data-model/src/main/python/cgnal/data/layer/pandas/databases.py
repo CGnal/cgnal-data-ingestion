@@ -8,6 +8,7 @@ from cgnal.utils.fs import create_dir_if_not_exists
 from cgnal.data.layer import DatabaseABC, TableABC
 from cgnal.logging.defaults import WithLogging
 
+
 class Database(WithLogging, DatabaseABC):
 
     def __init__(self, name, extension=".p"):
@@ -22,8 +23,8 @@ class Database(WithLogging, DatabaseABC):
         """
         if not os.path.exists(name):
             self.logger.info("Creating new database %s" % name)
-        self.name = create_dir_if_not_exists( name )
-        self.extenstion = extension
+        self.name = create_dir_if_not_exists(name)
+        self.extension = extension
 
     @property
     def tables(self):
@@ -32,9 +33,8 @@ class Database(WithLogging, DatabaseABC):
 
         :return: pickle names with appropriate extensions
         """
-        return list(map(lambda x: basename(x)[:-len(self.extenstion)],
-                        glob(os.path.join(self.name, "*%s" % self.extenstion))))
-
+        return list(map(lambda x: basename(x)[:-len(self.extension)],
+                        glob(os.path.join(self.name, "*%s" % self.extension))))
 
     def __getitem__(self, table_name):
         """
@@ -68,12 +68,12 @@ class Table(WithLogging, TableABC):
 
     def __init__(self, db, table_name):
         """
-        Class implementing a constructor to interface with gtaa from pickle databases
+        Class implementing a constructor for tables using pickle file format
 
-        :param db: object of class PickleDatabase
+        :param db: database to which the table belongs
         :param table_name: name of the table
 
-        :type db: Database
+        :type db: cgnal.data.layer.pandas.databases.Database
         :type table_name: str
         """
 
@@ -106,8 +106,10 @@ class Table(WithLogging, TableABC):
         Write pickle of data, eventually outer joined with an input DataFrame
 
         :param df: input data
+        :param overwrite: whether or not to overwrite existing file
 
         :type df: pd.DataFrame
+        :type overwrite: bool
 
         :return: None
         """

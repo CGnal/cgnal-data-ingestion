@@ -6,8 +6,10 @@ import uuid
 from cgnal.utils.dict import union, unflattenKeys
 from cgnal.data.model.core import Iterable, LazyIterable, CachedIterable
 
+
 def generate_random_uuid():
     return uuid.uuid1().bytes[:12]
+
 
 class Document(object):
     def __init__(self, uuid, data):
@@ -53,6 +55,7 @@ class Documents(Iterable):
     @property
     def documents(self):
         return self.items
+
 
 class CachedDocuments(CachedIterable, Documents):
 

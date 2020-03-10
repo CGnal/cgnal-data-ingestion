@@ -3,7 +3,10 @@ from abc import abstractmethod, ABCMeta
 from cgnal.data.model.core import IterGenerator
 from cgnal.data.exceptions import NoTableException
 
+
 class Archiver(object):
+    """ Object that retrieve data from source and stores it in memory """
+
     __metaclass__ = ABCMeta
 
     def dao(self):
@@ -33,6 +36,7 @@ class Archiver(object):
 
 
 class DAO(object):
+    """ Data Access Object"""
 
     @abstractmethod
     def computeKey(self, obj):

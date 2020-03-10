@@ -5,6 +5,7 @@ from bson.objectid import ObjectId
 
 from cgnal.data.layer import Archiver
 
+
 class MongoArchiver(Archiver):
     def __init__(self, collection, dao):
         if not isinstance(collection, Collection):
@@ -30,7 +31,7 @@ class MongoArchiver(Archiver):
         return self.__insert__(obj)
 
     def __insert__(self, obj):
-        return self.collection.update_one(self.dao.computeKey( obj ),
+        return self.collection.update_one(self.dao.computeKey(obj),
                                           {"$set": self.dao.get(obj)}, upsert=True)
 
     def archiveMany(self, objs):

@@ -6,10 +6,13 @@ from cgnal.data.layer import DAO
 
 
 class DocumentDAO(DAO):
+    """Data access object for documents"""
+
     def computeKey(self, doc):
         return doc.uuid
 
     def get(self, doc):
+        """Get doc as pd.Series with uuid as name"""
         return pd.Series(doc.data, name=self.computeKey(doc))
 
     def parse(self, row):
@@ -17,11 +20,12 @@ class DocumentDAO(DAO):
 
 
 class DataFrameDAO(DAO):
+    """Data Access Object for pd.DataFrames"""
 
     def computeKey(self, df):
         try:
             return df.name
-        except (AttributeError):
+        except AttributeError:
             return hash(json.dumps({str(k): str(v) for k, v in df.to_dict().items()}))
 
     def get(self, df):
@@ -37,6 +41,7 @@ class DataFrameDAO(DAO):
 
 
 class SeriesDAO(DAO):
+    """Data Access Object for pd.Series"""
 
     def computeKey(self, df):
         return df.name
