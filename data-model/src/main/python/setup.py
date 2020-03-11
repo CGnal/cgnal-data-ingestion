@@ -3,9 +3,11 @@ from setuptools import setup, find_packages
 with open("requirements.txt", "r") as fid:
     reqs = [line.replace("\n", "") for line in fid.readlines()]
 
+
 def readme():
     with open('README.md') as f:
         return f.read()
+
 
 def get_version(VERSIONFILE="cgnal/_version.py"):
     import re
@@ -16,6 +18,7 @@ def get_version(VERSIONFILE="cgnal/_version.py"):
         return mo.group(1)
     else:
         raise RuntimeError("Unable to find version string in %s." % (VERSIONFILE,))
+
 
 setup(
     name='cgnal-core',
