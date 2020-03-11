@@ -1,10 +1,9 @@
 import os
-from glob import glob
-
-from functools import wraps
-
 import pandas as pd
+from glob import glob
+from functools import wraps
 from cgnal.utils.fs import create_dir_if_not_exists
+
 
 def cache(func):
     """
@@ -16,12 +15,18 @@ def cache(func):
     @wraps(func)
     def _wrap(obj):
         try:
-            return obj.__cache__[func.func_name]
+            return obj.__dict__[func.__name__]
         except KeyError:
             score = func(obj)
-            obj.__cache__[func.func_name] = score
+            obj.__dict__[func.__name__] = score
             return score
+    _wrap.__name__ = func.__name__
     return _wrap
+
+
+def lazyproperty(obj):
+    return property(cache(obj))
+
 
 
 class Cached(object):
