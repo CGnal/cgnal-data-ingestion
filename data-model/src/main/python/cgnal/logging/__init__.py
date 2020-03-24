@@ -21,3 +21,7 @@ class LoggingConfig(BaseConfig):
     @property
     def level(self):
         return self.getValue("level")
+
+    @property
+    def filename(self):
+        return self.getValue("filename")
