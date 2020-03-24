@@ -1,3 +1,5 @@
+from cgnal.config import load as load_yaml
+
 from logging import getLogger, basicConfig, config
 
 from cgnal.logging import WithLoggingABC
@@ -76,10 +78,7 @@ def configFromYaml(path_to_file):
 
     :return: configuration for logger
     """
-    import yaml
-
-    with open(path_to_file, 'rt') as f:
-        configFile = yaml.safe_load(f.read())
+    configFile = load_yaml(path_to_file)
     config.dictConfig(configFile)
 
 
