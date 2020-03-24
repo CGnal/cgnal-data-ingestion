@@ -49,12 +49,30 @@ class Document(object):
     def language(self):
         return self.getOrThrow('language')
 
+    def __getitem__(self, item):
+        return self.data[item]
+
+    @property
+    def properties(self):
+        for prop in self.data.keys():
+            yield prop
+
+    def items(self):
+        for prop in self.properties:
+            yield prop, self[prop]
 
 class Documents(Iterable):
 
     @property
     def documents(self):
         return self.items
+
+    def __getitem__(self, item):
+        return self.documents[item]
+
+    def __iter__(self):
+        for doc in self.documents:
+            yield doc
 
 
 class CachedDocuments(CachedIterable, Documents):
