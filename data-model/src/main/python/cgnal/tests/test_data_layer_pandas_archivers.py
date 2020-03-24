@@ -125,6 +125,29 @@ class TestDocumentArchivers(TestCase):
 
         self.assertEqual(len(docs), 20)
 
+
+    @logTest
+    def test_documents_indexing(self):
+
+        from cgnal.data.model.text import CachedDocuments
+
+        dao = DocumentDAO()
+
+        archiver = CsvArchiver(os.path.join(DATA_FOLDER, 'test.csv'), dao)
+
+        docs = CachedDocuments(archiver.retrieve())
+
+        self.assertEqual(len(list(docs)), 20)
+
+        self.assertEqual(docs[0], docs.documents[0])
+
+        doc = docs[0]
+
+        self.assertEqual(doc["text"], doc.data["text"])
+
+        self.assertEqual(dict(doc.items()), doc.data)
+
+
     @logTest
     def test_retrieveById(self):
         dao = DocumentDAO()
