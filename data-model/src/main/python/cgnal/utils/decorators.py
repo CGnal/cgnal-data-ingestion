@@ -1,7 +1,10 @@
 import os
+import inspect
 import pandas as pd
 from glob import glob
-from functools import wraps
+from functools import wraps, partial
+
+from cgnal.utils.dict import union
 from cgnal.utils.fs import create_dir_if_not_exists
 
 
@@ -26,7 +29,6 @@ def cache(func):
 
 def lazyproperty(obj):
     return property(cache(obj))
-
 
 
 class Cached(object):
@@ -97,4 +99,37 @@ class Cached(object):
             return os.path.basename(filename)
 
 
+def paramCheck(function, allow_none=True):
+
+    @wraps(function)
+    def check(*arguments, **kwargs):
+
+        default_values = inspect.getfullargspec(function).defaults
+        annotations = inspect.getfullargspec(function).annotations
+        _args = inspect.getfullargspec(function).args[:-len(default_values)] if default_values \
+            else inspect.getfullargspec(function).args
+
+        non_default_args = [arg for arg in _args if (arg in annotations.keys() and arg != 'self')]
+        default_args = inspect.getfullargspec(function).args[-len(default_values):] if default_values else []
+
+        arg_dict = union({argument: {'type': annotations[argument], 'value': None} for argument in non_default_args},
+                         {argument: {'type': annotations.get(argument) if annotations.get(argument) \
+                             else type(default_values[index]), 'value': default_values[index]}
+                          for index, argument in enumerate(default_args)}
+                         )
+        for index, arg in enumerate(inspect.getfullargspec(function).args):
+
+            if arg != 'self':
+                argIn = arguments[index] if index < len(arguments) else kwargs.get(arg, arg_dict[arg]['value'])
+                if argIn is None:
+                    if allow_none is False: raise ValueError(f"{arg} cannot be None")
+                else:
+                    if (not isinstance(argIn, arg_dict[arg]['type'])) and (arg_dict[arg]['type'].__name__ != 'NoneType'):
+                        raise TypeError(f"{arg} parameter must be of type {arg_dict[arg]['type'].__name__}")
+
+        return function(*arguments, **kwargs)
+    return check
+
+
+param_check = lambda with_none: partial(paramCheck, allow_none=with_none)
 
