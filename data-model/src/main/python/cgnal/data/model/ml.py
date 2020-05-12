@@ -314,7 +314,7 @@ class PandasDataset(Dataset):
         :param idx: input indices
         :return: PandasDataset with features and labels filtered on input indices
         """
-        return self.createObject(self.features.loc[idx], self.__check_none__(self.labels.loc[idx]))
+        return self.createObject(self.features.loc[idx], self.labels.loc[idx] if self.labels is not None else None)
 
     def dropna(self, **kwargs):
         """
@@ -331,7 +331,8 @@ class PandasDataset(Dataset):
 
         :return: PandasDataset with features and labels with intersected indices
         """
-        return self.loc(list(self.features.index.intersection(self.labels.index)))
+        idx = list(self.features.index.intersection(self.labels.index)) if self.labels is not None else list(self.features.index)
+        return self.loc(idx)
 
     def getFeaturesAs(self, type='array'):
         if type == 'array':
