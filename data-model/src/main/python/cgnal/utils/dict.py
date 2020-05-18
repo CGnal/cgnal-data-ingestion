@@ -4,7 +4,7 @@ except ImportError:  # will be 3.x series
     from functools import reduce
     pass
 
-from itertools import islice, tee
+from itertools import islice, tee, groupby
 
 from copy import deepcopy as copy
 from collections import Mapping
@@ -75,4 +75,8 @@ def filterNones(_dict):
         elif __check(v):
             agg[k] = v
     return agg
+
+def groupBy(lst, key):
+    for k, it in groupby(sorted(lst, key=key), key=key):
+        yield k, list(it)
 
