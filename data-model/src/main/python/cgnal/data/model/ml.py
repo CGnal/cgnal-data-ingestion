@@ -7,9 +7,15 @@ try:
 except ImportError:  # will be 3.x series
     pass
 
+from typing import Union
 from itertools import islice
+
 from abc import ABCMeta, abstractmethod, abstractproperty
+
+from pandas import DataFrame, Series
+
 from cgnal.data.model.core import Iterable, LazyIterable, CachedIterable, IterGenerator
+from cgnal.utils.pandas import loc
 
 
 def features_and_labels_to_dataset(X, y=None):
@@ -266,7 +272,7 @@ class LazyDataset(LazyIterable, IterableDataset):
 
 class PandasDataset(Dataset):
 
-    def __init__(self, features, labels=None):
+    def __init__(self, features: Union[DataFrame, Series], labels: Union[DataFrame, Series, None]=None):
 
         if isinstance(features, pd.Series):
             self.__features__ = features.to_frame()
@@ -307,6 +313,10 @@ class PandasDataset(Dataset):
     def __len__(self):
         return len(self.index)
 
+    def take(self, n: int):
+        idx = list(self.features.index.intersection(self.labels.index)) if self.labels is not None else list(self.features.index)
+        return self.loc(idx[:n])
+
     def loc(self, idx):
         """
         Find given indices in features and labels
@@ -314,7 +324,11 @@ class PandasDataset(Dataset):
         :param idx: input indices
         :return: PandasDataset with features and labels filtered on input indices
         """
-        return self.createObject(self.features.loc[idx], self.labels.loc[idx] if self.labels is not None else None)
+
+        features = loc(self.features, idx) if isinstance(self.features, DataFrame) else self.features.loc[idx]
+        labels = self.labels.loc[idx] if self.labels is not None else None
+
+        return self.createObject(features, labels)
 
     def dropna(self, **kwargs):
         """
