@@ -1,10 +1,13 @@
+import os
+
 import numpy as np
 import pandas as pd
 import unittest
 
 from cgnal.tests.core import TestCase, logTest
-from cgnal.data.model.ml import LazyDataset, IterGenerator, MultiFeatureSample, Sample, PandasDataset
-
+from cgnal.data.model.ml import LazyDataset, IterGenerator, MultiFeatureSample, Sample, PandasDataset, \
+    PandasTimeIndexedDataset
+from cgnal.tests import TMP_FOLDER
 
 class LazyDatasetTests(TestCase):
 
@@ -156,13 +159,62 @@ class LazyDatasetTests(TestCase):
 
 class PandasDatasetTests(TestCase):
 
+    dataset = PandasDataset(features=pd.concat([pd.Series([1, np.nan, 2, 3], name="feat1"),
+                                                pd.Series([1, 2, 3, 4], name="feat2")], axis=1))
+
     @logTest
     def test_dropna_none_labels(self):
-        dataset = PandasDataset(features=pd.concat([pd.Series([1, np.nan, 2, 3], name="feat1"),
-                                                    pd.Series([1, 2, 3, 4], name="feat2")], axis=1))
 
         res = pd.concat([pd.Series([1, 2, 3], name="feat1"), pd.Series([1, 3, 4], name="feat2")], axis=1)
-        self.assertTrue((dataset.dropna(subset=["feat1"]).features.reset_index(drop=True) == res).all().all())
+
+        self.assertTrue((self.dataset.dropna(subset=["feat1"]).features.reset_index(drop=True) == res).all().all())
+
+
+    @logTest
+    def test_serialization(self):
+        filename = os.path.join(TMP_FOLDER, "my_dataset.p")
+
+        self.dataset.write(filename)
+
+        newDataset: PandasDataset = PandasDataset.load(filename)
+
+        self.assertTrue(isinstance(newDataset, PandasDataset))
+
+        self.assertTrue((self.dataset.features.fillna("NaN") == newDataset.features.fillna("NaN")).all().all())
+
+
+class PandasTimeIndexedDatasetTests(TestCase):
+
+    dates = pd.date_range("2010-01-01", "2010-01-04")
+
+    dateStr = [str(x) for x in dates]
+
+    dataset = PandasTimeIndexedDataset(
+        features=pd.concat([
+            pd.Series([1, np.nan, 2, 3], index=dateStr, name="feat1"),
+            pd.Series([1, 2, 3, 4], index=dateStr, name="feat2")
+        ], axis=1))
+
+
+    @logTest
+    def test_time_index(self):
+
+        #duck-typing check
+        days = [x.day for x in self.dataset.features.index]
+
+        self.assertTrue(set(days), set(range(4)))
+
+    @logTest
+    def test_serialization(self):
+        filename = os.path.join(TMP_FOLDER, "my_dataset.p")
+
+        self.dataset.write(filename)
+
+        newDataset = type(self.dataset).load(filename)
+
+        self.assertTrue(isinstance(newDataset, PandasTimeIndexedDataset))
+        self.assertTrue((self.dataset.features.fillna("NaN") == newDataset.features.fillna("NaN")).all().all())
+
 
 
 if __name__ == "__main__":

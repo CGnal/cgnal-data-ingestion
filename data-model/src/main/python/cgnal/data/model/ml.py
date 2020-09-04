@@ -14,7 +14,8 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 
 from pandas import DataFrame, Series
 
-from cgnal.data.model.core import Iterable, LazyIterable, CachedIterable, IterGenerator
+from cgnal.data.model.core import Iterable, LazyIterable, CachedIterable, IterGenerator, PickleSerialization, \
+    Serializable
 from cgnal.utils.pandas import loc
 
 
@@ -30,7 +31,7 @@ def features_and_labels_to_dataset(X, y=None):
                           for features, label, name in zip(np.array(df["features"]), np.array(df["labels"]), df.index)])
 
 
-class Sample(object):
+class Sample(PickleSerialization):
     def __init__(self, features, label=None, name=None):
         """
         Object representing a single sample of a training or test set
@@ -270,7 +271,7 @@ class LazyDataset(LazyIterable, IterableDataset):
         return LazyDataset(IterGenerator(__transformed_sample_generator__))
 
 
-class PandasDataset(Dataset):
+class PandasDataset(Dataset, Serializable):
 
     def __init__(self, features: Union[DataFrame, Series], labels: Union[DataFrame, Series, None]=None):
 
@@ -370,10 +371,17 @@ class PandasDataset(Dataset):
             labels_cols: self.getLabelsAs("pandas")
         }, axis=1).to_pickle(filename)
 
-    @staticmethod
-    def read(filename, features_cols="features", labels_cols="labels"):
+    @classmethod
+    def read(cls, filename, features_cols="features", labels_cols="labels"):
         _in = pd.read_pickle(filename)
-        return PandasDataset.createObject(_in[features_cols], _in[labels_cols])
+        return cls.createObject(
+            _in[features_cols] if features_cols in _in else None,
+            _in[labels_cols]   if labels_cols   in _in else None
+        )
+
+    @classmethod
+    def load(cls, filename):
+        return cls.read(filename)
 
     def union(self, other):
         if isinstance(other, PandasDataset):
@@ -394,10 +402,5 @@ class PandasTimeIndexedDataset(PandasDataset):
     @staticmethod
     def createObject(features, labels):
         return PandasTimeIndexedDataset(features, labels)
-
-    @staticmethod
-    def read(filename, features_cols="features", labels_cols="labels"):
-        _in = pd.read_pickle(filename)
-        return PandasTimeIndexedDataset.createObject(_in[features_cols], _in[labels_cols])
 
 
