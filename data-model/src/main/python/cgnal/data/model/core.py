@@ -1,6 +1,8 @@
-import pickle
 import numpy as np
 import pandas as pd
+
+import pickle
+import dill
 
 from itertools import islice
 from abc import ABCMeta, abstractproperty, abstractmethod
@@ -242,3 +244,71 @@ class Range(object):
         :return: pd.date_range from start to end with daily frequency
         """
         return self.range(freq="15T")
+
+
+
+class Serializable(object):
+
+    @abstractmethod
+    def write(self, filaname: str):
+        raise NotImplementedError
+
+    @classmethod
+    def load(cls, filename: str):
+        raise NotImplementedError
+
+
+class PickleSerialization(Serializable):
+
+    def write(self, filename: str):
+        """
+        Write processing pipeline as pickle
+
+        :param filename: Name of the file where to save the model
+
+        :type filename: str
+
+        :return: None
+        """
+        with open(filename, 'wb') as fid:
+            pickle.dump(self, fid)
+
+    @classmethod
+    def load(cls, filename: str):
+        """
+        Load processing pipeline
+
+        :param filename: Name of the file to be read
+        :return: Instance of the read Model
+        """
+        with open(filename, 'rb') as fid:
+            return pickle.load(fid)
+
+
+
+class DillSerialization(Serializable):
+
+    def write(self, filename: str):
+        """
+        Write processing pipeline as pickle
+
+        :param filename: Name of the file where to save the model
+
+        :type filename: str
+
+        :return: None
+        """
+        with open(filename, 'wb') as fid:
+            dill.dump(self, fid)
+
+    @classmethod
+    def load(cls, filename: str):
+        """
+        Load processing pipeline
+
+        :param filename: Name of the file to be read
+        :return: Instance of the read Model
+        """
+        with open(filename, 'rb') as fid:
+            return dill.load(fid)
+
