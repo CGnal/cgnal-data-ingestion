@@ -1,4 +1,5 @@
 import pandas as pd
+from pandas.errors import EmptyDataError
 from abc import abstractmethod
 from collections import Iterable
 from cgnal.data.layer import DAO, Archiver
@@ -87,7 +88,11 @@ class CsvArchiver(PandasArchiver):
         self.data.to_csv(self.filename, sep=self.sep)
 
     def __read__(self):
-        return pd.read_csv(self.filename, sep=self.sep, index_col=0)
+        try:
+            output = pd.read_csv(self.filename, sep=self.sep, index_col=0)
+        except EmptyDataError:
+            output = pd.DataFrame()
+        return output
 
 
 class PickleArchiver(PandasArchiver):

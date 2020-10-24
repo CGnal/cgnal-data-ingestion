@@ -384,9 +384,8 @@ class PandasDataset(Dataset, Serializable):
         return cls.read(filename)
 
     def union(self, other):
-        if isinstance(other, PandasDataset):
-            return PandasDataset(pd.concat([self.features, other.features]),
-                                 pd.concat([self.labels, other.labels]))
+        if isinstance(other, self.__class__):
+            return self.createObject(pd.concat([self.features, other.features]), pd.concat([self.labels, other.labels]))
         else:
             return Dataset.union(self, other)
 
