@@ -5,3 +5,11 @@ test_path = os.path.dirname(os.path.abspath(__file__))
 
 DATA_FOLDER = create_dir_if_not_exists(os.path.join(test_path, "..", "resources", "tests", "data"))
 TMP_FOLDER = create_dir_if_not_exists(os.path.join(test_path, "..", "resources", "tests", "tmp"))
+
+from mongomock import MongoClient
+
+DB_NAME = "db"
+
+client = MongoClient()
+
+db = client[DB_NAME]
