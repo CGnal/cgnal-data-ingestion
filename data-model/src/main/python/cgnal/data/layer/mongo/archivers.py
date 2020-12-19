@@ -1,14 +1,16 @@
 from collections import Iterable
+from typing import Union
 
-from pymongo.collection import Collection
 from bson.objectid import ObjectId
+from mongomock.collection import Collection as MockCollection
+from pymongo.collection import Collection
 
-from cgnal.data.layer import Archiver
+from cgnal.data.layer import Archiver, DAO
 
 
 class MongoArchiver(Archiver):
-    def __init__(self, collection, dao):
-        if not isinstance(collection, Collection):
+    def __init__(self, collection: Union[Collection, MockCollection], dao: DAO):
+        if not isinstance(collection, Collection) and not isinstance(collection, MockCollection):
             raise TypeError("Collection %s is not a MongoDb collection" % str(collection))
 
         self.collection = collection
@@ -25,7 +27,6 @@ class MongoArchiver(Archiver):
         for json in jsons:
             yield self.dao.parse(json)
         jsons.close()
-
 
     def archiveOne(self, obj):
         return self.__insert__(obj)
