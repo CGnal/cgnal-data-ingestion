@@ -1,11 +1,14 @@
+import pickle
+from abc import ABCMeta, abstractproperty, abstractmethod
+from functools import reduce
+from itertools import islice
+from typing import List, Iterator, Tuple
+
+import dill
 import numpy as np
 import pandas as pd
+from pandas.core.tools.datetimes import DatetimeScalar
 
-import pickle
-import dill
-
-from itertools import islice
-from abc import ABCMeta, abstractproperty, abstractmethod
 from cgnal.utils.dict import groupIterable
 
 try:
@@ -111,11 +114,13 @@ class LazyIterable(Iterable):
     def take(self, size):
         def generator():
             return islice(self.items, size)
+
         return self.__create_instance__(IterGenerator(generator))
 
     def filter(self, f):
         def generator():
             return filter(self.items, f)
+
         return self.__create_instance__(IterGenerator(generator))
 
     def kfold(self, folds=3):
@@ -163,7 +168,7 @@ class CachedIterable(Iterable):
     def cached(self):
         return True
 
-    def batch(self, size = 100):
+    def batch(self, size=100):
         for batch in super(CachedIterable, self).batch(size=size):
             yield self.__create_instance__(batch)
 
@@ -173,7 +178,7 @@ class CachedIterable(Iterable):
     def kfold(self, folds=3):
         array = np.array(self.items)
         size = range(len(array))
-        for fold in xrange(folds):
+        for fold in range(folds):
             iTest = array[((size + fold) % folds == 0)]
             iTrain = array[((size + fold) % folds != 0)]
             yield self.__create_instance__(array[iTrain]), self.__create_instance__(array[iTest])
@@ -193,18 +198,43 @@ class CachedIterable(Iterable):
         return CachedIterable(items)
 
 
-class Range(object):
-    def __init__(self, start, end):
-        """
-        Data Range Class
+class BaseRange(object):
+    """
+    Abstract Range Class
+    """
 
-        :param start: starting datetime for the range
-        :param end: ending datetime for the range
+    @property
+    @abstractmethod
+    def start(self):
         """
-        self.start = pd.to_datetime(start)
-        self.end = pd.to_datetime(end)
+        First timestamp
+        :return: Timestamp
+        """
+        raise NotImplementedError
 
-    def range(self, freq="H"):
+    @property
+    @abstractmethod
+    def end(self):
+        """
+        Last timestamp
+        :return: Timestamp
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def __iter__(self) -> Iterator['Range']:
+        raise NotImplementedError
+
+    @abstractmethod
+    def __add__(self, other: 'BaseRange'):
+        raise NotImplementedError
+
+    @abstractmethod
+    def overlaps(self, other: 'BaseRange') -> bool:
+        raise NotImplementedError
+
+    @abstractmethod
+    def range(self, freq="H") -> List:
         """
         Compute date range with given frequency
 
@@ -212,9 +242,12 @@ class Range(object):
 
         :type: str
 
-        :return: pd.date_range from start to end with given frequency
+        :return: List of timestamps
         """
-        return pd.date_range(self.start, self.end, freq=freq)
+        raise NotImplementedError
+
+    def __str__(self):
+        return " // ".join([f"{range.start}-{range.end}" for range in self])
 
     @property
     def days(self):
@@ -225,7 +258,6 @@ class Range(object):
         """
         return self.range(freq="1D")
 
-
     @property
     def business_days(self):
         """
@@ -234,7 +266,6 @@ class Range(object):
         :return: pd.date_range from start to end with daily frequency
         """
         return self.range(freq="1B")
-
 
     @property
     def minutes_15(self):
@@ -245,6 +276,119 @@ class Range(object):
         """
         return self.range(freq="15T")
 
+
+class Range(BaseRange):
+
+    def __init__(self, start: DatetimeScalar, end: DatetimeScalar):
+        """
+        Simple Range Class
+
+        :param start: starting datetime for the range
+        :param end: ending datetime for the range
+        """
+        self.__start__ = pd.to_datetime(start)
+        self.__end__ = pd.to_datetime(end)
+
+        if self.start > self.end:
+            raise ValueError("Start and End values should be consequential: start < end")
+
+    @property
+    def start(self):
+        return self.__start__
+
+    @property
+    def end(self):
+        return self.__end__
+
+    def __iter__(self) -> Iterator['Range']:
+        yield Range(self.start, self.end)
+
+    def range(self, freq="H"):
+        return pd.date_range(self.start, self.end, freq=freq)
+
+    def __overlaps_range__(self, other: 'Range') -> bool:
+        return ((self.start < other.start) and (self.end > other.start)) or (
+                (other.start < self.start) and (other.end > self.start))
+
+    def overlaps(self, other: 'BaseRange') -> bool:
+        """
+        Returns whether two ranges overlaps
+
+        :param other: other range to be compared with
+        :return: True or False whether the two overlaps
+        """
+        return any([self.__overlaps_range__(range) for range in other])
+
+    def __add__(self, other: BaseRange):
+        if not isinstance(other, BaseRange):
+            raise ValueError(f"add operator not defined for argument of type {type(other)}. Argument should be of "
+                             f"type BaseRange")
+        if isinstance(other, Range) and self.overlaps(other):
+            return Range(min(self.start, other.start), max(self.end, other.end))
+        else:
+            return CompositeRange([self] + [span for span in other])
+
+
+class CompositeRange(BaseRange):
+
+    def __init__(self, ranges: List[Range]):
+        """
+        Ranges made up of multiple ranges
+
+        :param ranges: List of Ranges
+        """
+        self.ranges = ranges
+
+    def simplify(self) -> BaseRange:
+        """
+        Simplifies the list into disjoint Range objects, aggregating non-disjoint ranges. If only one range would be
+        present, a simple Range object is returned
+
+        :return: BaseRange
+        """
+        ranges = sorted(self.ranges, key=lambda range: range.start)
+
+        # check overlapping ranges
+        overlaps = [first.overlaps(second) for first, second in zip(ranges[:-1], ranges[1:])]
+
+        def merge(agg: List[Range], item: Tuple[int, bool]):
+            ith, overlap = item
+            return agg + [ranges[ith + 1]] if not (overlap) else agg[:-1] + [agg[-1] + ranges[ith + 1]]
+
+        # merge ranges
+        rangeList = reduce(merge, enumerate(overlaps), [ranges[0]])
+
+        if len(rangeList) == 1:
+            return rangeList[0]
+        else:
+            return CompositeRange(rangeList)
+
+    @property
+    def start(self):
+        return min([range.start for range in self.ranges])
+
+    @property
+    def end(self):
+        return max([range.end for range in self.ranges])
+
+    def __iter__(self) -> Iterator['Range']:
+        for range in self.ranges:
+            yield range
+
+    def range(self, freq="H"):
+        items = np.unique([
+            item for range in self.ranges for item in pd.date_range(range.start, range.end, freq=freq)
+        ])
+        return sorted(items)
+
+    def __add__(self, other: BaseRange):
+        if not isinstance(other, BaseRange):
+            raise ValueError(f"add operator not defined for argument of type {type(other)}. Argument should be of "
+                             f"type BaseRange")
+        return CompositeRange(self.ranges + list(other)).simplify()
+
+    def overlaps(self, other: 'BaseRange') -> bool:
+        return any([range.overlaps(other) for range in self])
 
 
 class Serializable(object):
@@ -285,7 +429,6 @@ class PickleSerialization(Serializable):
             return pickle.load(fid)
 
 
-
 class DillSerialization(Serializable):
 
     def write(self, filename: str):
@@ -311,4 +454,3 @@ class DillSerialization(Serializable):
         """
         with open(filename, 'rb') as fid:
             return dill.load(fid)
-
