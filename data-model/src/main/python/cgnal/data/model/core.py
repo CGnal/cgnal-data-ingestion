@@ -1,8 +1,10 @@
+from __future__ import annotations
 import pickle
 from abc import ABCMeta, abstractproperty, abstractmethod
 from functools import reduce
 from itertools import islice
-from typing import List, Iterator, Tuple
+from typing import List, Iterator
+from collections import namedtuple
 
 import dill
 import numpy as np
@@ -198,53 +200,118 @@ class CachedIterable(Iterable):
         return CachedIterable(items)
 
 
-class BaseRange(object):
-    """
-    Abstract Range Class
-    """
+class Range(object):
+
+    Interval = namedtuple('Interval', ['start', 'end'])
+    ranges: List[Interval] = []
+
+    def __init__(self, start: DatetimeScalar, end: DatetimeScalar):
+        """
+        Range Class
+
+        :param start: starting datetime for the range
+        :param end: ending datetime for the range
+        """
+        if start > end:
+            raise ValueError("Start and End values should be consequential: start < end")
+
+        self.ranges.append(self.Interval(start, end))
+
+    @classmethod
+    def from_list_of_ranges(cls, ranges: List[Range]) -> Range:
+        """
+        Instantiates a new Range object from a list of Range objects
+        :param ranges: input ranges
+        :return: new Range object
+        """
+        return reduce(cls.add, ranges)
+
+    @classmethod
+    def from_list_of_intervals(cls, intervals: List[Range.Interval]) -> Range:
+        """
+        Instantiates a new Range object from a list of intervals tuples
+        :param intervals: input intervals
+        :return: new Range object
+        """
+        return reduce(cls.add, [Range(*interval) for interval in intervals])
+
+    @staticmethod
+    def add(first: Range, second: Range) -> Range:
+        return first + second
+
+    def simplify(self) -> Range:
+        """
+        Simplifies the list into disjoint Range objects, aggregating non-disjoint ranges. If only one range would be
+        present, a simple Range object is returned
+
+        :return: Range
+        """
+
+        def __add_simple_range(first: Range, second: Range) -> Range:
+            """
+            Add a simple Range (single interval) to another (possibly already complex) Range,
+            checking and simplifying overlaps between the simple Range and the last interval of the complex Range
+            :param first: first Range (possibly complex)
+            :param second: second Range (single interval)
+            :return: new Range
+            """
+            if first.start > second.start:
+                first, second = second, first
+            if len(second.ranges) != 1:
+                raise ValueError('This method works only if the second operand is a simple range.')
+            if Range(*first.ranges[-1]).overlaps(second):
+                return Range.from_list_of_intervals(first.ranges[:-1] + [first.ranges[-1].start, second.ranges[0].end])
+            else:
+                return first + second
+
+        ranges = [Range(*r) for r in sorted(self.ranges, key=lambda r: r.start)]
+        return reduce(__add_simple_range, ranges[1:], ranges[0])
 
     @property
-    @abstractmethod
     def start(self):
-        """
-        First timestamp
-        :return: Timestamp
-        """
-        raise NotImplementedError
+        return min([r.start for r in self.ranges])
 
     @property
-    @abstractmethod
     def end(self):
+        return max([r.end for r in self.ranges])
+
+    def __iter__(self) -> Iterator[Range]:
+        for r in self.ranges:
+            yield Range(*r)
+
+    def range(self, freq="H"):
+        items = np.unique([
+            item for r in self.ranges for item in pd.date_range(r.start, r.end, freq=freq)
+        ])
+        return sorted(items)
+
+    def __add__(self, other: Range) -> Range:
+        if not isinstance(other, Range):
+            raise ValueError(f"add operator not defined for argument of type {type(other)}. Argument should be of "
+                             f"type CompositeRange")
+        return self.add(self, other)
+
+    @staticmethod
+    def __overlaps_simple_range(first: Range, second: Range) -> bool:
         """
-        Last timestamp
-        :return: Timestamp
+        Checks overlaps between two simple Ranges (single intervals)
+        :param first: simple Range
+        :param second: simple Range
+        :return: True if they overlap, False otherwise
         """
-        raise NotImplementedError
+        if len(first.ranges) != 1 or len(second.ranges) != 1:
+            raise ValueError('This method works only for two simple ranges.')
+        return ((first.start < second.start) and (first.end > second.start)) or (
+                (second.start < first.start) and (second.end > first.start))
 
-    @abstractmethod
-    def __iter__(self) -> Iterator['Range']:
-        raise NotImplementedError
-
-    @abstractmethod
-    def __add__(self, other: 'BaseRange'):
-        raise NotImplementedError
-
-    @abstractmethod
-    def overlaps(self, other: 'BaseRange') -> bool:
-        raise NotImplementedError
-
-    @abstractmethod
-    def range(self, freq="H") -> List:
+    def overlaps(self, other: Range) -> bool:
         """
-        Compute date range with given frequency
-
-        :param freq: frequency
-
-        :type: str
-
-        :return: List of timestamps
+        Checks if this Range overlaps with another Range
+        :param other: Range
+        :return: True if they overlap, False otherwise
         """
-        raise NotImplementedError
+        return any([self.__overlaps_simple_range(Range(*first), Range(*second))
+                    for first in self.ranges for second in other.ranges])
 
     def __str__(self):
         return " // ".join([f"{range.start}-{range.end}" for range in self])
@@ -275,120 +342,6 @@ class BaseRange(object):
         :return: pd.date_range from start to end with daily frequency
         """
         return self.range(freq="15T")
-
-
-class Range(BaseRange):
-
-    def __init__(self, start: DatetimeScalar, end: DatetimeScalar):
-        """
-        Simple Range Class
-
-        :param start: starting datetime for the range
-        :param end: ending datetime for the range
-        """
-        self.__start__ = pd.to_datetime(start)
-        self.__end__ = pd.to_datetime(end)
-
-        if self.start > self.end:
-            raise ValueError("Start and End values should be consequential: start < end")
-
-    @property
-    def start(self):
-        return self.__start__
-
-    @property
-    def end(self):
-        return self.__end__
-
-    def __iter__(self) -> Iterator['Range']:
-        yield Range(self.start, self.end)
-
-    def range(self, freq="H"):
-        return pd.date_range(self.start, self.end, freq=freq)
-
-    def __overlaps_range__(self, other: 'Range') -> bool:
-        return ((self.start < other.start) and (self.end > other.start)) or (
-                (other.start < self.start) and (other.end > self.start))
-
-    def overlaps(self, other: 'BaseRange') -> bool:
-        """
-        Returns whether two ranges overlaps
-
-        :param other: other range to be compared with
-        :return: True or False whether the two overlaps
-        """
-        return any([self.__overlaps_range__(range) for range in other])
-
-    def __add__(self, other: BaseRange):
-        if not isinstance(other, BaseRange):
-            raise ValueError(f"add operator not defined for argument of type {type(other)}. Argument should be of "
-                             f"type BaseRange")
-        if isinstance(other, Range) and self.overlaps(other):
-            return Range(min(self.start, other.start), max(self.end, other.end))
-        else:
-            return CompositeRange([self] + [span for span in other])
-
-
-class CompositeRange(BaseRange):
-
-    def __init__(self, ranges: List[Range]):
-        """
-        Ranges made up of multiple ranges
-
-        :param ranges: List of Ranges
-        """
-        self.ranges = ranges
-
-    def simplify(self) -> BaseRange:
-        """
-        Simplifies the list into disjoint Range objects, aggregating non-disjoint ranges. If only one range would be
-        present, a simple Range object is returned
-
-        :return: BaseRange
-        """
-        ranges = sorted(self.ranges, key=lambda range: range.start)
-
-        # check overlapping ranges
-        overlaps = [first.overlaps(second) for first, second in zip(ranges[:-1], ranges[1:])]
-
-        def merge(agg: List[Range], item: Tuple[int, bool]):
-            ith, overlap = item
-            return agg + [ranges[ith + 1]] if not (overlap) else agg[:-1] + [agg[-1] + ranges[ith + 1]]
-
-        # merge ranges
-        rangeList = reduce(merge, enumerate(overlaps), [ranges[0]])
-
-        if len(rangeList) == 1:
-            return rangeList[0]
-        else:
-            return CompositeRange(rangeList)
-
-    @property
-    def start(self):
-        return min([range.start for range in self.ranges])
-
-    @property
-    def end(self):
-        return max([range.end for range in self.ranges])
-
-    def __iter__(self) -> Iterator['Range']:
-        for range in self.ranges:
-            yield range
-
-    def range(self, freq="H"):
-        items = np.unique([
-            item for range in self.ranges for item in pd.date_range(range.start, range.end, freq=freq)
-        ])
-        return sorted(items)
-
-    def __add__(self, other: BaseRange):
-        if not isinstance(other, BaseRange):
-            raise ValueError(f"add operator not defined for argument of type {type(other)}. Argument should be of "
-                             f"type BaseRange")
-        return CompositeRange(self.ranges + list(other)).simplify()
-
-    def overlaps(self, other: 'BaseRange') -> bool:
-        return any([range.overlaps(other) for range in self])
 
 
 class Serializable(object):
