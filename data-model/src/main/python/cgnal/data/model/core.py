@@ -5,6 +5,7 @@ from functools import reduce
 from itertools import islice
 from typing import List, Iterator
 from collections import namedtuple
+from copy import deepcopy
 
 import dill
 import numpy as np
@@ -237,7 +238,9 @@ class Range(object):
 
     @staticmethod
     def add(first: Range, second: Range) -> Range:
-        return first + second
+        result = deepcopy(first)
+        result.ranges.extend(second.ranges)
+        return result
 
     def simplify(self) -> Range:
         """
