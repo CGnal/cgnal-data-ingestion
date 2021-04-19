@@ -204,7 +204,6 @@ class CachedIterable(Iterable):
 class Range(object):
 
     Interval = namedtuple('Interval', ['start', 'end'])
-    ranges: List[Interval] = []
 
     def __init__(self, start: DatetimeScalar, end: DatetimeScalar):
         """
@@ -215,8 +214,8 @@ class Range(object):
         """
         if start > end:
             raise ValueError("Start and End values should be consequential: start < end")
-
-        self.ranges.append(self.Interval(start, end))
+        interval_type = self.Interval
+        self.ranges: List[interval_type] = [self.Interval(start, end)]
 
     @classmethod
     def from_list_of_ranges(cls, ranges: List[Range]) -> Range:
