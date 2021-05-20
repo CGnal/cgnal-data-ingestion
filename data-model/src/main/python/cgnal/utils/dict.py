@@ -2,13 +2,18 @@ try:
     from itertools import izip as zip
 except ImportError:  # will be 3.x series
     from functools import reduce
+
     pass
 
-from itertools import islice, tee, groupby
-
-from copy import deepcopy as copy
 from collections import Mapping
+from copy import deepcopy as copy
+from itertools import islice, tee, groupby
 from operator import add
+
+from pymonad.tools import curry
+
+from cgnal.utils.monads import safe
+from cgnal.utils.monads.either import Either, Right
 
 
 def groupIterable(iterable, batch_size=10000):
@@ -36,7 +41,7 @@ def union(*dicts):
         merged = copy(dct)
         for k, v in merge_dct.items():
             if (k in dct and isinstance(dct[k], dict)
-                and isinstance(merge_dct[k], Mapping)):
+                    and isinstance(merge_dct[k], Mapping)):
                 merged[k] = __dict_merge(dct[k], merge_dct[k])
             else:
                 merged[k] = merge_dct[k]
@@ -45,12 +50,13 @@ def union(*dicts):
     return reduce(__dict_merge, dicts)
 
 
-def flattenKeys(input_dict, sep = "."):
+def flattenKeys(input_dict, sep="."):
     def _flatten_(key, value):
         if isinstance(value, dict) and (len(value) > 0):
             return reduce(add, [_flatten_(sep.join([key, name]), item) for name, item in value.items()])
         else:
             return [(key, value)]
+
     return union(*[dict(_flatten_(key, value)) for key, value in input_dict.items()])
 
 
@@ -61,11 +67,13 @@ def unflattenKeys(input_dict, sep="."):
         for level in reversed(levels):
             out = {level: out}
         return out
+
     return union(*[__translate(key, value) for key, value in input_dict.items()])
 
 
 def __check(value):
     return False if value is None else True
+
 
 def filterNones(_dict):
     agg = {}
@@ -76,7 +84,17 @@ def filterNones(_dict):
             agg[k] = v
     return agg
 
+
 def groupBy(lst, key):
     for k, it in groupby(sorted(lst, key=key), key=key):
         yield k, list(it)
 
+
+@curry(2)
+@safe
+def safeGet(key: str, json: dict) -> Either:
+    return json[key]
+
+
+def nestedGet(json, key, sep=".") -> Either:
+    return reduce(lambda right, key: right.then(safeGet(key)), key.split(sep), Right(json))

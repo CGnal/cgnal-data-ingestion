@@ -1,3 +1,5 @@
+import sys
+
 from setuptools import setup, find_packages
 
 with open("requirements.txt", "r") as fid:
@@ -20,6 +22,9 @@ def get_version(VERSIONFILE="cgnal/_version.py"):
         raise RuntimeError("Unable to find version string in %s." % (VERSIONFILE,))
 
 
+if sys.version_info < (3, 7):
+    sys.exit('Sorry, Python < 3.7 is not supported')
+
 setup(
     name='cgnal-core',
     version=get_version(),
@@ -33,11 +38,11 @@ setup(
         'Development Status :: 3 - Alpha',
         'Environment :: MacOS X',
         'Intended Audience :: Science/Research',
-        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Natural Language :: English',
         'Operating System :: MacOS',
         'Topic :: Scientific/Engineering :: Artificial Intelligence'
-      ],
+    ],
     url='https://github.com/CGnal/cgnal-data-ingestion',
     author='CGnal',
     author_email='datascience@cgnal.com',
