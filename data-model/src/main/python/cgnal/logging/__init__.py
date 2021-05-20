@@ -1,4 +1,4 @@
-from abc import ABCMeta, abstractproperty
+from abc import ABCMeta, abstractmethod
 from cgnal.config import BaseConfig
 
 DEFAULT_LOG_LEVEL = "INFO"
@@ -8,7 +8,8 @@ class WithLoggingABC(object):
 
     __metaclass__ = ABCMeta
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def logger(self):
         """
         Logging class to be used to output logs within a class
