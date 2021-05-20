@@ -10,7 +10,7 @@ except ImportError:  # will be 3.x series
 from typing import Union
 from itertools import islice
 
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta, abstractmethod
 
 from pandas import DataFrame, Series
 
@@ -86,7 +86,8 @@ class Dataset(object):
 
     __metaclass__ = ABCMeta
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def samples(self):
         raise NotImplementedError
 

@@ -36,7 +36,8 @@ class Iterable(object):
         obj.__init__(items)
         return obj
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def items(self):
         raise NotImplementedError
 
@@ -47,7 +48,8 @@ class Iterable(object):
     def filter(self, f):
         raise NotImplementedError
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def cached(self):
         raise NotImplementedError
 
