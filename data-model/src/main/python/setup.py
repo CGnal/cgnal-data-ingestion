@@ -1,8 +1,5 @@
 from setuptools import setup, find_packages
 
-with open("requirements.txt", "r") as fid:
-    reqs = [line.replace("\n", "") for line in fid.readlines()]
-
 
 def readme():
     with open('README.md') as f:
@@ -26,7 +23,17 @@ setup(
     description='Python Core Functionalities Package',
     long_description=readme(),
     packages=find_packages(exclude=['contrib', 'docs', 'tests']),
-    install_requires=reqs,
+    install_requires=[
+        "pymongo>=3.6",
+        "mongomock>=3.19",
+        "numpy>=1.16",
+        "setuptools>=40.3",
+        "PyYAML>=5.1",
+        "pandas>=1.0",
+        "requests>=2.22",
+        "cfg-load>=0.8",
+        "dill>=0.3"
+    ],
     test_suite='nose.collector',
     tests_require=['nose'],
     classifiers=[
@@ -37,7 +44,7 @@ setup(
         'Natural Language :: English',
         'Operating System :: MacOS',
         'Topic :: Scientific/Engineering :: Artificial Intelligence'
-      ],
+    ],
     url='https://github.com/CGnal/cgnal-data-ingestion',
     author='CGnal',
     author_email='datascience@cgnal.com',

@@ -1,0 +1,11 @@
+repos:
+  - repo: https://github.com/jazzband/pip-tools
+    rev: 6.1.0
+    hooks:
+      - id: pip-compile
+        name: UpdateProd
+        stages: [ commit ]
+        files: (^requirements/requirements\.(in|txt)$|^setup.py$)
+        #TODO: Remove no-emit flag once the package will be available on public pypi
+        args: [ --output-file=requirements/requirements.txt, --no-emit-index-url, setup.py ]
+        description: This hook updates requirements from setup.py to requirements.txt
