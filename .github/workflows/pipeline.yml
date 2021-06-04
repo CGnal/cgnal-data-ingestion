@@ -1,0 +1,36 @@
+name: CGnal-Core Package
+
+on: [pull_request]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.6]
+
+    env:
+      MY_HOME: data-model/src/main/python
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      env:
+        GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
+      run: |
+        cd $MY_HOME
+        pip install -r requirements/requirements.txt
+    - name: Build package
+      run: |
+        cd $MY_HOME
+        python setup.py sdist
+        pip install dist/*.tar.gz
+    - name: Run tests
+      run: |
+        cd $MY_HOME
+        sh bin/run_tests.sh
