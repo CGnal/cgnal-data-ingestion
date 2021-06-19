@@ -1,34 +1,39 @@
 import os
-
+import re
+import sys
 import yaml
 import cfg_load
-from cfg_load import Configuration
 
-import sys
+from typing import List, Optional
+from cfg_load import Configuration
 from functools import reduce
 
 __this_dir__, __this_filename__ = os.path.split(__file__)
 
-
-import re
-
 path_matcher = re.compile(r'\$\{([^}^{]+)\}')
-def path_constructor(loader, node):
-  ''' Extract the matched value, expand env variable, and replace the match '''
-  value = node.value
-  match = path_matcher.match(value)
-  env_var = match.group()[2:-1]
-  return os.environ.get(env_var) + value[match.end():]
 
-## define custom tag handler
+
+def path_constructor(loader, node):
+    """
+    Extract the matched value, expand env variable, and replace the match
+    """
+    value = node.value
+    match = path_matcher.match(value)
+    env_var = match.group()[2:-1]
+    return os.environ.get(env_var) + value[match.end():]
+
+
+# define custom tag handler
 def joinPath(loader, node):
     seq = loader.construct_sequence(node)
     return os.path.join(*seq)
 
-## register the tag handler
+
+# register tag handlers
 yaml.add_implicit_resolver('!path', path_matcher)
 yaml.add_constructor('!path', path_constructor)
 yaml.add_constructor('!joinPath', joinPath)
+
 
 def load(filename):
     return cfg_load.load(filename, safe_load=False, Loader=yaml.Loader)
@@ -36,15 +41,16 @@ def load(filename):
 
 def get_all_configuration_file(application_file="application.yml", name_env="CONFIG_FILE"):
     confs = [os.path.join(path, application_file)
-            for path in sys.path if os.path.exists(os.path.join(path, application_file))]
+             for path in sys.path if os.path.exists(os.path.join(path, application_file))]
     env = [] if name_env not in os.environ.keys() else [os.environ[name_env]]
     print(f"Using Configuration files: {', '.join(confs + env)}")
     return confs + env
 
 
-def merge_confs(filenames, default="defaults.yml"):
+def merge_confs(filenames: List[str], default: Optional[str] = "defaults.yml"):
     print(f"Using Default Configuration file: {default}")
-    return reduce(lambda agg, filename: agg.update( load(filename) ), filenames, load(default))
+    return reduce(lambda agg, filename: agg.update(load(filename)), filenames, load(default)) if default is not None \
+        else reduce(lambda agg, filename: agg.update(load(filename)), filenames)
 
 
 class BaseConfig(object):
@@ -71,6 +77,7 @@ class FileSystemConfig(BaseConfig):
 
     def getFile(self, file):
         return self.config["files"][file]
+
 
 class AuthConfig(BaseConfig):
     @property

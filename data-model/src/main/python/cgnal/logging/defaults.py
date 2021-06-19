@@ -1,9 +1,11 @@
-from cgnal.config import load as load_yaml
+import os
+import sys
+from typing import Optional
+from logging import getLogger, basicConfig, config, captureWarnings, Logger, FileHandler
 
-from logging import getLogger, basicConfig, config
-
-from cgnal.logging import WithLoggingABC
-from cgnal.logging import DEFAULT_LOG_LEVEL as LOG_LEVEL
+from cgnal.config import load as load_yaml, merge_confs
+from cgnal.logging import WithLoggingABC, DEFAULT_LOG_LEVEL as LOG_LEVEL
+from cgnal.utils.fs import create_dir_if_not_exists
 
 levels = {
     "CRITICAL"	: 50 ,
@@ -37,7 +39,7 @@ class WithLogging(WithLoggingABC):
         return wrap
 
 
-def getDefaultLogger(level=levels[LOG_LEVEL]):
+def getDefaultLogger(level: str = levels[LOG_LEVEL]) -> Logger:
     """
     Create default logger
 
@@ -51,13 +53,11 @@ def getDefaultLogger(level=levels[LOG_LEVEL]):
     return getLogger()
 
 
-def configFromJson(path_to_file):
+def configFromJson(path_to_file: str):
     """
     Configure logger from json
 
     :param path_to_file: path to configuration file
-
-    :type path_to_file: str
 
     :return: configuration for logger
     """
@@ -68,13 +68,11 @@ def configFromJson(path_to_file):
     config.dictConfig(configFile)
 
 
-def configFromYaml(path_to_file):
+def configFromYaml(path_to_file: str):
     """
     Configure logger from yaml
 
     :param path_to_file: path to configuration file
-
-    :type path_to_file: str
 
     :return: configuration for logger
     """
@@ -82,13 +80,11 @@ def configFromYaml(path_to_file):
     config.dictConfig(configFile)
 
 
-def configFromFile(path_to_file):
+def configFromFile(path_to_file: str):
     """
     Configure logger from file
 
     :param path_to_file: path to configuration file
-
-    :type path_to_file: str
 
     :return: configuration for logger
     """
@@ -108,12 +104,52 @@ def configFromFile(path_to_file):
     return readers[file_extension](path_to_file)
 
 
-def logger(name=None):
+def logger(name: Optional[str] = None) -> Logger:
     """
-    Initialize default logger
+    Initialize named logger
 
     :param name: name to be used for the logger
 
     :return: default logger
     """
     return getLogger(name)
+
+
+def setup_logger(name: str = "",
+                 level: str = "INFO",
+                 config_file: Optional[str] = None,
+                 default_config_file: Optional[str] = None,
+                 capture_warnings: bool = True) -> Logger:
+    """
+    Setup logger handling exceptions using error handler defined in configuration file.
+
+    :param name: name of the logger to use. By default take the root logger
+    :param level: logging level
+    :param config_file: config file to use to setup logger
+    :param default_config_file: default config_file to use
+    :param capture_warnings: whether or not to capture warnings with logger
+
+    :return: logger
+    """
+    captureWarnings(capture_warnings)
+
+    if config_file is not None:
+        import logging
+        configuration = merge_confs(filenames=[config_file], default=default_config_file)
+        for v in configuration.to_dict()['handlers'].values():
+            if issubclass(eval(v['class']), FileHandler):
+                create_dir_if_not_exists(os.path.dirname(v['filename']))
+        config.dictConfig(configuration)
+
+    basicConfig(level=level)
+    logger = getLogger(name)
+
+    def handle_exception(exc_type, exc_value, exc_traceback):
+        if issubclass(exc_type, KeyboardInterrupt):
+            sys.__excepthook__(exc_type, exc_value, exc_traceback)
+            return
+        logger.error(f"{exc_type.__name__}: {exc_value}", exc_info=(exc_type, exc_value, exc_traceback))
+
+    sys.excepthook = handle_exception
+
+    return logger

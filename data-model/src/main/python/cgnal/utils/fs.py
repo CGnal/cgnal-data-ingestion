@@ -1,6 +1,7 @@
 import errno
 import os
 
+
 def mkdir(path):
     try:
         os.makedirs(path)
@@ -10,10 +11,12 @@ def mkdir(path):
         else:
             raise
 
+
 def create_dir_if_not_exists(directory):
     if not os.path.exists(directory):
         os.makedirs(directory)
     return directory
+
 
 def get_lexicographic_dirname(dirpath, first=False):
     id = 0 if first else -1
