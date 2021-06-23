@@ -1,9 +1,9 @@
 import os
 import re
 import sys
-import yaml
 import cfg_load
 
+from yaml import Loader, add_implicit_resolver, add_constructor, SequenceNode
 from typing import List, Optional
 from cfg_load import Configuration
 from functools import reduce
@@ -13,7 +13,7 @@ __this_dir__, __this_filename__ = os.path.split(__file__)
 path_matcher = re.compile(r'\$\{([^}^{]+)\}')
 
 
-def path_constructor(loader, node):
+def path_constructor(loader: Loader, node: SequenceNode):
     """
     Extract the matched value, expand env variable, and replace the match
     """
@@ -24,19 +24,19 @@ def path_constructor(loader, node):
 
 
 # define custom tag handler
-def joinPath(loader, node):
+def joinPath(loader: Loader, node: SequenceNode):
     seq = loader.construct_sequence(node)
     return os.path.join(*seq)
 
 
 # register tag handlers
-yaml.add_implicit_resolver('!path', path_matcher)
-yaml.add_constructor('!path', path_constructor)
-yaml.add_constructor('!joinPath', joinPath)
+add_implicit_resolver('!path', path_matcher)
+add_constructor('!path', path_constructor)
+add_constructor('!joinPath', joinPath)
 
 
 def load(filename):
-    return cfg_load.load(filename, safe_load=False, Loader=yaml.Loader)
+    return cfg_load.load(filename, safe_load=False, Loader=Loader)
 
 
 def get_all_configuration_file(application_file="application.yml", name_env="CONFIG_FILE"):
@@ -49,8 +49,8 @@ def get_all_configuration_file(application_file="application.yml", name_env="CON
 
 def merge_confs(filenames: List[str], default: Optional[str] = "defaults.yml"):
     print(f"Using Default Configuration file: {default}")
-    return reduce(lambda agg, filename: agg.update(load(filename)), filenames, load(default)) if default is not None \
-        else reduce(lambda agg, filename: agg.update(load(filename)), filenames)
+    filenames = [default, *filenames] if default is not None else filenames
+    return reduce(lambda agg, filename: agg.update(load(filename)), filenames[1:], load(filenames[0]))
 
 
 class BaseConfig(object):

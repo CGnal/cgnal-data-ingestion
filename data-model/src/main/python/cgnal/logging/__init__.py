@@ -26,3 +26,11 @@ class LoggingConfig(BaseConfig):
     @property
     def filename(self):
         return self.getValue("filename")
+
+    @property
+    def default_config_file(self):
+        return self.getValue("default_config_file")
+
+    @property
+    def capture_warnings(self):
+        return self.getValue("capture_warnings")

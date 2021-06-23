@@ -1,6 +1,7 @@
 import os
 import sys
-from typing import Optional
+from importlib import import_module
+from typing import Optional, List
 from logging import getLogger, basicConfig, config, captureWarnings, Logger, FileHandler
 
 from cgnal.config import load as load_yaml, merge_confs
@@ -115,41 +116,35 @@ def logger(name: Optional[str] = None) -> Logger:
     return getLogger(name)
 
 
+def __handle_exception__(exc_type, exc_value, exc_traceback, logger):
+    if issubclass(exc_type, KeyboardInterrupt):
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+        return
+    logger.error(f"{exc_type.__name__}: {exc_value}", exc_info=(exc_type, exc_value, exc_traceback))
+
+
 def setup_logger(name: str = "",
-                 level: str = "INFO",
-                 config_file: Optional[str] = None,
-                 default_config_file: Optional[str] = None,
+                 config_files: Optional[List[str]] = None,
                  capture_warnings: bool = True) -> Logger:
     """
     Setup logger handling exceptions using error handler defined in configuration file.
 
     :param name: name of the logger to use. By default take the root logger
-    :param level: logging level
-    :param config_file: config file to use to setup logger
-    :param default_config_file: default config_file to use
+    :param config_files: list of config files to use to setup logger
     :param capture_warnings: whether or not to capture warnings with logger
 
     :return: logger
     """
     captureWarnings(capture_warnings)
 
-    if config_file is not None:
-        import logging
-        configuration = merge_confs(filenames=[config_file], default=default_config_file)
+    if config_files is not None:
+        configuration = merge_confs(filenames=config_files, default=None)
         for v in configuration.to_dict()['handlers'].values():
-            if issubclass(eval(v['class']), FileHandler):
+            splitted = v['class'].split('.')
+            if issubclass(getattr(import_module('.'.join(splitted[:-1])), splitted[-1]), FileHandler):
                 create_dir_if_not_exists(os.path.dirname(v['filename']))
         config.dictConfig(configuration)
 
-    basicConfig(level=level)
     logger = getLogger(name)
-
-    def handle_exception(exc_type, exc_value, exc_traceback):
-        if issubclass(exc_type, KeyboardInterrupt):
-            sys.__excepthook__(exc_type, exc_value, exc_traceback)
-            return
-        logger.error(f"{exc_type.__name__}: {exc_value}", exc_info=(exc_type, exc_value, exc_traceback))
-
-    sys.excepthook = handle_exception
-
+    sys.excepthook = lambda exctype, value, traceback:  __handle_exception__(exctype, value, traceback, logger=logger)
     return logger

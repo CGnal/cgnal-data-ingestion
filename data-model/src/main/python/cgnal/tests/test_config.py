@@ -12,6 +12,7 @@ from cgnal.config import get_all_configuration_file, __this_dir__ as config_dir,
 TEST_DATA_PATH = DATA_FOLDER
 logger = getDefaultLogger()
 
+
 class TestConfig(BaseConfig):
 
     @property
@@ -41,7 +42,6 @@ class TestDocumentArchivers(TestCase):
 
         logger.info(f"Get File: {config.fs.getFile('credentials')}")
         self.assertEqual(config.fs.getFile("credentials"), os.path.join("/this/is/a/folder","myfolder","credentials.p"))
-
 
     @logTest
     def test_read_logging_config(self):
