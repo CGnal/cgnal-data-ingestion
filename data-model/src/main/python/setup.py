@@ -32,7 +32,8 @@ setup(
         "pandas>=1.0",
         "requests>=2.22",
         "cfg-load>=0.8",
-        "dill>=0.3"
+        "dill>=0.3",
+        "deprecated>=1.2.12"
     ],
     test_suite='nose.collector',
     tests_require=['nose'],

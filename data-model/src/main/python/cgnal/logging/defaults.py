@@ -3,8 +3,9 @@ import sys
 from importlib import import_module
 from typing import Optional, List
 from logging import getLogger, basicConfig, config, captureWarnings, Logger, FileHandler
+from deprecated import deprecated
 
-from cgnal.config import load as load_yaml, merge_confs
+from cgnal.config import load, merge_confs
 from cgnal.logging import WithLoggingABC, DEFAULT_LOG_LEVEL as LOG_LEVEL
 from cgnal.utils.fs import create_dir_if_not_exists
 
@@ -54,7 +55,8 @@ def getDefaultLogger(level: str = levels[LOG_LEVEL]) -> Logger:
     return getLogger()
 
 
-def configFromJson(path_to_file: str):
+@deprecated("This function is deprecated and will be removed in future versions. Use configFromFiles instead")
+def configFromJson(path_to_file: str) -> None:
     """
     Configure logger from json
 
@@ -62,14 +64,11 @@ def configFromJson(path_to_file: str):
 
     :return: configuration for logger
     """
-    import json
-
-    with open(path_to_file, 'rt') as f:
-        configFile = json.load(f.read())
-    config.dictConfig(configFile)
+    config.dictConfig(load(path_to_file))
 
 
-def configFromYaml(path_to_file: str):
+@deprecated("This function is deprecated and will be removed in future versions. Use configFromFiles instead")
+def configFromYaml(path_to_file: str) -> None:
     """
     Configure logger from yaml
 
@@ -77,11 +76,11 @@ def configFromYaml(path_to_file: str):
 
     :return: configuration for logger
     """
-    configFile = load_yaml(path_to_file)
-    config.dictConfig(configFile)
+    config.dictConfig(load(path_to_file))
 
 
-def configFromFile(path_to_file: str):
+@deprecated("This function is deprecated and will be removed in future versions. Use configFromFiles instead")
+def configFromFile(path_to_file: str) -> None:
     """
     Configure logger from file
 
@@ -89,62 +88,48 @@ def configFromFile(path_to_file: str):
 
     :return: configuration for logger
     """
-    import os
-
-    readers = {
-        ".yml": configFromYaml,
-        ".yaml": configFromYaml,
-        ".json": configFromJson
-    }
-
-    _, file_extension = os.path.splitext(path_to_file)
-
-    if file_extension not in readers.keys():
-        raise NotImplementedError(f"Reader for file extention {file_extension} is not supported")
-
-    return readers[file_extension](path_to_file)
+    config.dictConfig(load(path_to_file))
 
 
-def logger(name: Optional[str] = None) -> Logger:
-    """
-    Initialize named logger
-
-    :param name: name to be used for the logger
-
-    :return: default logger
-    """
-    return getLogger(name)
-
-
-def __handle_exception__(exc_type, exc_value, exc_traceback, logger):
+def __handle_exception__(exc_type, exc_value, exc_traceback, logger) -> None:
     if issubclass(exc_type, KeyboardInterrupt):
         sys.__excepthook__(exc_type, exc_value, exc_traceback)
         return
     logger.error(f"{exc_type.__name__}: {exc_value}", exc_info=(exc_type, exc_value, exc_traceback))
 
 
-def setup_logger(name: str = "",
-                 config_files: Optional[List[str]] = None,
-                 capture_warnings: bool = True) -> Logger:
+def configFromFiles(config_files: List[str], capture_warnings: bool = True, catch_exceptions: Optional[str] = None):
     """
-    Setup logger handling exceptions using error handler defined in configuration file.
+    Configure loggers from configuration obtained merging configuration files.
+    If any handler inherits from FileHandler create the directory for its output files if it does not exist yet.
 
-    :param name: name of the logger to use. By default take the root logger
-    :param config_files: list of config files to use to setup logger
+    :param config_files: list of configuration files
     :param capture_warnings: whether or not to capture warnings with logger
-
-    :return: logger
+    :param catch_exceptions: name of the logger used to catch exceptions. If None do not catch exception with loggers.
+    :return: None
     """
+
     captureWarnings(capture_warnings)
 
-    if config_files is not None:
-        configuration = merge_confs(filenames=config_files, default=None)
-        for v in configuration.to_dict()['handlers'].values():
-            splitted = v['class'].split('.')
-            if issubclass(getattr(import_module('.'.join(splitted[:-1])), splitted[-1]), FileHandler):
-                create_dir_if_not_exists(os.path.dirname(v['filename']))
-        config.dictConfig(configuration)
+    configuration = merge_confs(filenames=config_files, default=None)
+    for v in configuration.to_dict()['handlers'].values():
+        splitted = v['class'].split('.')
+        if issubclass(getattr(import_module('.'.join(splitted[:-1])), splitted[-1]), FileHandler):
+            create_dir_if_not_exists(os.path.dirname(v['filename']))
+    config.dictConfig(configuration)
 
-    logger = getLogger(name)
-    sys.excepthook = lambda exctype, value, traceback:  __handle_exception__(exctype, value, traceback, logger=logger)
-    return logger
+    if catch_exceptions is not None:
+        sys.excepthook = lambda exctype, value, traceback: __handle_exception__(exctype, value, traceback,
+                                                                                logger=getLogger(catch_exceptions))
+
+
+def logger(name: Optional[str] = None) -> Logger:
+    """
+    Return a logger with the specified name, creating it if necessary.
+
+    :param name: name to be used for the logger. If None return root logger
+
+    :return: named logger
+    """
+    return getLogger(name)
+

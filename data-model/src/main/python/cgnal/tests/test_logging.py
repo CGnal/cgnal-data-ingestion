@@ -1,16 +1,16 @@
 import os
 import unittest
 from logging import StreamHandler, FileHandler
-from cgnal.logging.defaults import setup_logger
+from cgnal.logging.defaults import configFromFiles, logger
 from cgnal.tests import DATA_FOLDER, TMP_FOLDER, clean_tmp_folder, unset_TMP_FOLDER
 from cgnal.tests.core import TestCase, logTest
 
+configFromFiles(config_files=[os.path.join(DATA_FOLDER, "logging.yml")], capture_warnings=True)
+
 
 class TestSetupLogger(TestCase):
-    root_logger = setup_logger(name="", config_files=[os.path.join(DATA_FOLDER, "logging.yml")],
-                               capture_warnings=True)
-    cgnal_logger = setup_logger(name="cgnal", config_files=[os.path.join(DATA_FOLDER, "logging.yml")],
-                                capture_warnings=True)
+    root_logger = logger()
+    cgnal_logger = logger(name="cgnal", level="INFO", catch_exceptions=True)
 
     @logTest
     def test_console_logger(self):
@@ -34,7 +34,7 @@ class TestSetupLogger(TestCase):
 
     @logTest
     def test_file_logger_overwrite_level(self):
-        self.assertEqual(self.cgnal_logger.level, 10)
+        self.assertEqual(self.cgnal_logger.level, 20)
 
     @logTest
     def test_file_logger_info_message(self):

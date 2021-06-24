@@ -36,7 +36,10 @@ add_constructor('!joinPath', joinPath)
 
 
 def load(filename):
-    return cfg_load.load(filename, safe_load=False, Loader=Loader)
+    try:
+        return cfg_load.load(filename, safe_load=False, Loader=Loader)
+    except TypeError:
+        return cfg_load.load(filename)
 
 
 def get_all_configuration_file(application_file="application.yml", name_env="CONFIG_FILE"):
@@ -48,9 +51,9 @@ def get_all_configuration_file(application_file="application.yml", name_env="CON
 
 
 def merge_confs(filenames: List[str], default: Optional[str] = "defaults.yml"):
-    print(f"Using Default Configuration file: {default}")
-    filenames = [default, *filenames] if default is not None else filenames
-    return reduce(lambda agg, filename: agg.update(load(filename)), filenames[1:], load(filenames[0]))
+    lst = [default, *filenames] if default is not None else filenames
+    print(f"Using Default Configuration file: {lst[0]}")
+    return reduce(lambda config, fil: config.update(load(fil)), lst[1:], load(lst[0]))
 
 
 class BaseConfig(object):
