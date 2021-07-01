@@ -2,7 +2,7 @@ import os
 import unittest
 from logging import StreamHandler, FileHandler
 from cgnal.logging.defaults import configFromFiles, logger
-from cgnal.tests import DATA_FOLDER, TMP_FOLDER, clean_tmp_folder, unset_TMP_FOLDER
+from data import DATA_FOLDER, TMP_FOLDER, clean_tmp_folder, unset_TMP_FOLDER
 from cgnal.tests.core import TestCase, logTest
 
 configFromFiles(config_files=[os.path.join(DATA_FOLDER, "logging.yml")], capture_warnings=True)
@@ -10,7 +10,7 @@ configFromFiles(config_files=[os.path.join(DATA_FOLDER, "logging.yml")], capture
 
 class TestSetupLogger(TestCase):
     root_logger = logger()
-    cgnal_logger = logger(name="cgnal", level="INFO", catch_exceptions=True)
+    cgnal_logger = logger(name="cgnal")
 
     @logTest
     def test_console_logger(self):
@@ -40,8 +40,10 @@ class TestSetupLogger(TestCase):
     def test_file_logger_info_message(self):
         msg = "Example of logging with cgnal logger!"
         self.cgnal_logger.info(msg)
+        self.cgnal_logger.handlers[0].flush()
         with open(self.cgnal_logger.handlers[0].baseFilename, 'r') as fil:
-            lin = fil.readline(-1)
+            lines = fil.readlines()
+        lin = lines[-1]
         self.assertEqual(lin.split(" - ")[-1], f'{msg}\n')
 
 

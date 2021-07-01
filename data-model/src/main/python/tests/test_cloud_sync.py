@@ -2,7 +2,7 @@ import unittest
 import os
 from time import sleep
 
-from cgnal.tests import TMP_FOLDER
+from data import TMP_FOLDER
 from cgnal.tests.core import TestCase, logTest
 from cgnal.logging.defaults import getDefaultLogger
 from cgnal.utils.cloud import CloudSync

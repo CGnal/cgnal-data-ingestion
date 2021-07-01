@@ -25,6 +25,7 @@ jobs:
       run: |
         cd $MY_HOME
         pip install -r requirements/requirements.txt
+        pip install -r requirements/requirements_dev.txt
     - name: Build package
       run: |
         cd $MY_HOME
