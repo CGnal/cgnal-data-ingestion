@@ -3,7 +3,7 @@ import os
 import numpy as np
 import pandas as pd
 
-from cgnal.tests import TMP_FOLDER, DATA_FOLDER
+from data import TMP_FOLDER, DATA_FOLDER
 from cgnal.tests.core import TestCase, logTest
 
 from cgnal.logging.defaults import getDefaultLogger

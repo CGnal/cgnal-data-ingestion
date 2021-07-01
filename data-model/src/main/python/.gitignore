@@ -1,6 +1,3 @@
-# tests:
-cgnal/resources/tests/tmp
-
 # Python
 *.pyc
 dist

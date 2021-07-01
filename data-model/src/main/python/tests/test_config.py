@@ -3,7 +3,7 @@ import os
 
 from cgnal.logging import LoggingConfig
 from cgnal.logging.defaults import getDefaultLogger, configFromFile
-from cgnal.tests import DATA_FOLDER
+from data import DATA_FOLDER
 from cgnal.tests.core import TestCase, logTest
 from cgnal.config import get_all_configuration_file, __this_dir__ as config_dir, merge_confs, \
     BaseConfig, FileSystemConfig

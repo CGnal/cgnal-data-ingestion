@@ -7,7 +7,7 @@ import unittest
 from cgnal.tests.core import TestCase, logTest
 from cgnal.data.model.ml import LazyDataset, IterGenerator, MultiFeatureSample, Sample, PandasDataset, \
     PandasTimeIndexedDataset
-from cgnal.tests import TMP_FOLDER
+from data import TMP_FOLDER
 
 class LazyDatasetTests(TestCase):
 

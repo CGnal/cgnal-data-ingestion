@@ -72,5 +72,5 @@ loggers:
 
   "cgnal":
       handlers: ['regular_file_handler', 'error_file_handler']
-      level: 'DEBUG'
+      level: 'INFO'
       propagate: False

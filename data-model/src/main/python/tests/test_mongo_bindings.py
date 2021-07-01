@@ -3,7 +3,7 @@ import unittest
 from cgnal.data.layer.mongo.archivers import MongoArchiver
 from cgnal.data.layer.mongo.dao import DocumentDAO
 from cgnal.data.model.text import Document, generate_random_uuid
-from cgnal.tests import db
+from data import db
 from cgnal.tests.core import TestCase, logTest
 
 

@@ -1,5 +1,4 @@
 include README.md
 include requirements.txt
-include cgnal/resources/tests/data/*
 include cgnal/config/defaults.yml
 
