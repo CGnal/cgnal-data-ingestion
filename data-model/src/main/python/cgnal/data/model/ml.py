@@ -7,7 +7,7 @@ try:
 except ImportError:  # will be 3.x series
     pass
 
-from typing import Union
+from typing import Union, Sequence
 from itertools import islice
 
 from abc import ABCMeta, abstractmethod
@@ -384,9 +384,20 @@ class PandasDataset(Dataset, Serializable):
     def load(cls, filename):
         return cls.read(filename)
 
+    @classmethod
+    def from_sequence(cls, datasets: Sequence['PandasDataset']):
+        features_iter, labels_iter = zip(*[(dataset.features, dataset.labels) for dataset in datasets])
+        labels = None if all([lab is None for lab in labels_iter]) else pd.concat(labels_iter)
+        features = pd.concat(features_iter)
+        return cls.createObject(features, labels)
+
     def union(self, other):
         if isinstance(other, self.__class__):
-            return self.createObject(pd.concat([self.features, other.features]), pd.concat([self.labels, other.labels]))
+            features = pd.concat([self.features, other.features])
+            labels = pd.concat([self.labels, other.labels]) \
+                if not (self.labels is None and other.labels is None) \
+                else None
+            return self.createObject(features, labels)
         else:
             return Dataset.union(self, other)
 

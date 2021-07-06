@@ -169,6 +169,20 @@ class PandasDatasetTests(TestCase):
 
         self.assertTrue((self.dataset.dropna(subset=["feat1"]).features.reset_index(drop=True) == res).all().all())
 
+    @logTest
+    def test_from_sequence(self):
+        features_1 = pd.DataFrame({'feat1': [1, 2, 3, 4], 'feat2': [100, 200, 300, 400]}, index=[1, 2, 3, 4])
+        features_2 = pd.DataFrame({'feat1': [9, 11, 13, 14], 'feat2': [90, 110, 130, 140]}, index=[10, 11, 12, 13])
+        features_3 = pd.DataFrame({'feat1': [90, 10, 10, 1400], 'feat2': [.9, .11, .13, .14]}, index=[15, 16, 17, 18])
+        labels_1 = pd.DataFrame({'target': [1, 0, 1, 1]}, index=[1, 2, 3, 4])
+        labels_2 = pd.DataFrame({'target': [1, 1, 1, 0]}, index=[10, 11, 12, 13])
+        labels_3 = pd.DataFrame({'target': [0, 1, 1, 0]}, index=[15, 16, 17, 18])
+        dataset_1 = PandasDataset(features_1, labels_1)
+        dataset_2 = PandasDataset(features_2, labels_2)
+        dataset_3 = PandasDataset(features_3, labels_3)
+        dataset_merged = PandasDataset.from_sequence([dataset_1, dataset_2, dataset_3])
+        self.assertEqual(pd.concat([features_1, features_2, features_3]), dataset_merged.features)
+        self.assertEqual(pd.concat([labels_1, labels_2, labels_3]), dataset_merged.labels)
 
     @logTest
     def test_serialization(self):
