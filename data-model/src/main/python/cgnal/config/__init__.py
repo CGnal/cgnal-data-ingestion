@@ -45,7 +45,7 @@ def load(filename):
 def get_all_configuration_file(application_file="application.yml", name_env="CONFIG_FILE"):
     confs = [os.path.join(path, application_file)
              for path in sys.path if os.path.exists(os.path.join(path, application_file))]
-    env = [] if name_env not in os.environ.keys() else [os.environ[name_env]]
+    env = [] if name_env not in os.environ.keys() else os.environ[name_env].split(":")
     print(f"Using Configuration files: {', '.join(confs + env)}")
     return confs + env
 
