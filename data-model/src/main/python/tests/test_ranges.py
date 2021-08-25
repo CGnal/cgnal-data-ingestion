@@ -8,6 +8,7 @@ from cgnal.data.model.core import Range, CompositeRange
 
 logger = getDefaultLogger()
 
+
 class TestUtils(TestCase):
 
     @logTest

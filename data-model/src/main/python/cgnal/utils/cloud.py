@@ -4,31 +4,34 @@ import http.server
 import cgi
 import requests
 
+from typing import Callable
+from cgnal import PathLike
 from cgnal.logging.defaults import WithLogging
-from cgnal.utils.fs import  create_dir_if_not_exists
+from cgnal.utils.fs import create_dir_if_not_exists
+
 
 class CloudSync(WithLogging):
 
-    def __init__(self, url, root):
+    def __init__(self, url: str, root: PathLike) -> None:
         self.url = url
         self.root = root
 
-    def pathTo(self, filename):
+    def pathTo(self, filename: PathLike) -> PathLike:
         return os.path.join(self.root, filename)
 
-    def create_base_directory(self, filename):
+    def create_base_directory(self, filename: PathLike) -> PathLike:
         return os.path.join(
             create_dir_if_not_exists(os.path.dirname(filename)),
             os.path.basename(filename)
         )
 
-    def get(self, filename):
+    def get(self, filename: PathLike) -> None:
 
         self.logger.info(f"Getting resource {filename} from {self.url}")
 
         r = requests.get(f"{self.url}/{filename}")
 
-        if (r.status_code == 200):
+        if r.status_code == 200:
             file_out = self.pathTo(filename)
 
             with open(self.create_base_directory(file_out), 'wb') as f:
@@ -36,19 +39,19 @@ class CloudSync(WithLogging):
         else:
             raise FileNotFoundError
 
-    def get_if_not_exists(self, filename):
+    def get_if_not_exists(self, filename: PathLike) -> PathLike:
         file_out = self.pathTo(filename)
 
         if not os.path.exists(file_out):
             self.get(filename)
         return file_out
 
-    def get_if_not_exists_decorator(self, f):
+    def get_if_not_exists_decorator(self, f: Callable[[PathLike], PathLike]) -> Callable[[PathLike], PathLike]:
         def wrap(filename):
-            return f( self.get_if_not_exists(filename) )
+            return f(self.get_if_not_exists(filename))
         return wrap
 
-    def upload(self, filename):
+    def upload(self, filename: PathLike) -> requests.Response:
         with open(self.pathTo(filename), "rb") as fid:
             files = {'file': fid}
             self.logger.info(f"POST REQUEST ON {self.url}/{filename}")
@@ -56,7 +59,7 @@ class CloudSync(WithLogging):
 
 
 class HTTPRequestHandler(http.server.SimpleHTTPRequestHandler, WithLogging):
-    def do_POST(self):
+    def do_POST(self) -> None:
 
         path = self.translate_path(self.path)
 
@@ -90,7 +93,6 @@ if __name__ == '__main__':
     """
     python - m cgnal.utils.cloud - -bind [IP_ADDRESS] [PORT]
     """
-
 
     import argparse
 

@@ -6,10 +6,10 @@ def readme():
         return f.read()
 
 
-def get_version(VERSIONFILE="cgnal/_version.py"):
+def get_version(VERSIONFILE = "cgnal/_version.py"):
     import re
     verstrline = open(VERSIONFILE, "rt").read()
-    VSRE = r"^__version__ = ['\"]([^'\"]*)['\"]"
+    VSRE = r"^__version__: str = ['\"]([^'\"]*)['\"]"
     mo = re.search(VSRE, verstrline, re.M)
     if mo:
         return mo.group(1)

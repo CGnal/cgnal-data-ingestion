@@ -1,10 +1,12 @@
-from pandas import DataFrame
+from pandas import DataFrame, Index
 from pandas.core.arrays.sparse.dtype import SparseDtype
 
-def is_sparse(df: DataFrame):
-    return True if all([isinstance(v, SparseDtype) for k, v in df.dtypes.items()]) else False
 
-def loc(df: DataFrame, idx):
+def is_sparse(df: DataFrame) -> bool:
+    return all([isinstance(v, SparseDtype) for k, v in df.dtypes.items()])
+
+
+def loc(df: DataFrame, idx: Index):
     """
     This loc function is designed to work propertly with sparse dataframe as well
 

@@ -1,5 +1,5 @@
 import smtplib
-from typing import List
+from typing import List, Optional, Union
 from os.path import basename
 
 from cgnal.logging.defaults import WithLogging
@@ -10,47 +10,17 @@ from email.mime.application import MIMEApplication
 
 
 class EmailSender(WithLogging):
-    """
-        Email Sender Utility Class
-
-        ...
-
-        Attributes
-        ----------
-        email_address : str
-            Email Address of the sender
-        username : str
-            Username for login
-        password : str
-            Password for login
-        smtp_address : str
-            SMTP address of the SMTP server
-        auth_protocol : str
-            STMP Authentication protocol can be "TSL" or "SSL"
-        port: int
-            Port for SMTP server
-
-        Methods
-        -------
-        send_mail(text, destination)
-            Send the mail with a specific text to a specific destination
-        """
+    """ Email Sender Utility Class """
 
     def __init__(self, email_address: str, username: str, password: str, smtp_address: str, auth_protocol: str = "None",
-                 port: int = None):
+                 port: Optional[int] = None) -> None:
         """
-            :param email_address: Sender email address
-            :type email_address: str
-            :param username: Username for authentication
-            :type username: str
-            :param password: Password for authentication
-            :type password: str
-            :param smtp_address: SMTP server address
-            :type smtp_address: str
-            :param auth_protocol: Authentication protocol to use
-            :type auth_protocol: str
-            :param port: Port of SMTP server
-            :type port: int
+        :param email_address: Sender email address
+        :param username: Username for authentication
+        :param password: Password for authentication
+        :param smtp_address: SMTP server address
+        :param auth_protocol: Authentication protocol to use
+        :param port: Port of SMTP server
         """
         self.email_address = email_address
         self.username = username
@@ -59,17 +29,15 @@ class EmailSender(WithLogging):
         self.auth_protocol = auth_protocol
         self.port = port
 
-    def send_mail(self, text: str, subject: str, destination: str, attachments: List[str] = None):
+    def send_mail(self, text: str, subject: str, destination: str, attachments: Optional[List[str]] = None) -> None:
         """
+        Send email
+
         :param text: The text of the email
-        :type text: str
         :param subject: The subject of the email
-        :type subject: str
         :param destination: The destination email address
-        :type destination: str
         :param attachments: List with the files to send as attachments to the email
-        :type attachments: List[str]
-        :return:
+        :return: None
         """
 
         msg = MIMEMultipart()
@@ -91,7 +59,7 @@ class EmailSender(WithLogging):
         try:
             if self.auth_protocol == "SSL":
                 port = 465 if self.port is None else self.port
-                server = smtplib.SMTP_SSL(self.smtp_address, port=port)
+                server: Union[smtplib.SMTP_SSL, smtplib.SMTP] = smtplib.SMTP_SSL(self.smtp_address, port=port)
             elif self.auth_protocol == "TLS":
                 port = 587 if self.port is None else self.port
                 server = smtplib.SMTP(self.smtp_address, port=port)
