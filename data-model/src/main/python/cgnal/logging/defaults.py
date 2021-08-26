@@ -1,28 +1,31 @@
 import os
 import sys
+from types import TracebackType
 from importlib import import_module
-from typing import Optional, List
+from typing import Optional, List, Callable, Union, Any, Type
 from logging import getLogger, basicConfig, config, captureWarnings, Logger, FileHandler
 from deprecated import deprecated
 
+from cgnal import PathLike
 from cgnal.config import load, merge_confs
-from cgnal.logging import WithLoggingABC, DEFAULT_LOG_LEVEL as LOG_LEVEL
+from cgnal.logging import WithLoggingABC, DEFAULT_LOG_LEVEL, LevelsDict, LevelTypes, StrLevelTypes
 from cgnal.utils.fs import create_dir_if_not_exists
 
-levels = {
-    "CRITICAL"	: 50 ,
-    "ERROR"	    : 40 ,
-    "WARNING"	: 30 ,
-    "INFO"	    : 20 ,
-    "DEBUG"	    : 10 ,
-    "NOTSET"	: 0
+
+levels: LevelsDict = {
+    "CRITICAL": 50,
+    "ERROR": 40,
+    "WARNING": 30,
+    "INFO": 20,
+    "DEBUG": 10,
+    "NOTSET": 0
 }
 
 
 class WithLogging(WithLoggingABC):
 
     @property
-    def logger(self):
+    def logger(self) -> Logger:
         """
         Create logger
 
@@ -31,8 +34,8 @@ class WithLogging(WithLoggingABC):
         nameLogger = str(self.__class__).replace("<class '", "").replace("'>", "")
         return getLogger(nameLogger)
 
-    def logResult(self, msg, level="INFO"):
-        def wrap(x):
+    def logResult(self, msg: Union[Callable[..., str], str], level: StrLevelTypes = "INFO") -> Callable[..., Any]:
+        def wrap(x: Any) -> Any:
             if isinstance(msg, str):
                 self.logger.log(levels[level], msg)
             else:
@@ -41,7 +44,7 @@ class WithLogging(WithLoggingABC):
         return wrap
 
 
-def getDefaultLogger(level: str = levels[LOG_LEVEL]) -> Logger:
+def getDefaultLogger(level: LevelTypes = levels[DEFAULT_LOG_LEVEL]) -> Logger:
     """
     Create default logger
 
@@ -56,7 +59,7 @@ def getDefaultLogger(level: str = levels[LOG_LEVEL]) -> Logger:
 
 
 @deprecated("This function is deprecated and will be removed in future versions. Use configFromFiles instead")
-def configFromJson(path_to_file: str) -> None:
+def configFromJson(path_to_file: PathLike) -> None:
     """
     Configure logger from json
 
@@ -68,7 +71,7 @@ def configFromJson(path_to_file: str) -> None:
 
 
 @deprecated("This function is deprecated and will be removed in future versions. Use configFromFiles instead")
-def configFromYaml(path_to_file: str) -> None:
+def configFromYaml(path_to_file: PathLike) -> None:
     """
     Configure logger from yaml
 
@@ -80,7 +83,7 @@ def configFromYaml(path_to_file: str) -> None:
 
 
 @deprecated("This function is deprecated and will be removed in future versions. Use configFromFiles instead")
-def configFromFile(path_to_file: str) -> None:
+def configFromFile(path_to_file: PathLike) -> None:
     """
     Configure logger from file
 
@@ -91,14 +94,15 @@ def configFromFile(path_to_file: str) -> None:
     config.dictConfig(load(path_to_file))
 
 
-def __handle_exception__(exc_type, exc_value, exc_traceback, logger) -> None:
+def __handle_exception__(exc_type: Type[BaseException], exc_value: BaseException,
+                         exc_traceback: TracebackType, logger: Logger) -> None:
     if issubclass(exc_type, KeyboardInterrupt):
         sys.__excepthook__(exc_type, exc_value, exc_traceback)
         return
     logger.error(f"{exc_type.__name__}: {exc_value}", exc_info=(exc_type, exc_value, exc_traceback))
 
 
-def configFromFiles(config_files: List[str], capture_warnings: bool = True, catch_exceptions: Optional[str] = None):
+def configFromFiles(config_files: List[PathLike], capture_warnings: bool = True, catch_exceptions: Optional[str] = None) -> None:
     """
     Configure loggers from configuration obtained merging configuration files.
     If any handler inherits from FileHandler create the directory for its output files if it does not exist yet.

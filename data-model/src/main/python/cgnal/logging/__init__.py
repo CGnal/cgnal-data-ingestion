@@ -1,18 +1,32 @@
-from abc import ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
+from logging import Logger
+from typing_extensions import Literal, TypedDict
+from cgnal import PathLike
 from cgnal.config import BaseConfig
 
-DEFAULT_LOG_LEVEL = "INFO"
+LevelTypes = Literal["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG", "NOTSET", 50, 40, 30, 20, 10, 0]
+StrLevelTypes = Literal["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG", "NOTSET"]
 
 
-class WithLoggingABC(object):
+class LevelsDict(TypedDict):
+    CRITICAL: Literal[50]
+    ERROR: Literal[40]
+    WARNING: Literal[30]
+    INFO: Literal[20]
+    DEBUG: Literal[10]
+    NOTSET: Literal[0]
 
-    __metaclass__ = ABCMeta
+
+DEFAULT_LOG_LEVEL: StrLevelTypes = "INFO"
+
+
+class WithLoggingABC(ABC):
 
     @property
     @abstractmethod
-    def logger(self):
+    def logger(self) -> Logger:
         """
-        Logging class to be used to output logs within a class
+        Logger instance to be used to output logs within a class
         :return: None, outputs logs
         """
         pass
@@ -20,17 +34,17 @@ class WithLoggingABC(object):
 
 class LoggingConfig(BaseConfig):
     @property
-    def level(self):
+    def level(self) -> str:
         return self.getValue("level")
 
     @property
-    def filename(self):
+    def filename(self) -> PathLike:
         return self.getValue("filename")
 
     @property
-    def default_config_file(self):
+    def default_config_file(self) -> PathLike:
         return self.getValue("default_config_file")
 
     @property
-    def capture_warnings(self):
+    def capture_warnings(self) -> bool:
         return self.getValue("capture_warnings")
