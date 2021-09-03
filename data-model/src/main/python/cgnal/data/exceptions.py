@@ -1,5 +1,5 @@
 class NoTableException(BaseException):
-    def __init__(self, message):
+    def __init__(self, message: str) -> None:
         """
         The given table is missing
 

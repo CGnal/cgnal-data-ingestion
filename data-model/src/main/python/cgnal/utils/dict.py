@@ -1,29 +1,23 @@
-try:
-    from itertools import izip as zip  # type: ignore
-except ImportError:  # will be 3.x series
+import sys
+if sys.version_info[0] < 3:
+    from itertools import izip as zip
+else:
     from functools import reduce
-    pass
 
 from itertools import islice, tee, groupby
-
-from typing import Iterator, Iterable, TypeVar, List, Tuple, Dict, Any, Callable
+from typing import Iterator, Iterable, List, Tuple, Dict, Any, Callable, Optional
 from copy import deepcopy as copy
 from collections import Mapping
 from operator import add
-from cgnal import SupportsLessThan
+from cgnal import SupportsLessThan, T
 
 
-IterType = TypeVar('IterType')
-ValueType = TypeVar('ValueType')
-KeyType = TypeVar('KeyType')
-
-
-def groupIterable(iterable: Iterable[IterType], batch_size: int = 10000) -> Iterator[List[IterType]]:
+def groupIterable(iterable: Iterable[T], batch_size: int = 10000) -> Iterator[List[T]]:
     iterable = iter(iterable)
     return iter(lambda: list(islice(iterable, batch_size)), [])
 
 
-def pairwise(iterable: Iterable[IterType]) -> List[Tuple[IterType]]:
+def pairwise(iterable: Iterable[T]) -> zip[Tuple[T, T]]:
     """s -> (s0,s1), (s1,s2), (s2, s3), ..."""
     a, b = tee(iterable)
     next(b, None)
@@ -52,8 +46,8 @@ def union(*dicts: dict) -> dict:
     return reduce(__dict_merge, dicts)
 
 
-def flattenKeys(input_dict: Dict[str, ValueType], sep: str = ".") -> Dict[str, ValueType]:
-    def _flatten_(key: str, value: ValueType) -> List[Tuple[str, ValueType]]:
+def flattenKeys(input_dict: Dict[str, T], sep: str = ".") -> Dict[str, T]:
+    def _flatten_(key: str, value: T) -> List[Tuple[str, T]]:
         if isinstance(value, dict) and (len(value) > 0):
             return reduce(add, [_flatten_(sep.join([key, name]), item) for name, item in value.items()])
         else:
@@ -71,11 +65,11 @@ def unflattenKeys(input_dict: Dict[str, Any], sep: str = ".") -> Dict[str, Any]:
     return union(*[__translate(key, value) for key, value in input_dict.items()])
 
 
-def __check(value: Any) -> bool:
+def __check(value: Optional[T]) -> bool:
     return False if value is None else True
 
 
-def filterNones(_dict: Dict[KeyType, Any]) -> Dict[KeyType, Any]:
+def filterNones(_dict: Dict[T, Any]) -> Dict[T, Any]:
     agg = {}
     for k, v in _dict.items():
         if isinstance(v, dict):
@@ -85,7 +79,7 @@ def filterNones(_dict: Dict[KeyType, Any]) -> Dict[KeyType, Any]:
     return agg
 
 
-def groupBy(lst: Iterable[IterType], key: Callable[[IterType], SupportsLessThan]) -> Iterator[Tuple[SupportsLessThan, List[IterType]]]:
+def groupBy(lst: Iterable[T], key: Callable[[T], SupportsLessThan]) -> Iterator[Tuple[SupportsLessThan, List[T]]]:
     for k, it in groupby(sorted(lst, key=key), key=key):
         yield k, list(it)
 

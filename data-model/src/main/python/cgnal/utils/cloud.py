@@ -19,7 +19,8 @@ class CloudSync(WithLogging):
     def pathTo(self, filename: PathLike) -> PathLike:
         return os.path.join(self.root, filename)
 
-    def create_base_directory(self, filename: PathLike) -> PathLike:
+    @staticmethod
+    def create_base_directory(filename: PathLike) -> PathLike:
         return os.path.join(
             create_dir_if_not_exists(os.path.dirname(filename)),
             os.path.basename(filename)

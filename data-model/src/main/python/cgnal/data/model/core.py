@@ -1,81 +1,94 @@
+import sys
 import pickle
-from abc import ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 from functools import reduce
 from itertools import islice
-from typing import List, Iterator, Tuple
+from typing import List, Iterator, Tuple, Callable, Iterable as IterableType, Union, Any, overload, Generic, Sequence
 
-import dill
-import numpy as np
-import pandas as pd
-from pandas.core.tools.datetimes import DatetimeScalar, Timestamp, DatetimeIndex
+import dill  # type: ignore
+import numpy as np  # type: ignore
+import pandas as pd  # type: ignore
+from pandas.core.tools.datetimes import DatetimeScalar, Timestamp, DatetimeIndex  # type: ignore
 
+from cgnal import T, PathLike
 from cgnal.utils.dict import groupIterable
 
-try:
-    # Python 2
+if sys.version_info[0] < 3:
     from future_builtins import filter
-except ImportError:
-    # Python 3
-    pass
 
 
-class IterGenerator(object):
-    def __init__(self, generator_function):
+class IterGenerator(Generic[T]):
+    def __init__(self, generator_function: Callable[[], Iterator[T]]) -> None:
         self.generator_function = generator_function
 
     @property
-    def iterator(self):
+    def iterator(self) -> Iterator[T]:
         return self.generator_function()
 
 
-class Iterable(object):
-    __metaclass__ = ABCMeta
+class Iterable(ABC, IterableType[T], Generic[T]):
 
-    def __create_instance__(self, items):
+    # TODO: shouldn't this class have an __init__ like this?
+    #  def __init__(self, items: Union[IterGenerator, IterableType]):
+    #      self.__items__ = items
+
+    # TODO: wouldn't it be better if this becomes a classmethod?
+
+    @overload
+    def __create_instance__(self, items: IterableType) -> 'CachedIterable': ...
+
+    @overload
+    def __create_instance__(self, items: IterGenerator) -> 'LazyIterable': ...
+
+    def __create_instance__(self, items: Union[IterGenerator, IterableType]) -> Union['CachedIterable', 'LazyIterable']:
         obj = self.__new__(type(self))
         obj.__init__(items)
         return obj
 
     @property
     @abstractmethod
-    def items(self):
-        raise NotImplementedError
+    def items(self) -> IterableType[T]: ...
 
     @abstractmethod
-    def take(self, size):
-        raise NotImplementedError
+    def take(self, size: int) -> 'Iterable': ...
 
-    def filter(self, f):
+    # TODO: shouldn't this method be abstract?
+    def filter(self, f: Callable) -> 'Iterable':
         raise NotImplementedError
 
     @property
     @abstractmethod
-    def cached(self):
-        raise NotImplementedError
+    def cached(self) -> bool: ...
 
     @abstractmethod
-    def kfold(self, int):
-        raise NotImplementedError
+    def kfold(self, folds: int) -> Iterator[Tuple['Iterable', 'Iterable']]: ...
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[T]:
         for item in self.items:
             yield item
 
-    def batch(self, size=100):
+    def batch(self, size: int = 100) -> Iterator[List[T]]:
+        """
+        Generator that yields batches of items of given size
+        :param size: batch size
+        :return: list of "size" items
+        """
         for batch in groupIterable(self.items, batch_size=size):
             yield batch
 
-    def map(self, f):
-        for doc in self.items:
-            yield f(doc)
+    def map(self, f: Callable[[T], Any]) -> Iterator[Any]:
+        for item in self.items:
+            yield f(item)
 
-    def foreach(self, f):
-        for doc in self.items:
-            f(doc)
+    # TODO why does this method return None? What is the point of this method?
+    def foreach(self, f: Callable[[T], Any]) -> None:
+        for item in self.items:
+            f(item)
 
-    def hold_out(self, ratio):
+    # TODO Do we really need this functionality when we have the FeatureProcessing class in cgnal.analytics?
+    def hold_out(self, ratio: float) -> Tuple['Iterable', 'Iterable']:
         """
-        Train, Test Dataset split
+        Train, Test Iterable split
 
         :param ratio: Int, ratio for splitting
         :return: (Dataset, Dataset), Train and Test Datasets
@@ -86,46 +99,125 @@ class Iterable(object):
         return next(self.kfold(fold))
 
 
-class LazyIterable(Iterable):
+# TODO wouldn't it be better for this class to inherit from PickleSerialization or DillSerialization instead of
+#  implementing its own save and load methods?
+class CachedIterable(Iterable, Generic[T]):
 
-    def __init__(self, items):
+    def __init__(self, items: IterableType[T]):
+        self.__items__ = list(items)
+
+    def __len__(self) -> int:
+        return len(self.items)
+
+    @property
+    def items(self) -> List[T]:
+        return self.__items__
+
+    @overload
+    def __getitem__(self, item: int) -> T: ...
+
+    @overload
+    def __getitem__(self, item: slice) -> List[T]: ...
+
+    def __getitem__(self, item: Union[int, slice]) -> Union[T, List[T]]:
+        return self.items[item]
+
+    @property
+    def cached(self) -> bool:
+        return True
+
+    # TODO: this method's signature is not coherent with parents' method signature
+    def batch(self, size: int = 100) -> Iterator['CachedIterable']:
+        """
+        Generator that yields batches of given size
+        :param size: batch size
+        :return: CachedIterable with
+        """
+        for batch in super(CachedIterable, self).batch(size=size):
+            yield self.__create_instance__(batch)
+
+    def filter(self, f: Callable[[T], T]) -> 'CachedIterable':
+        return self.__create_instance__(filter(f, self.items))
+
+    # TODO this method seems wrong. size is a range and fold is and int, they cannot be summed. Below the proposed fix
+    def kfold(self, folds: int = 3) -> Iterator[Tuple['CachedIterable', 'CachedIterable']]:
+        """
+        Generator to select
+        :param folds:
+        :return:
+        """
+        array = np.array(self.items)
+        size = range(len(array))
+        for fold in range(folds):
+            iTest = array[((size + fold) % folds == 0)]
+            iTrain = array[((size + fold) % folds != 0)]
+            yield self.__create_instance__(array[iTrain]), self.__create_instance__(array[iTest])
+        # for fold in range(folds):
+        #     yield (self.__create_instance__([x for n, x in enumerate(self.items)
+        #                                      if n not in range(fold, len(self), folds)]),
+        #            self.__create_instance__(self[fold::folds]))
+
+    def take(self, size: int) -> 'CachedIterable':
+        """
+        Get first size elements
+
+        :param size: number of items to take
+        :return: CachedIterable with only chosen items
+        """
+        return self.__create_instance__(self.items[:size])
+
+    def save(self, filename: PathLike) -> PathLike:
+        with open(filename, 'w') as fid:
+            pickle.dump(self.items, fid)  # type: ignore
+        return filename
+
+    @staticmethod
+    def load(filename: PathLike) -> 'CachedIterable':
+        with open(filename, 'r') as fid:
+            items = pickle.load(fid)  # type: ignore
+        return CachedIterable(items)
+
+
+class LazyIterable(Iterable, Generic[T]):
+
+    def __init__(self, items: IterGenerator[T]) -> None:
         if not isinstance(items, IterGenerator):
-            raise TypeError("For lazy iterables the input must be an IterGenerator(object). Input of type %s passed"
-                            % type(items))
+            raise TypeError(f"The input must be an IterGenerator. Input of type {type(items)} passed")
         self.__items__ = items
 
     @property
-    def items(self):
+    def items(self) -> Iterator[T]:
         return self.__items__.iterator
 
     @property
-    def cached(self):
+    def cached(self) -> bool:
         return False
 
     @staticmethod
-    def toCached(items):
+    def toCached(items: IterableType[T]) -> CachedIterable:
         return CachedIterable(items)
 
-    def batch(self, size=100):
+    # TODO: this method's signature is not coherent with parents' method signature
+    def batch(self, size: int = 100) -> Iterator['CachedIterable']:
         for batch in super(LazyIterable, self).batch(size=size):
             yield self.toCached(batch)
 
-    def cache(self):
-        return self.toCached(list(self.items))
+    def cache(self) -> 'CachedIterable':
+        return self.toCached(self.items)
 
-    def take(self, size):
+    def take(self, size: int) -> 'LazyIterable':
         def generator():
             return islice(self.items, size)
 
         return self.__create_instance__(IterGenerator(generator))
 
-    def filter(self, f):
+    def filter(self, f: Callable[[T], T]) -> 'LazyIterable':
         def generator():
             return filter(self.items, f)
 
         return self.__create_instance__(IterGenerator(generator))
 
-    def kfold(self, folds=3):
+    def kfold(self, folds: int = 3) -> Iterator[Tuple['LazyIterable', 'LazyIterable']]:
         """
         Kfold iterator of Train, Test Dataset split over the folds
 
@@ -151,56 +243,7 @@ class LazyIterable(Iterable):
             yield self.__create_instance__(IterGenerator(train)), self.__create_instance__(IterGenerator(test))
 
 
-class CachedIterable(Iterable):
-
-    def __init__(self, items):
-        self.__items__ = list(items)
-
-    def __len__(self):
-        return len(self.items)
-
-    @property
-    def items(self):
-        return self.__items__
-
-    def __getitem__(self, item):
-        return self.items[item]
-
-    @property
-    def cached(self):
-        return True
-
-    def batch(self, size=100):
-        for batch in super(CachedIterable, self).batch(size=size):
-            yield self.__create_instance__(batch)
-
-    def filter(self, f):
-        return self.__create_instance__(filter(f, self.items))
-
-    def kfold(self, folds=3):
-        array = np.array(self.items)
-        size = range(len(array))
-        for fold in range(folds):
-            iTest = array[((size + fold) % folds == 0)]
-            iTrain = array[((size + fold) % folds != 0)]
-            yield self.__create_instance__(array[iTrain]), self.__create_instance__(array[iTest])
-
-    def take(self, size):
-        return self.__create_instance__(self.items[:size])
-
-    def save(self, filename):
-        with open(filename, 'w') as fid:
-            pickle.dump(self.items, fid)
-        return filename
-
-    @staticmethod
-    def load(filename):
-        with open(filename, 'r') as fid:
-            items = pickle.load(fid)
-        return CachedIterable(items)
-
-
-class BaseRange(object):
+class BaseRange(ABC):
     """
     Abstract Range Class
     """
@@ -224,32 +267,19 @@ class BaseRange(object):
         raise NotImplementedError
 
     @abstractmethod
-    def __iter__(self) -> Iterator['Range']:
-        raise NotImplementedError
+    def __iter__(self) -> Iterator['Range']: ...
 
     @abstractmethod
-    def __add__(self, other: 'BaseRange') -> 'BaseRange':
-        raise NotImplementedError
+    def __add__(self, other: 'BaseRange') -> 'BaseRange': ...
 
     @abstractmethod
-    def overlaps(self, other: 'BaseRange') -> bool:
-        raise NotImplementedError
+    def overlaps(self, other: 'BaseRange') -> bool: ...
 
     @abstractmethod
-    def range(self, freq="H") -> List[Timestamp]:
-        """
-        Compute date range with given frequency
-
-        :param freq: frequency
-
-        :type: str
-
-        :return: List of timestamps
-        """
-        raise NotImplementedError
+    def range(self, freq="H") -> List[Timestamp]: ...
 
     def __str__(self) -> str:
-        return " // ".join([f"{range.start}-{range.end}" for range in self])
+        return " // ".join([f"{r.start}-{r.end}" for r in self])
 
     @property
     def days(self) -> List[Timestamp]:
@@ -281,7 +311,7 @@ class BaseRange(object):
 
 class Range(BaseRange):
 
-    def __init__(self, start: DatetimeScalar, end: DatetimeScalar):
+    def __init__(self, start: DatetimeScalar, end: DatetimeScalar) -> None:
         """
         Simple Range Class
 
@@ -319,12 +349,12 @@ class Range(BaseRange):
         :param other: other range to be compared with
         :return: True or False whether the two overlaps
         """
-        return any([self.__overlaps_range__(range) for range in other])
+        return any([self.__overlaps_range__(r) for r in other])
 
-    def __add__(self, other: BaseRange) -> BaseRange:
-        if not isinstance(other, BaseRange):
+    def __add__(self, other: BaseRange) -> Union['CompositeRange', 'Range']:
+        if not isinstance(other, Range):
             raise ValueError(f"add operator not defined for argument of type {type(other)}. Argument should be of "
-                             f"type BaseRange")
+                             f"type Range")
         if isinstance(other, Range) and self.overlaps(other):
             return Range(min(self.start, other.start), max(self.end, other.end))
         else:
@@ -333,7 +363,7 @@ class Range(BaseRange):
 
 class CompositeRange(BaseRange):
 
-    def __init__(self, ranges: List[Range]):
+    def __init__(self, ranges: List[Range]) -> None:
         """
         Ranges made up of multiple ranges
 
@@ -341,21 +371,21 @@ class CompositeRange(BaseRange):
         """
         self.ranges = ranges
 
-    def simplify(self) -> BaseRange:
+    def simplify(self) -> Union['CompositeRange', Range]:
         """
         Simplifies the list into disjoint Range objects, aggregating non-disjoint ranges. If only one range would be
         present, a simple Range object is returned
 
         :return: BaseRange
         """
-        ranges = sorted(self.ranges, key=lambda range: range.start)
+        ranges = sorted(self.ranges, key=lambda r: r.start)
 
         # check overlapping ranges
         overlaps = [first.overlaps(second) for first, second in zip(ranges[:-1], ranges[1:])]
 
-        def merge(agg: List[Range], item: Tuple[int, bool]):
+        def merge(agg: List[Range], item: Tuple[int, bool]) -> List[Range]:
             ith, overlap = item
-            return agg + [ranges[ith + 1]] if not (overlap) else agg[:-1] + [agg[-1] + ranges[ith + 1]]
+            return agg + [ranges[ith + 1]] if not overlap else agg[:-1] + [agg[-1] + ranges[ith + 1]]  # type: ignore
 
         # merge ranges
         rangeList = reduce(merge, enumerate(overlaps), [ranges[0]])
@@ -383,36 +413,33 @@ class CompositeRange(BaseRange):
         ])
         return sorted(items)
 
-    def __add__(self, other: BaseRange):
+    def __add__(self, other: BaseRange) -> BaseRange:
         if not isinstance(other, BaseRange):
             raise ValueError(f"add operator not defined for argument of type {type(other)}. Argument should be of "
                              f"type BaseRange")
         return CompositeRange(self.ranges + list(other)).simplify()
 
     def overlaps(self, other: 'BaseRange') -> bool:
-        return any([range.overlaps(other) for range in self])
+        return any([r.overlaps(other) for r in self])
 
 
-class Serializable(object):
+class Serializable(ABC):
 
     @abstractmethod
-    def write(self, filaname: str):
-        raise NotImplementedError
+    def write(self, filaname: PathLike) -> None: ...
 
     @classmethod
-    def load(cls, filename: str):
-        raise NotImplementedError
+    @abstractmethod
+    def load(cls, filename: PathLike) -> 'Serializable': ...
 
 
 class PickleSerialization(Serializable):
 
-    def write(self, filename: str):
+    def write(self, filename: PathLike) -> None:
         """
-        Write processing pipeline as pickle
+        Write instance as pickle
 
-        :param filename: Name of the file where to save the model
-
-        :type filename: str
+        :param filename: Name of the file where to save the instance
 
         :return: None
         """
@@ -420,9 +447,9 @@ class PickleSerialization(Serializable):
             pickle.dump(self, fid)
 
     @classmethod
-    def load(cls, filename: str):
+    def load(cls, filename: PathLike) -> 'PickleSerialization':
         """
-        Load processing pipeline
+        Load instance from pickle
 
         :param filename: Name of the file to be read
         :return: Instance of the read Model
@@ -433,13 +460,11 @@ class PickleSerialization(Serializable):
 
 class DillSerialization(Serializable):
 
-    def write(self, filename: str):
+    def write(self, filename: PathLike) -> None:
         """
-        Write processing pipeline as pickle
+        Write instance as pickle
 
-        :param filename: Name of the file where to save the model
-
-        :type filename: str
+        :param filename: Name of the file where to save the instance
 
         :return: None
         """
@@ -447,9 +472,9 @@ class DillSerialization(Serializable):
             dill.dump(self, fid)
 
     @classmethod
-    def load(cls, filename: str):
+    def load(cls, filename: PathLike) -> 'DillSerialization':
         """
-        Load processing pipeline
+        Load instance from file
 
         :param filename: Name of the file to be read
         :return: Instance of the read Model

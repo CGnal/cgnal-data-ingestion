@@ -5,12 +5,12 @@ from glob import glob
 from functools import wraps, partial
 
 from typing import Callable, Any, Union, Dict
-from cgnal import PathLike
+from cgnal import PathLike, T
 from cgnal.utils.dict import union
 from cgnal.utils.fs import create_dir_if_not_exists
 
 
-def cache(func: Callable[..., Any]) -> Callable[..., Any]:
+def cache(func: Callable[..., T]) -> Callable[..., T]:
     """
     Decorator to cache function return values
 
@@ -87,7 +87,7 @@ class Cached(object):
                     for path in glob(os.path.join(filename, "*"))}
         else:
             # TODO do we really want to force the file extension to be .p? Wouldn't it be better keep only filename?
-            return pd.read_pickle(filename + ".p")
+            return pd.read_pickle(filename + ".p")  # type: ignore
 
     @staticmethod
     def __reformat_name(filename: PathLike) -> PathLike:
@@ -103,7 +103,7 @@ class Cached(object):
             return os.path.basename(filename)
 
 
-def paramCheck(function: Callable[..., Any], allow_none: bool = True) -> Callable[..., Any]:
+def paramCheck(function: Callable[..., T], allow_none: bool = True) -> Callable[..., T]:
 
     @wraps(function)
     def check(*arguments, **kwargs):
