@@ -19,12 +19,6 @@ else:
 
 FeatType = TypeVar('FeatType', List[Any], Tuple[Any], np.ndarray, Dict[str, Any])
 LabType = TypeVar('LabType', int, float)
-# FeaturesType = TypeVar('FeaturesType', pd.DataFrame, np.ndarray,
-#                        List[Union[List[Any], Tuple[Any], np.ndarray]],
-#                        Dict[str, Union[List[Any], Tuple[Any], np.ndarray]])
-# LabelsType = TypeVar('LabelsType', pd.DataFrame, np.ndarray,  List[Union[int, float]],  Dict[str, Union[int, float]])
-# FeaturesType = TypeVar('FeaturesType', np.ndarray, pd.DataFrame, dict, list)
-# LabelsType = TypeVar('LabelsType', np.ndarray, pd.DataFrame, dict, list)
 FeaturesType = Union[np.ndarray, pd.DataFrame, Dict[str, FeatType], List[FeatType]]
 LabelsType = Union[np.ndarray, pd.DataFrame, Dict[str, LabType], List[LabType]]
 AllowedTypes = Literal['array', 'pandas', 'dict', 'list']

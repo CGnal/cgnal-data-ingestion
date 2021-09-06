@@ -1,26 +1,41 @@
+import pandas as pd  # type: ignore
 from collections import Iterable
-from typing import Union
-
-from bson.objectid import ObjectId
+from bson.objectid import ObjectId  # type: ignore
 from mongomock.collection import Collection as MockCollection
-from pymongo.collection import Collection
-
-from cgnal.data.layer import Archiver, DAO
+from pymongo.collection import Collection, UpdateResult  # type: ignore
+from typing import Union, Optional, List, Dict, Any, Iterator, Iterable as IterableType
+from cgnal.data.layer import Archiver
+from cgnal.data.model.text import Document
+from cgnal.data.layer.mongo.dao import DocumentDAO, SeriesDAO
 
 
 class MongoArchiver(Archiver):
-    def __init__(self, collection: Union[Collection, MockCollection], dao: DAO):
+    def __init__(self, collection: Union[Collection, MockCollection], dao: Union[DocumentDAO, SeriesDAO]) -> None:
         if not isinstance(collection, Collection) and not isinstance(collection, MockCollection):
-            raise TypeError("Collection %s is not a MongoDb collection" % str(collection))
+            raise TypeError(f"Collection {collection} is not a MongoDb collection")
 
         self.collection = collection
         self.dao = dao
 
-    def retrieveById(self, uuid):
+    def retrieveById(self, uuid: str) -> Union[Document, pd.Series]:
+        """
+        Retrive document from collection by id
+
+        :param uuid: document id
+        :return: retrieved document parsed according to self.dao
+        """
         json = self.collection.find_one({"_id": ObjectId(uuid)})
         return self.dao.parse(json)
 
-    def retrieve(self, condition={}, sort_by=None):
+    def retrieve(self, condition: Dict[str, Dict[str, Any]] = {},
+                 sort_by: Optional[Union[str, List[str]]] = None) -> Iterator[Union[Document, pd.Series]]:
+        """
+        Retrieve documents satisfying condition, sorted according to given ordering
+
+        :param condition: condition to satisfy. If {}, return all documents.
+        :param sort_by: ordering to respect. If None, no ordering is given.
+        :return: iterator of (ordered) documents satisfying given condition
+        """
         jsons = self.collection.find(condition, no_cursor_timeout=True)
         if sort_by is not None:
             jsons = jsons.sort(sort_by)
@@ -28,27 +43,64 @@ class MongoArchiver(Archiver):
             yield self.dao.parse(json)
         jsons.close()
 
-    def archiveOne(self, obj):
+    def archiveOne(self, obj: Document) -> UpdateResult:
+        """
+        Archive one document in collection
+
+        :param obj: document to archive
+        :return: an instance of :class:`~pymongo.results.UpdateResult with update operation's results
+        """
         return self.__insert__(obj)
 
-    def __insert__(self, obj):
-        return self.collection.update_one(self.dao.computeKey(obj),
-                                          {"$set": self.dao.get(obj)}, upsert=True)
+    def __insert__(self, obj: Document) -> UpdateResult:
+        """
+        Insert one document in collection
 
-    def archiveMany(self, objs):
+        :param obj: document to archive
+        :return: an instance of :class:`~pymongo.results.UpdateResult with update operation's results
+        """
+        return self.collection.update_one(self.dao.computeKey(obj), {"$set": self.dao.get(obj)}, upsert=True)
+
+    def archiveMany(self, objs: IterableType[Document]) -> List[UpdateResult]:
+        """
+        Insert many documents in collection
+
+        :param objs: documents to archive
+        :return: list of instances of :class:`~pymongo.results.UpdateResult with update operations' results
+        """
         return [self.__insert__(obj) for obj in objs]
 
-    def archive(self, objs):
+    # TODO this method's output type is not consistent with its' ancestor's return type (that should be 'MongoArchiver')
+    def archive(self, objs: Union[Document, IterableType[Document]]) -> Union[UpdateResult, List[UpdateResult]]:
+        """
+        Archive one or more documents in collection
+
+        :param objs: documents to archive
+        :return: list of instances of :class:`~pymongo.results.UpdateResult with update operations' results
+        """
         if isinstance(objs, Iterable):
             return self.archiveMany(objs)
         else:
             return self.archiveOne(objs)
 
-    def first(self):
+    def first(self) -> Union[pd.Series, Document]:
+        """
+        Retrieve first element in collection
+        :return: parsed document
+        """
         json = self.collection.find_one()
         return self.dao.parse(json)
 
-    def aggregate(self, pipeline, allowDiskUse=True):
+    def aggregate(self, pipeline: List[Dict[str, Dict[str, Any]]],
+                  allowDiskUse: bool = True) -> Iterator[Union[pd.Series, Document]]:
+        """
+        Aggregate collection's documents using given aggregation steps
+
+        :param pipeline: a list of aggregation pipeline stages
+        :param allowDiskUse: Enables writing to temporary files. When set to True, aggregation stages can write data to
+            the _tmp subdirectory of the --dbpath directory. The default is False.
+        :return: iterator with parsed aggregated documents
+        """
         jsons = self.collection.aggregate(pipeline, allowDiskUse=allowDiskUse)
         for json in jsons:
             yield self.dao.parse(json)

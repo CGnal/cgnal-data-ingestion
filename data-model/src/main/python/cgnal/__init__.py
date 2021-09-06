@@ -1,5 +1,5 @@
 import os
-from typing import Union, Any, TypeVar
+from typing import Union, Any, TypeVar, Hashable
 from typing_extensions import Protocol
 from cgnal._version import __version__
 

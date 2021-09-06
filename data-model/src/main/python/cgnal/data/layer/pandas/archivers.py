@@ -45,11 +45,15 @@ class PandasArchiver(Archiver, ABC):
         row = self.data.loc[uuid]
         return self.dao.parse(row)
 
+    # TODO: the signature of this method is not compatible with the one of Archiver, since Archive.retrieve requires
+    #  *args and **kwargs
     def retrieve(self, condition: Optional[Callable[[pd.DataFrame], pd.DataFrame]] = None) -> Iterator[DataVal]:
         rows = self.data if condition is None else condition(self.data)
         return (self.dao.parse(row) for _, row in rows.iterrows())
 
-    def retrieveGenerator(self, condition: Optional[Callable[[pd.DataFrame], pd.DataFrame]] = None) -> IterGenerator:
+    # TODO: the signature of this method is not compatible with the one of Archiver, since Archive.retrieve requires
+    #  *args and **kwargs
+    def retrieveGenerator(self, condition: Optional[Callable[[pd.DataFrame], pd.DataFrame]] = None) -> IterGenerator[DataVal]:
         def __iterator__():
             return self.retrieve(condition=condition)
         return IterGenerator(__iterator__)

@@ -32,7 +32,7 @@ class DataFrameDAO(DAO):
     def get(self, df: pd.DataFrame) -> pd.Series:
         return pd.concat({k: df[k] for k in df})
 
-    def parse(self, row: pd.DataFrame) -> pd.DataFrame:
+    def parse(self, row: pd.Series) -> pd.DataFrame:
         return pd.concat({c: row[c] for c in row.index.levels[0]}, axis=1)
 
     @staticmethod

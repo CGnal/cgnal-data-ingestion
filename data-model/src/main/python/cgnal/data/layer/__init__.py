@@ -1,6 +1,8 @@
 import pandas as pd  # type: ignore
 from abc import abstractmethod, ABC
-from typing import Any, Callable, Optional, Iterator, TypeVar
+from bson.objectid import ObjectId  # type: ignore
+from typing import Any, Callable, Optional, Iterator, TypeVar, Union, Hashable, Dict
+
 from cgnal import T
 from cgnal.data.model.text import Document
 from cgnal.data.model.core import IterGenerator
@@ -14,23 +16,22 @@ class DAO(ABC):
     """ Data Access Object"""
 
     @abstractmethod
-    def computeKey(self, obj): ...
+    def computeKey(self, obj: DataVal) -> Union[Hashable, Dict[str, ObjectId]]: ...
 
     @abstractmethod
-    def get(self, obj): ...
+    def get(self, obj: DataVal) -> Union[pd.Series, dict]: ...
 
     @abstractmethod
-    def parse(self, row: Any) -> Any: ...
+    def parse(self, row: Any) -> Union[Document, pd.DataFrame, pd.Series]: ...
 
 
 class Archiver(ABC):
     """ Object that retrieve data from source and stores it in memory """
 
-    # TODO: why is this a method and not an (abstract, settable) property? In PandasArchiver it is used as such...
     def dao(self) -> DAO: ...
 
     @abstractmethod
-    def retrieve(self, *args: Any, **kwargs: Any) -> Iterator[DataVal]: ...
+    def retrieve(self, *args: Any, **kwargs: Any) -> Iterator[Union[pd.Series, pd.DataFrame, Document]]: ...
 
     @abstractmethod
     def archive(self, obj: DataVal) -> 'Archiver': ...
@@ -39,7 +40,6 @@ class Archiver(ABC):
         for obj in self.retrieve(*args, **kwargs):  # type: DataVal
             yield f(obj)
 
-    # TODO: this method does not return anything: what is its point?
     def foreach(self, f: Callable[[DataVal], T], *args, **kwargs) -> None:
         for obj in self.retrieve(*args, **kwargs):  # type: DataVal
             f(obj)
