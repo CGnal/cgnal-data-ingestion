@@ -1,9 +1,9 @@
 import os
-
 import pandas as pd
 from glob import glob
-from os.path import basename
 
+from typing import List
+from cgnal import PathLike
 from cgnal.utils.fs import create_dir_if_not_exists
 from cgnal.data.layer import DatabaseABC, TableABC
 from cgnal.logging.defaults import WithLogging
@@ -11,32 +11,29 @@ from cgnal.logging.defaults import WithLogging
 
 class Database(WithLogging, DatabaseABC):
 
-    def __init__(self, name, extension=".p"):
+    def __init__(self, name: PathLike, extension: str = ".p") -> None:
         """
         Class implementing standard read and write methods to pickle data sources
 
         :param name: path to pickles
         :param extension: standard pickle extension
-
-        :type name: str
-        :type extension: str
         """
         if not os.path.exists(name):
-            self.logger.info("Creating new database %s" % name)
+            self.logger.info(f"Creating new database {name}")
         self.name = create_dir_if_not_exists(name)
         self.extension = extension
 
     @property
-    def tables(self):
+    def tables(self) -> List[str]:
         """
         Complete pickle names with appropriate extension
 
         :return: pickle names with appropriate extensions
         """
-        return list(map(lambda x: basename(x)[:-len(self.extension)],
+        return list(map(lambda x: os.path.basename(x)[:-len(self.extension)],
                         glob(os.path.join(self.name, "*%s" % self.extension))))
 
-    def __getitem__(self, table_name):
+    def __getitem__(self, table_name: str) -> 'Table':
         """
         Return table from the database
 
@@ -47,44 +44,40 @@ class Database(WithLogging, DatabaseABC):
         """
         return self.table(table_name)
 
-    def table(self, table_name):
+    def table(self, table_name: str) -> 'Table':
         """
         Table selector
 
         :param table_name: name of the table
-
-        :type table_name: str
 
         :return: object of class PickleTable
         """
         if table_name in self.tables:
             return Table(self, table_name)
         else:
-            self.logger.warning("Table %s not found in database %s" % (table_name, self.name))
+            self.logger.warning(f"Table {table_name} not found in database {self.name}")
             return Table(self, table_name)
 
 
+# TODO: this class does not implement to_df abstract method from TableABC
 class Table(WithLogging, TableABC):
 
-    def __init__(self, db, table_name):
+    def __init__(self, db: Database, table_name: str) -> None:
         """
         Class implementing a constructor for tables using pickle file format
 
         :param db: database to which the table belongs
         :param table_name: name of the table
-
-        :type db: cgnal.data.layer.pandas.databases.Database
-        :type table_name: str
         """
 
         if not isinstance(db, Database):
-            raise ValueError("The db should be of type %s" % type(Database))
+            raise ValueError(f"The db should an instance of {'.'.join([Database.__module__, Database.__name__])}")
 
         self.db = db
         self.name = table_name
 
     @property
-    def filename(self):
+    def filename(self) -> PathLike:
         """
         Path to pickle
 
@@ -93,7 +86,7 @@ class Table(WithLogging, TableABC):
         return os.path.join(self.db.name, '%s.p' % self.name)
 
     @property
-    def data(self):
+    def data(self) -> pd.DataFrame:
         """
         Read pickle
 
@@ -101,15 +94,12 @@ class Table(WithLogging, TableABC):
         """
         return pd.read_pickle(self.filename)
 
-    def write(self, df, overwrite=False):
+    def write(self, df: pd.DataFrame, overwrite: bool = False) -> None:
         """
         Write pickle of data, eventually outer joined with an input DataFrame
 
         :param df: input data
         :param overwrite: whether or not to overwrite existing file
-
-        :type df: pd.DataFrame
-        :type overwrite: bool
 
         :return: None
         """

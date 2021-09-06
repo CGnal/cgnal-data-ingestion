@@ -17,7 +17,7 @@ def groupIterable(iterable: Iterable[T], batch_size: int = 10000) -> Iterator[Li
     return iter(lambda: list(islice(iterable, batch_size)), [])
 
 
-def pairwise(iterable: Iterable[T]) -> zip[Tuple[T, T]]:
+def pairwise(iterable: Iterable[T]) -> zip:
     """s -> (s0,s1), (s1,s2), (s2, s3), ..."""
     a, b = tee(iterable)
     next(b, None)

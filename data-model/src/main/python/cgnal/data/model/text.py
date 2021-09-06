@@ -2,7 +2,7 @@ import uuid
 import numpy as np  # type: ignore
 import pandas as pd  # type: ignore
 
-from typing import Dict, Any, Union, Optional, Iterator, Tuple, Iterable as IterableType, List
+from typing import Dict, Any, Union, Optional, Iterator, Tuple, Iterable as IterableType, List, Mapping, Hashable
 from cgnal.utils.dict import union, unflattenKeys
 from cgnal.data.model.core import Iterable, LazyIterable, CachedIterable
 
@@ -14,7 +14,7 @@ def generate_random_uuid() -> bytes:
 # TODO: shouldn't uuid be just a string? If so the usage of setRandomUUID is not coherent since generate_random_uuid
 #  does not return a string
 class Document(object):
-    def __init__(self, uuid: Union[str, bytes], data: Dict[str, Any]):
+    def __init__(self, uuid: Hashable, data: Dict[str, Any]):
         self.uuid = uuid
         self.data = data
 
