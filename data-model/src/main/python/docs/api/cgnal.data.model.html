@@ -1,0 +1,1219 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>cgnal.data.model package &mdash; CGnal Core 1.10.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="cgnal.logging package" href="cgnal.logging.html" />
+    <link rel="prev" title="cgnal.data.layer.pandas package" href="cgnal.data.layer.pandas.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> CGnal Core
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Intro</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/README.html">Core Package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../git.html">Git Structure</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer Guide</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">cgnal</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="cgnal.html">cgnal package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="cgnal.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="cgnal.config.html">cgnal.config package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="cgnal.data.html">cgnal.data package</a><ul class="current">
+<li class="toctree-l5 current"><a class="reference internal" href="cgnal.data.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l6"><a class="reference internal" href="cgnal.data.layer.html">cgnal.data.layer package</a></li>
+<li class="toctree-l6 current"><a class="current reference internal" href="#">cgnal.data.model package</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="cgnal.data.html#submodules">Submodules</a></li>
+<li class="toctree-l5"><a class="reference internal" href="cgnal.data.html#module-cgnal.data.exceptions">cgnal.data.exceptions module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="cgnal.data.html#module-cgnal.data">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="cgnal.logging.html">cgnal.logging package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cgnal.tests.html">cgnal.tests package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cgnal.utils.html">cgnal.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cgnal.html#module-cgnal">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">CGnal Core</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="modules.html">cgnal</a> &raquo;</li>
+        
+          <li><a href="cgnal.html">cgnal package</a> &raquo;</li>
+        
+          <li><a href="cgnal.data.html">cgnal.data package</a> &raquo;</li>
+        
+      <li>cgnal.data.model package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/api/cgnal.data.model.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="cgnal-data-model-package">
+<h1>cgnal.data.model package<a class="headerlink" href="#cgnal-data-model-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-cgnal.data.model.core">
+<span id="cgnal-data-model-core-module"></span><h2>cgnal.data.model.core module<a class="headerlink" href="#module-cgnal.data.model.core" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="cgnal.data.model.core.BaseRange">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">cgnal.data.model.core.</span></span><span class="sig-name descname"><span class="pre">BaseRange</span></span><a class="headerlink" href="#cgnal.data.model.core.BaseRange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>Abstract Range Class</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="cgnal.data.model.core.BaseRange.business_days">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">business_days</span></span><em class="property"><span class="pre">:</span> <span class="pre">List[pandas._libs.tslibs.timestamps.Timestamp]</span></em><a class="headerlink" href="#cgnal.data.model.core.BaseRange.business_days" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create date range with daily frequency</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>pd.date_range from start to end with daily frequency</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cgnal.data.model.core.BaseRange.days">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">days</span></span><em class="property"><span class="pre">:</span> <span class="pre">List[pandas._libs.tslibs.timestamps.Timestamp]</span></em><a class="headerlink" href="#cgnal.data.model.core.BaseRange.days" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create date range with daily frequency</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>pd.date_range from start to end with daily frequency</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cgnal.data.model.core.BaseRange.end">
+<em class="property"><span class="pre">abstract</span> <span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">end</span></span><em class="property"><span class="pre">:</span> <span class="pre">pandas._libs.tslibs.timestamps.Timestamp</span></em><a class="headerlink" href="#cgnal.data.model.core.BaseRange.end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Last timestamp
+:return: Timestamp</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cgnal.data.model.core.BaseRange.minutes_15">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">minutes_15</span></span><em class="property"><span class="pre">:</span> <span class="pre">List[pandas._libs.tslibs.timestamps.Timestamp]</span></em><a class="headerlink" href="#cgnal.data.model.core.BaseRange.minutes_15" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create date range with daily frequency</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>pd.date_range from start to end with daily frequency</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.core.BaseRange.overlaps">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">overlaps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#cgnal.data.model.core.BaseRange" title="cgnal.data.model.core.BaseRange"><span class="pre">cgnal.data.model.core.BaseRange</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#cgnal.data.model.core.BaseRange.overlaps" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.core.BaseRange.range">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">range</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'H'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas._libs.tslibs.timestamps.Timestamp</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cgnal.data.model.core.BaseRange.range" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cgnal.data.model.core.BaseRange.start">
+<em class="property"><span class="pre">abstract</span> <span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">start</span></span><em class="property"><span class="pre">:</span> <span class="pre">pandas._libs.tslibs.timestamps.Timestamp</span></em><a class="headerlink" href="#cgnal.data.model.core.BaseRange.start" title="Permalink to this definition">¶</a></dt>
+<dd><p>First timestamp
+:return: Timestamp</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cgnal.data.model.core.CachedIterable">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">cgnal.data.model.core.</span></span><span class="sig-name descname"><span class="pre">CachedIterable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#cgnal.data.model.core.Iterable" title="cgnal.data.model.core.Iterable"><span class="pre">Iterable</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cgnal.data.model.core.CachedIterable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cgnal.data.model.core.Iterable" title="cgnal.data.model.core.Iterable"><code class="xref py py-class docutils literal notranslate"><span class="pre">cgnal.data.model.core.Iterable</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">T</span></code>]</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.core.CachedIterable.batch">
+<span class="sig-name descname"><span class="pre">batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cgnal.data.model.core.CachedIterable" title="cgnal.data.model.core.CachedIterable"><span class="pre">cgnal.data.model.core.CachedIterable</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cgnal.data.model.core.CachedIterable.batch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generator that yields batches of given size
+:param size: batch size
+:return: CachedIterable with</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cgnal.data.model.core.CachedIterable.cached">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">cached</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#cgnal.data.model.core.CachedIterable.cached" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.core.CachedIterable.filter">
+<span class="sig-name descname"><span class="pre">filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">,</span> </span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cgnal.data.model.core.CachedIterable" title="cgnal.data.model.core.CachedIterable"><span class="pre">cgnal.data.model.core.CachedIterable</span></a></span></span><a class="headerlink" href="#cgnal.data.model.core.CachedIterable.filter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cgnal.data.model.core.CachedIterable.items">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">items</span></span><em class="property"><span class="pre">:</span> <span class="pre">List[T]</span></em><a class="headerlink" href="#cgnal.data.model.core.CachedIterable.items" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.core.CachedIterable.kfold">
+<span class="sig-name descname"><span class="pre">kfold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folds</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cgnal.data.model.core.CachedIterable" title="cgnal.data.model.core.CachedIterable"><span class="pre">cgnal.data.model.core.CachedIterable</span></a><span class="p"><span class="pre">,</span> </span><a class="reference internal" href="#cgnal.data.model.core.CachedIterable" title="cgnal.data.model.core.CachedIterable"><span class="pre">cgnal.data.model.core.CachedIterable</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cgnal.data.model.core.CachedIterable.kfold" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generator to select
+:param folds:
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.core.CachedIterable.load">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">os.PathLike</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cgnal.data.model.core.CachedIterable" title="cgnal.data.model.core.CachedIterable"><span class="pre">CachedIterable</span></a></span></span><a class="headerlink" href="#cgnal.data.model.core.CachedIterable.load" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.core.CachedIterable.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">os.PathLike</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">os.PathLike</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cgnal.data.model.core.CachedIterable.save" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.core.CachedIterable.take">
+<span class="sig-name descname"><span class="pre">take</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cgnal.data.model.core.CachedIterable" title="cgnal.data.model.core.CachedIterable"><span class="pre">cgnal.data.model.core.CachedIterable</span></a></span></span><a class="headerlink" href="#cgnal.data.model.core.CachedIterable.take" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get first size elements</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>size</strong> – number of items to take</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>CachedIterable with only chosen items</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cgnal.data.model.core.CompositeRange">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">cgnal.data.model.core.</span></span><span class="sig-name descname"><span class="pre">CompositeRange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ranges</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cgnal.data.model.core.Range" title="cgnal.data.model.core.Range"><span class="pre">cgnal.data.model.core.Range</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cgnal.data.model.core.CompositeRange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cgnal.data.model.core.BaseRange" title="cgnal.data.model.core.BaseRange"><code class="xref py py-class docutils literal notranslate"><span class="pre">cgnal.data.model.core.BaseRange</span></code></a></p>
+<p>Ranges made up of multiple ranges</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ranges</strong> – List of Ranges</p>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="cgnal.data.model.core.CompositeRange.end">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">end</span></span><em class="property"><span class="pre">:</span> <span class="pre">pandas._libs.tslibs.timestamps.Timestamp</span></em><a class="headerlink" href="#cgnal.data.model.core.CompositeRange.end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Last timestamp
+:return: Timestamp</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.core.CompositeRange.overlaps">
+<span class="sig-name descname"><span class="pre">overlaps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#cgnal.data.model.core.BaseRange" title="cgnal.data.model.core.BaseRange"><span class="pre">cgnal.data.model.core.BaseRange</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#cgnal.data.model.core.CompositeRange.overlaps" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.core.CompositeRange.range">
+<span class="sig-name descname"><span class="pre">range</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'H'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas._libs.tslibs.timestamps.Timestamp</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cgnal.data.model.core.CompositeRange.range" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.core.CompositeRange.simplify">
+<span class="sig-name descname"><span class="pre">simplify</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cgnal.data.model.core.CompositeRange" title="cgnal.data.model.core.CompositeRange"><span class="pre">cgnal.data.model.core.CompositeRange</span></a><span class="p"><span class="pre">,</span> </span><a class="reference internal" href="#cgnal.data.model.core.Range" title="cgnal.data.model.core.Range"><span class="pre">cgnal.data.model.core.Range</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cgnal.data.model.core.CompositeRange.simplify" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simplifies the list into disjoint Range objects, aggregating non-disjoint ranges. If only one range would be
+present, a simple Range object is returned</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>BaseRange</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cgnal.data.model.core.CompositeRange.start">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">start</span></span><em class="property"><span class="pre">:</span> <span class="pre">pandas._libs.tslibs.timestamps.Timestamp</span></em><a class="headerlink" href="#cgnal.data.model.core.CompositeRange.start" title="Permalink to this definition">¶</a></dt>
+<dd><p>First timestamp
+:return: Timestamp</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cgnal.data.model.core.DillSerialization">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">cgnal.data.model.core.</span></span><span class="sig-name descname"><span class="pre">DillSerialization</span></span><a class="headerlink" href="#cgnal.data.model.core.DillSerialization" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cgnal.data.model.core.Serializable" title="cgnal.data.model.core.Serializable"><code class="xref py py-class docutils literal notranslate"><span class="pre">cgnal.data.model.core.Serializable</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.core.DillSerialization.load">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">os.PathLike</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cgnal.data.model.core.DillSerialization" title="cgnal.data.model.core.DillSerialization"><span class="pre">DillSerialization</span></a></span></span><a class="headerlink" href="#cgnal.data.model.core.DillSerialization.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load instance from file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> – Name of the file to be read</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Instance of the read Model</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.core.DillSerialization.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">os.PathLike</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#cgnal.data.model.core.DillSerialization.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write instance as pickle</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> – Name of the file where to save the instance</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cgnal.data.model.core.IterGenerator">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">cgnal.data.model.core.</span></span><span class="sig-name descname"><span class="pre">IterGenerator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">generator_function</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cgnal.data.model.core.IterGenerator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">T</span></code>]</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="cgnal.data.model.core.IterGenerator.iterator">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">iterator</span></span><em class="property"><span class="pre">:</span> <span class="pre">Iterator[T]</span></em><a class="headerlink" href="#cgnal.data.model.core.IterGenerator.iterator" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cgnal.data.model.core.Iterable">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">cgnal.data.model.core.</span></span><span class="sig-name descname"><span class="pre">Iterable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cgnal.data.model.core.Iterable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">T</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">T</span></code>]</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.core.Iterable.batch">
+<span class="sig-name descname"><span class="pre">batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cgnal.data.model.core.Iterable.batch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generator that yields batches of items of given size
+:param size: batch size
+:return: list of “size” items</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cgnal.data.model.core.Iterable.cached">
+<em class="property"><span class="pre">abstract</span> <span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">cached</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#cgnal.data.model.core.Iterable.cached" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.core.Iterable.filter">
+<span class="sig-name descname"><span class="pre">filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Callable</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cgnal.data.model.core.Iterable" title="cgnal.data.model.core.Iterable"><span class="pre">cgnal.data.model.core.Iterable</span></a></span></span><a class="headerlink" href="#cgnal.data.model.core.Iterable.filter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.core.Iterable.foreach">
+<span class="sig-name descname"><span class="pre">foreach</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">,</span> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#cgnal.data.model.core.Iterable.foreach" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.core.Iterable.hold_out">
+<span class="sig-name descname"><span class="pre">hold_out</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ratio</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cgnal.data.model.core.Iterable" title="cgnal.data.model.core.Iterable"><span class="pre">cgnal.data.model.core.Iterable</span></a><span class="p"><span class="pre">,</span> </span><a class="reference internal" href="#cgnal.data.model.core.Iterable" title="cgnal.data.model.core.Iterable"><span class="pre">cgnal.data.model.core.Iterable</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cgnal.data.model.core.Iterable.hold_out" title="Permalink to this definition">¶</a></dt>
+<dd><p>Train, Test Iterable split</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ratio</strong> – Int, ratio for splitting</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>(Dataset, Dataset), Train and Test Datasets</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cgnal.data.model.core.Iterable.items">
+<em class="property"><span class="pre">abstract</span> <span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">items</span></span><em class="property"><span class="pre">:</span> <span class="pre">Iterable[T]</span></em><a class="headerlink" href="#cgnal.data.model.core.Iterable.items" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.core.Iterable.kfold">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">kfold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folds</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cgnal.data.model.core.Iterable" title="cgnal.data.model.core.Iterable"><span class="pre">cgnal.data.model.core.Iterable</span></a><span class="p"><span class="pre">,</span> </span><a class="reference internal" href="#cgnal.data.model.core.Iterable" title="cgnal.data.model.core.Iterable"><span class="pre">cgnal.data.model.core.Iterable</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cgnal.data.model.core.Iterable.kfold" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.core.Iterable.map">
+<span class="sig-name descname"><span class="pre">map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">,</span> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cgnal.data.model.core.Iterable.map" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.core.Iterable.take">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">take</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cgnal.data.model.core.Iterable" title="cgnal.data.model.core.Iterable"><span class="pre">cgnal.data.model.core.Iterable</span></a></span></span><a class="headerlink" href="#cgnal.data.model.core.Iterable.take" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cgnal.data.model.core.LazyIterable">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">cgnal.data.model.core.</span></span><span class="sig-name descname"><span class="pre">LazyIterable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#cgnal.data.model.core.IterGenerator" title="cgnal.data.model.core.IterGenerator"><span class="pre">cgnal.data.model.core.IterGenerator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cgnal.data.model.core.LazyIterable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cgnal.data.model.core.Iterable" title="cgnal.data.model.core.Iterable"><code class="xref py py-class docutils literal notranslate"><span class="pre">cgnal.data.model.core.Iterable</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">T</span></code>]</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.core.LazyIterable.batch">
+<span class="sig-name descname"><span class="pre">batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cgnal.data.model.core.CachedIterable" title="cgnal.data.model.core.CachedIterable"><span class="pre">cgnal.data.model.core.CachedIterable</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cgnal.data.model.core.LazyIterable.batch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generator that yields batches of items of given size
+:param size: batch size
+:return: list of “size” items</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.core.LazyIterable.cache">
+<span class="sig-name descname"><span class="pre">cache</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cgnal.data.model.core.CachedIterable" title="cgnal.data.model.core.CachedIterable"><span class="pre">cgnal.data.model.core.CachedIterable</span></a></span></span><a class="headerlink" href="#cgnal.data.model.core.LazyIterable.cache" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cgnal.data.model.core.LazyIterable.cached">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">cached</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#cgnal.data.model.core.LazyIterable.cached" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.core.LazyIterable.filter">
+<span class="sig-name descname"><span class="pre">filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">,</span> </span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cgnal.data.model.core.LazyIterable" title="cgnal.data.model.core.LazyIterable"><span class="pre">cgnal.data.model.core.LazyIterable</span></a></span></span><a class="headerlink" href="#cgnal.data.model.core.LazyIterable.filter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cgnal.data.model.core.LazyIterable.items">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">items</span></span><em class="property"><span class="pre">:</span> <span class="pre">Iterator[T]</span></em><a class="headerlink" href="#cgnal.data.model.core.LazyIterable.items" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.core.LazyIterable.kfold">
+<span class="sig-name descname"><span class="pre">kfold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folds</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cgnal.data.model.core.LazyIterable" title="cgnal.data.model.core.LazyIterable"><span class="pre">cgnal.data.model.core.LazyIterable</span></a><span class="p"><span class="pre">,</span> </span><a class="reference internal" href="#cgnal.data.model.core.LazyIterable" title="cgnal.data.model.core.LazyIterable"><span class="pre">cgnal.data.model.core.LazyIterable</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cgnal.data.model.core.LazyIterable.kfold" title="Permalink to this definition">¶</a></dt>
+<dd><p>Kfold iterator of Train, Test Dataset split over the folds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>folds</strong> – Int, number of folds</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Iterator(Dataset, Dataset), Iterator over the Train, Test splits for the given fold</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.core.LazyIterable.take">
+<span class="sig-name descname"><span class="pre">take</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cgnal.data.model.core.LazyIterable" title="cgnal.data.model.core.LazyIterable"><span class="pre">cgnal.data.model.core.LazyIterable</span></a></span></span><a class="headerlink" href="#cgnal.data.model.core.LazyIterable.take" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.core.LazyIterable.toCached">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">toCached</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#cgnal.data.model.core.Iterable" title="cgnal.data.model.core.Iterable"><span class="pre">Iterable</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cgnal.data.model.core.CachedIterable" title="cgnal.data.model.core.CachedIterable"><span class="pre">cgnal.data.model.core.CachedIterable</span></a></span></span><a class="headerlink" href="#cgnal.data.model.core.LazyIterable.toCached" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cgnal.data.model.core.PickleSerialization">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">cgnal.data.model.core.</span></span><span class="sig-name descname"><span class="pre">PickleSerialization</span></span><a class="headerlink" href="#cgnal.data.model.core.PickleSerialization" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cgnal.data.model.core.Serializable" title="cgnal.data.model.core.Serializable"><code class="xref py py-class docutils literal notranslate"><span class="pre">cgnal.data.model.core.Serializable</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.core.PickleSerialization.load">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">os.PathLike</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cgnal.data.model.core.PickleSerialization" title="cgnal.data.model.core.PickleSerialization"><span class="pre">PickleSerialization</span></a></span></span><a class="headerlink" href="#cgnal.data.model.core.PickleSerialization.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load instance from pickle</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> – Name of the file to be read</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Instance of the read Model</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.core.PickleSerialization.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">os.PathLike</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#cgnal.data.model.core.PickleSerialization.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write instance as pickle</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> – Name of the file where to save the instance</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cgnal.data.model.core.Range">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">cgnal.data.model.core.</span></span><span class="sig-name descname"><span class="pre">Range</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">DatetimeScalar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">DatetimeScalar</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cgnal.data.model.core.Range" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cgnal.data.model.core.BaseRange" title="cgnal.data.model.core.BaseRange"><code class="xref py py-class docutils literal notranslate"><span class="pre">cgnal.data.model.core.BaseRange</span></code></a></p>
+<p>Simple Range Class</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start</strong> – starting datetime for the range</p></li>
+<li><p><strong>end</strong> – ending datetime for the range</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="cgnal.data.model.core.Range.end">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">end</span></span><em class="property"><span class="pre">:</span> <span class="pre">pandas._libs.tslibs.timestamps.Timestamp</span></em><a class="headerlink" href="#cgnal.data.model.core.Range.end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Last timestamp
+:return: Timestamp</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.core.Range.overlaps">
+<span class="sig-name descname"><span class="pre">overlaps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#cgnal.data.model.core.BaseRange" title="cgnal.data.model.core.BaseRange"><span class="pre">cgnal.data.model.core.BaseRange</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#cgnal.data.model.core.Range.overlaps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns whether two ranges overlaps</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>other</strong> – other range to be compared with</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True or False whether the two overlaps</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.core.Range.range">
+<span class="sig-name descname"><span class="pre">range</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'H'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas._libs.tslibs.timestamps.Timestamp</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cgnal.data.model.core.Range.range" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cgnal.data.model.core.Range.start">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">start</span></span><em class="property"><span class="pre">:</span> <span class="pre">pandas._libs.tslibs.timestamps.Timestamp</span></em><a class="headerlink" href="#cgnal.data.model.core.Range.start" title="Permalink to this definition">¶</a></dt>
+<dd><p>First timestamp
+:return: Timestamp</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cgnal.data.model.core.Serializable">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">cgnal.data.model.core.</span></span><span class="sig-name descname"><span class="pre">Serializable</span></span><a class="headerlink" href="#cgnal.data.model.core.Serializable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.core.Serializable.load">
+<em class="property"><span class="pre">abstract</span> <span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">os.PathLike</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cgnal.data.model.core.Serializable" title="cgnal.data.model.core.Serializable"><span class="pre">Serializable</span></a></span></span><a class="headerlink" href="#cgnal.data.model.core.Serializable.load" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.core.Serializable.write">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filaname</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">os.PathLike</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#cgnal.data.model.core.Serializable.write" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-cgnal.data.model.ml">
+<span id="cgnal-data-model-ml-module"></span><h2>cgnal.data.model.ml module<a class="headerlink" href="#module-cgnal.data.model.ml" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.CachedDataset">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">cgnal.data.model.ml.</span></span><span class="sig-name descname"><span class="pre">CachedDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cgnal.data.model.ml.CachedDataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cgnal.data.model.core.CachedIterable" title="cgnal.data.model.core.CachedIterable"><code class="xref py py-class docutils literal notranslate"><span class="pre">cgnal.data.model.core.CachedIterable</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="#cgnal.data.model.ml.Sample" title="cgnal.data.model.ml.Sample"><code class="xref py py-class docutils literal notranslate"><span class="pre">cgnal.data.model.ml.Sample</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">FeatType</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">LabType</span></code>], <a class="reference internal" href="#cgnal.data.model.ml.MultiFeatureSample" title="cgnal.data.model.ml.MultiFeatureSample"><code class="xref py py-class docutils literal notranslate"><span class="pre">cgnal.data.model.ml.MultiFeatureSample</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">LabType</span></code>]]], <a class="reference internal" href="#cgnal.data.model.ml.IterableDataset" title="cgnal.data.model.ml.IterableDataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">cgnal.data.model.ml.IterableDataset</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.CachedDataset.to_df">
+<span class="sig-name descname"><span class="pre">to_df</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="headerlink" href="#cgnal.data.model.ml.CachedDataset.to_df" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reformat the Features and Labels as a DataFrame</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>DataFrame, Dataframe with features and labels</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.Dataset">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">cgnal.data.model.ml.</span></span><span class="sig-name descname"><span class="pre">Dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cgnal.data.model.ml.Dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">FeatType</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">LabType</span></code>]</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.Dataset.createObject">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">createObject</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">FeatType</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">LabType</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cgnal.data.model.ml.Dataset" title="cgnal.data.model.ml.Dataset"><span class="pre">cgnal.data.model.ml.Dataset</span></a></span></span><a class="headerlink" href="#cgnal.data.model.ml.Dataset.createObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.Dataset.default_type">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">default_type</span></span><em class="property"><span class="pre">:</span> <span class="pre">typing_extensions.Literal['array',</span> <span class="pre">'pandas',</span> <span class="pre">'dict',</span> <span class="pre">'list']</span></em><a class="headerlink" href="#cgnal.data.model.ml.Dataset.default_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.Dataset.features">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">features</span></span><em class="property"><span class="pre">:</span> <span class="pre">Union[numpy.ndarray,</span> <span class="pre">pandas.core.frame.DataFrame,</span> <span class="pre">Dict[str,</span> <span class="pre">FeatType],</span> <span class="pre">List[FeatType]]</span></em><a class="headerlink" href="#cgnal.data.model.ml.Dataset.features" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.Dataset.getFeaturesAs">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">getFeaturesAs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">typing_extensions.Literal[‘array’]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span></span></span><a class="headerlink" href="#cgnal.data.model.ml.Dataset.getFeaturesAs" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">getFeaturesAs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">typing_extensions.Literal[‘pandas’]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">getFeaturesAs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">typing_extensions.Literal[‘dict’]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">FeatType</span><span class="p"><span class="pre">]</span></span></span></span></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">getFeaturesAs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">typing_extensions.Literal[‘list’]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">FeatType</span><span class="p"><span class="pre">]</span></span></span></span></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.Dataset.getLabelsAs">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">getLabelsAs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">typing_extensions.Literal[‘array’]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span></span></span><a class="headerlink" href="#cgnal.data.model.ml.Dataset.getLabelsAs" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">getLabelsAs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">typing_extensions.Literal[‘pandas’]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">getLabelsAs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">typing_extensions.Literal[‘dict’]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">LabType</span><span class="p"><span class="pre">]</span></span></span></span></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">getLabelsAs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">typing_extensions.Literal[‘list’]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">LabType</span><span class="p"><span class="pre">]</span></span></span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.Dataset.labels">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">labels</span></span><em class="property"><span class="pre">:</span> <span class="pre">Union[numpy.ndarray,</span> <span class="pre">pandas.core.frame.DataFrame,</span> <span class="pre">Dict[str,</span> <span class="pre">LabType],</span> <span class="pre">List[LabType]]</span></em><a class="headerlink" href="#cgnal.data.model.ml.Dataset.labels" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.Dataset.samples">
+<em class="property"><span class="pre">abstract</span> <span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">samples</span></span><em class="property"><span class="pre">:</span> <span class="pre">Iterable[Union[cgnal.data.model.ml.Sample[FeatType,</span> <span class="pre">LabType],</span> <span class="pre">cgnal.data.model.ml.MultiFeatureSample[LabType]]]</span></em><a class="headerlink" href="#cgnal.data.model.ml.Dataset.samples" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.Dataset.union">
+<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">union</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#cgnal.data.model.ml.Dataset" title="cgnal.data.model.ml.Dataset"><span class="pre">cgnal.data.model.ml.Dataset</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cgnal.data.model.ml.Dataset" title="cgnal.data.model.ml.Dataset"><span class="pre">cgnal.data.model.ml.Dataset</span></a></span></span><a class="headerlink" href="#cgnal.data.model.ml.Dataset.union" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.Dataset.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#cgnal.data.model.ml.Dataset.write" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.IterableDataset">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">cgnal.data.model.ml.</span></span><span class="sig-name descname"><span class="pre">IterableDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cgnal.data.model.ml.IterableDataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cgnal.data.model.core.Iterable" title="cgnal.data.model.core.Iterable"><code class="xref py py-class docutils literal notranslate"><span class="pre">cgnal.data.model.core.Iterable</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="#cgnal.data.model.ml.Sample" title="cgnal.data.model.ml.Sample"><code class="xref py py-class docutils literal notranslate"><span class="pre">cgnal.data.model.ml.Sample</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">FeatType</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">LabType</span></code>], <a class="reference internal" href="#cgnal.data.model.ml.MultiFeatureSample" title="cgnal.data.model.ml.MultiFeatureSample"><code class="xref py py-class docutils literal notranslate"><span class="pre">cgnal.data.model.ml.MultiFeatureSample</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">LabType</span></code>]]], <a class="reference internal" href="#cgnal.data.model.ml.Dataset" title="cgnal.data.model.ml.Dataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">cgnal.data.model.ml.Dataset</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">FeatType</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">LabType</span></code>]</p>
+<p>Collection of Sample objects to be used</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.IterableDataset.checkNames">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">checkNames</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#cgnal.data.model.ml.IterableDataset.checkNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.IterableDataset.createObject">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">createObject</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">FeatType</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">LabType</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cgnal.data.model.ml.Dataset" title="cgnal.data.model.ml.Dataset"><span class="pre">cgnal.data.model.ml.Dataset</span></a><span class="p"><span class="pre">[</span></span><span class="pre">FeatType</span><span class="p"><span class="pre">,</span> </span><span class="pre">LabType</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cgnal.data.model.ml.IterableDataset.createObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.IterableDataset.getFeaturesAs">
+<span class="sig-name descname"><span class="pre">getFeaturesAs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">typing_extensions.Literal[‘array’]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span></span></span><a class="headerlink" href="#cgnal.data.model.ml.IterableDataset.getFeaturesAs" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">getFeaturesAs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">typing_extensions.Literal[‘pandas’]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">getFeaturesAs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">typing_extensions.Literal[‘dict’]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">FeatType</span><span class="p"><span class="pre">]</span></span></span></span></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">getFeaturesAs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">typing_extensions.Literal[‘list’]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">FeatType</span><span class="p"><span class="pre">]</span></span></span></span></dt>
+<dd><p>Object of the specified type containing the feature space</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>type</strong> – type of return. Can be one of “pandas”, “dict”, “list” or “array</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>an object of the specified type containing the features</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.IterableDataset.getLabelsAs">
+<span class="sig-name descname"><span class="pre">getLabelsAs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">typing_extensions.Literal[‘array’]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span></span></span><a class="headerlink" href="#cgnal.data.model.ml.IterableDataset.getLabelsAs" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">getLabelsAs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">typing_extensions.Literal[‘pandas’]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">getLabelsAs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">typing_extensions.Literal[‘dict’]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">LabType</span><span class="p"><span class="pre">]</span></span></span></span></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">getLabelsAs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">typing_extensions.Literal[‘list’]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">LabType</span><span class="p"><span class="pre">]</span></span></span></span></dt>
+<dd><p>Object of the specified type containing the labels</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>type</strong> – type of return. Can be one of “pandas”, “dict”, “list” or “array</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>an object of the specified type containing the features</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array/dict/pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.IterableDataset.samples">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">samples</span></span><em class="property"><span class="pre">:</span> <span class="pre">Iterable[Union[cgnal.data.model.ml.Sample[FeatType,</span> <span class="pre">LabType],</span> <span class="pre">cgnal.data.model.ml.MultiFeatureSample[LabType]]]</span></em><a class="headerlink" href="#cgnal.data.model.ml.IterableDataset.samples" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.IterableDataset.union">
+<span class="sig-name descname"><span class="pre">union</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#cgnal.data.model.ml.Dataset" title="cgnal.data.model.ml.Dataset"><span class="pre">cgnal.data.model.ml.Dataset</span></a><span class="p"><span class="pre">[</span></span><span class="pre">FeatType</span><span class="p"><span class="pre">,</span> </span><span class="pre">LabType</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cgnal.data.model.ml.LazyDataset" title="cgnal.data.model.ml.LazyDataset"><span class="pre">cgnal.data.model.ml.LazyDataset</span></a></span></span><a class="headerlink" href="#cgnal.data.model.ml.IterableDataset.union" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.LazyDataset">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">cgnal.data.model.ml.</span></span><span class="sig-name descname"><span class="pre">LazyDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#cgnal.data.model.core.IterGenerator" title="cgnal.data.model.core.IterGenerator"><span class="pre">cgnal.data.model.core.IterGenerator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cgnal.data.model.ml.LazyDataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cgnal.data.model.core.LazyIterable" title="cgnal.data.model.core.LazyIterable"><code class="xref py py-class docutils literal notranslate"><span class="pre">cgnal.data.model.core.LazyIterable</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="#cgnal.data.model.ml.Sample" title="cgnal.data.model.ml.Sample"><code class="xref py py-class docutils literal notranslate"><span class="pre">cgnal.data.model.ml.Sample</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">FeatType</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">LabType</span></code>], <a class="reference internal" href="#cgnal.data.model.ml.MultiFeatureSample" title="cgnal.data.model.ml.MultiFeatureSample"><code class="xref py py-class docutils literal notranslate"><span class="pre">cgnal.data.model.ml.MultiFeatureSample</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">LabType</span></code>]]], <a class="reference internal" href="#cgnal.data.model.ml.IterableDataset" title="cgnal.data.model.ml.IterableDataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">cgnal.data.model.ml.IterableDataset</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.LazyDataset.rebalance">
+<span class="sig-name descname"><span class="pre">rebalance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prob</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">LabType</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cgnal.data.model.ml.LazyDataset" title="cgnal.data.model.ml.LazyDataset"><span class="pre">cgnal.data.model.ml.LazyDataset</span></a></span></span><a class="headerlink" href="#cgnal.data.model.ml.LazyDataset.rebalance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new LazyDataset instance with samples rebalanced according to probabilites given assigned to each value
+of the labels
+:param prob: dictionary with probabilities of inclusion in the new instance for each value of labels.</p>
+<blockquote>
+<div><p>If a label value is missing from dictionary keys, all samples with that label value will be excluded.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.LazyDataset.toCached">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">toCached</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cgnal.data.model.ml.Sample" title="cgnal.data.model.ml.Sample"><span class="pre">cgnal.data.model.ml.Sample</span></a><span class="p"><span class="pre">[</span></span><span class="pre">FeatType</span><span class="p"><span class="pre">,</span> </span><span class="pre">LabType</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><a class="reference internal" href="#cgnal.data.model.ml.MultiFeatureSample" title="cgnal.data.model.ml.MultiFeatureSample"><span class="pre">cgnal.data.model.ml.MultiFeatureSample</span></a><span class="p"><span class="pre">[</span></span><span class="pre">LabType</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cgnal.data.model.ml.CachedDataset" title="cgnal.data.model.ml.CachedDataset"><span class="pre">cgnal.data.model.ml.CachedDataset</span></a></span></span><a class="headerlink" href="#cgnal.data.model.ml.LazyDataset.toCached" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.LazyDataset.withLookback">
+<span class="sig-name descname"><span class="pre">withLookback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lookback</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cgnal.data.model.ml.LazyDataset" title="cgnal.data.model.ml.LazyDataset"><span class="pre">cgnal.data.model.ml.LazyDataset</span></a></span></span><a class="headerlink" href="#cgnal.data.model.ml.LazyDataset.withLookback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a LazyDataset with features that are an array of lookback lists of samples’ features.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>lookback</strong> – number of samples’ features to look at</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>LazyDataset with changed samples</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.MultiFeatureSample">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">cgnal.data.model.ml.</span></span><span class="sig-name descname"><span class="pre">MultiFeatureSample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">LabType</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cgnal.data.model.ml.MultiFeatureSample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cgnal.data.model.ml.Sample" title="cgnal.data.model.ml.Sample"><code class="xref py py-class docutils literal notranslate"><span class="pre">cgnal.data.model.ml.Sample</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code>], <code class="xref py py-obj docutils literal notranslate"><span class="pre">LabType</span></code>]</p>
+<p>Object representing a single sample of a training or test set</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>features</strong> – features of the sample</p></li>
+<li><p><strong>label</strong> – labels of the sample (optional)</p></li>
+<li><p><strong>name</strong> – id of the sample (optional)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.PandasDataset">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">cgnal.data.model.ml.</span></span><span class="sig-name descname"><span class="pre">PandasDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">,</span> </span><span class="pre">pandas.core.series.Series</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">,</span> </span><span class="pre">pandas.core.series.Series</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cgnal.data.model.ml.PandasDataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cgnal.data.model.ml.Dataset" title="cgnal.data.model.ml.Dataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">cgnal.data.model.ml.Dataset</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">FeatType</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">LabType</span></code>], <a class="reference internal" href="#cgnal.data.model.core.Serializable" title="cgnal.data.model.core.Serializable"><code class="xref py py-class docutils literal notranslate"><span class="pre">cgnal.data.model.core.Serializable</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.PandasDataset.createObject">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">createObject</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">,</span> </span><span class="pre">pandas.core.series.Series</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">,</span> </span><span class="pre">pandas.core.series.Series</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cgnal.data.model.ml.PandasDataset" title="cgnal.data.model.ml.PandasDataset"><span class="pre">cgnal.data.model.ml.PandasDataset</span></a></span></span><a class="headerlink" href="#cgnal.data.model.ml.PandasDataset.createObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.PandasDataset.dropna">
+<span class="sig-name descname"><span class="pre">dropna</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cgnal.data.model.ml.PandasDataset" title="cgnal.data.model.ml.PandasDataset"><span class="pre">cgnal.data.model.ml.PandasDataset</span></a></span></span><a class="headerlink" href="#cgnal.data.model.ml.PandasDataset.dropna" title="Permalink to this definition">¶</a></dt>
+<dd><p>Drop NAs from feature and labels</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>PandasDataset with features and labels without NAs</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.PandasDataset.from_sequence">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">from_sequence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datasets</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cgnal.data.model.ml.PandasDataset" title="cgnal.data.model.ml.PandasDataset"><span class="pre">cgnal.data.model.ml.PandasDataset</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cgnal.data.model.ml.PandasDataset.from_sequence" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.PandasDataset.getFeaturesAs">
+<span class="sig-name descname"><span class="pre">getFeaturesAs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">typing_extensions.Literal[‘array’]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span></span></span><a class="headerlink" href="#cgnal.data.model.ml.PandasDataset.getFeaturesAs" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">getFeaturesAs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">typing_extensions.Literal[‘pandas’]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">getFeaturesAs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">typing_extensions.Literal[‘dict’]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">FeatType</span><span class="p"><span class="pre">]</span></span></span></span></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">getFeaturesAs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">typing_extensions.Literal[‘list’]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">FeatType</span><span class="p"><span class="pre">]</span></span></span></span></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.PandasDataset.getLabelsAs">
+<span class="sig-name descname"><span class="pre">getLabelsAs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">typing_extensions.Literal[‘array’]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span></span></span><a class="headerlink" href="#cgnal.data.model.ml.PandasDataset.getLabelsAs" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">getLabelsAs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">typing_extensions.Literal[‘pandas’]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">getLabelsAs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">typing_extensions.Literal[‘dict’]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">LabType</span><span class="p"><span class="pre">]</span></span></span></span></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">getLabelsAs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">typing_extensions.Literal[‘list’]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">LabType</span><span class="p"><span class="pre">]</span></span></span></span></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.PandasDataset.index">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">index</span></span><em class="property"><span class="pre">:</span> <span class="pre">pandas.core.indexes.base.Index</span></em><a class="headerlink" href="#cgnal.data.model.ml.PandasDataset.index" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.PandasDataset.intersection">
+<span class="sig-name descname"><span class="pre">intersection</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cgnal.data.model.ml.PandasDataset" title="cgnal.data.model.ml.PandasDataset"><span class="pre">cgnal.data.model.ml.PandasDataset</span></a></span></span><a class="headerlink" href="#cgnal.data.model.ml.PandasDataset.intersection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Intersect feature and labels indices</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>PandasDataset with features and labels with intersected indices</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.PandasDataset.load">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">os.PathLike</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cgnal.data.model.ml.PandasDataset.load" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.PandasDataset.loc">
+<span class="sig-name descname"><span class="pre">loc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cgnal.data.model.ml.PandasDataset" title="cgnal.data.model.ml.PandasDataset"><span class="pre">cgnal.data.model.ml.PandasDataset</span></a></span></span><a class="headerlink" href="#cgnal.data.model.ml.PandasDataset.loc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find given indices in features and labels</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>idx</strong> – input indices</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>PandasDataset with features and labels filtered on input indices</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.PandasDataset.read">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">os.PathLike</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features_cols</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'features'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels_cols</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'labels'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cgnal.data.model.ml.PandasDataset" title="cgnal.data.model.ml.PandasDataset"><span class="pre">PandasDataset</span></a></span></span><a class="headerlink" href="#cgnal.data.model.ml.PandasDataset.read" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.PandasDataset.samples">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">samples</span></span><em class="property"><span class="pre">:</span> <span class="pre">Iterator[cgnal.data.model.ml.Sample[Dict[str,</span> <span class="pre">Any],</span> <span class="pre">Any]]</span></em><a class="headerlink" href="#cgnal.data.model.ml.PandasDataset.samples" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.PandasDataset.take">
+<span class="sig-name descname"><span class="pre">take</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cgnal.data.model.ml.PandasDataset" title="cgnal.data.model.ml.PandasDataset"><span class="pre">cgnal.data.model.ml.PandasDataset</span></a></span></span><a class="headerlink" href="#cgnal.data.model.ml.PandasDataset.take" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.PandasDataset.union">
+<span class="sig-name descname"><span class="pre">union</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#cgnal.data.model.ml.Dataset" title="cgnal.data.model.ml.Dataset"><span class="pre">cgnal.data.model.ml.Dataset</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cgnal.data.model.ml.Dataset" title="cgnal.data.model.ml.Dataset"><span class="pre">cgnal.data.model.ml.Dataset</span></a></span></span><a class="headerlink" href="#cgnal.data.model.ml.PandasDataset.union" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.PandasDataset.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">os.PathLike</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features_cols</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'features'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels_cols</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'labels'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#cgnal.data.model.ml.PandasDataset.write" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.PandasTimeIndexedDataset">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">cgnal.data.model.ml.</span></span><span class="sig-name descname"><span class="pre">PandasTimeIndexedDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">,</span> </span><span class="pre">pandas.core.series.Series</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">,</span> </span><span class="pre">pandas.core.series.Series</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cgnal.data.model.ml.PandasTimeIndexedDataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cgnal.data.model.ml.PandasDataset" title="cgnal.data.model.ml.PandasDataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">cgnal.data.model.ml.PandasDataset</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.PandasTimeIndexedDataset.createObject">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">createObject</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">,</span> </span><span class="pre">pandas.core.series.Series</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">,</span> </span><span class="pre">pandas.core.series.Series</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cgnal.data.model.ml.PandasTimeIndexedDataset" title="cgnal.data.model.ml.PandasTimeIndexedDataset"><span class="pre">cgnal.data.model.ml.PandasTimeIndexedDataset</span></a></span></span><a class="headerlink" href="#cgnal.data.model.ml.PandasTimeIndexedDataset.createObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.Sample">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">cgnal.data.model.ml.</span></span><span class="sig-name descname"><span class="pre">Sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">FeatType</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">LabType</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cgnal.data.model.ml.Sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cgnal.data.model.core.PickleSerialization" title="cgnal.data.model.core.PickleSerialization"><code class="xref py py-class docutils literal notranslate"><span class="pre">cgnal.data.model.core.PickleSerialization</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">FeatType</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">LabType</span></code>]</p>
+<p>Object representing a single sample of a training or test set</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>features</strong> – features of the sample</p></li>
+<li><p><strong>label</strong> – labels of the sample (optional)</p></li>
+<li><p><strong>name</strong> – id of the sample (optional)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cgnal.data.model.ml.features_and_labels_to_dataset">
+<span class="sig-prename descclassname"><span class="pre">cgnal.data.model.ml.</span></span><span class="sig-name descname"><span class="pre">features_and_labels_to_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">,</span> </span><span class="pre">pandas.core.series.Series</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">,</span> </span><span class="pre">pandas.core.series.Series</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cgnal.data.model.ml.CachedDataset" title="cgnal.data.model.ml.CachedDataset"><span class="pre">cgnal.data.model.ml.CachedDataset</span></a></span></span><a class="headerlink" href="#cgnal.data.model.ml.features_and_labels_to_dataset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-cgnal.data.model.text">
+<span id="cgnal-data-model-text-module"></span><h2>cgnal.data.model.text module<a class="headerlink" href="#module-cgnal.data.model.text" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="cgnal.data.model.text.CachedDocuments">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">cgnal.data.model.text.</span></span><span class="sig-name descname"><span class="pre">CachedDocuments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cgnal.data.model.text.CachedDocuments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cgnal.data.model.core.CachedIterable" title="cgnal.data.model.core.CachedIterable"><code class="xref py py-class docutils literal notranslate"><span class="pre">cgnal.data.model.core.CachedIterable</span></code></a>, <a class="reference internal" href="#cgnal.data.model.text.Documents" title="cgnal.data.model.text.Documents"><code class="xref py py-class docutils literal notranslate"><span class="pre">cgnal.data.model.text.Documents</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.text.CachedDocuments.to_df">
+<span class="sig-name descname"><span class="pre">to_df</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fields</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="headerlink" href="#cgnal.data.model.text.CachedDocuments.to_df" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cgnal.data.model.text.Document">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">cgnal.data.model.text.</span></span><span class="sig-name descname"><span class="pre">Document</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uuid</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">collections.abc.Hashable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">collections.abc.Hashable</span><span class="p"><span class="pre">,</span> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cgnal.data.model.text.Document" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Document representation as couple of uuid and dictionary of information</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>uuid</strong> – document id</p></li>
+<li><p><strong>data</strong> – document data as a dictionary</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.text.Document.addProperty">
+<span class="sig-name descname"><span class="pre">addProperty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cgnal.data.model.text.Document" title="cgnal.data.model.text.Document"><span class="pre">cgnal.data.model.text.Document</span></a></span></span><a class="headerlink" href="#cgnal.data.model.text.Document.addProperty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate new Document instance with given new data element</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> – key of the data element to add</p></li>
+<li><p><strong>value</strong> – value of the data element to add</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Document with new given data element</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cgnal.data.model.text.Document.author">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">author</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional[str]</span></em><a class="headerlink" href="#cgnal.data.model.text.Document.author" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve ‘author’ field</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>author data field value</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.text.Document.getOrThrow">
+<span class="sig-name descname"><span class="pre">getOrThrow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">collections.abc.Hashable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="headerlink" href="#cgnal.data.model.text.Document.getOrThrow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve value associated to given key or return default value</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> – key to retrieve</p></li>
+<li><p><strong>default</strong> – default value to return</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>retrieve element</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.text.Document.items">
+<span class="sig-name descname"><span class="pre">items</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">collections.abc.Hashable</span><span class="p"><span class="pre">,</span> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cgnal.data.model.text.Document.items" title="Permalink to this definition">¶</a></dt>
+<dd><p>Yield data items</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>iterator with tuples of data properties names and values</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cgnal.data.model.text.Document.language">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">language</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional[str]</span></em><a class="headerlink" href="#cgnal.data.model.text.Document.language" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve ‘language’ field</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>language data field value</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cgnal.data.model.text.Document.properties">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">properties</span></span><em class="property"><span class="pre">:</span> <span class="pre">Iterator[collections.abc.Hashable]</span></em><a class="headerlink" href="#cgnal.data.model.text.Document.properties" title="Permalink to this definition">¶</a></dt>
+<dd><p>Yield data properties names</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>iterator with data properties names</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.text.Document.removeProperty">
+<span class="sig-name descname"><span class="pre">removeProperty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">collections.abc.Hashable</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cgnal.data.model.text.Document" title="cgnal.data.model.text.Document"><span class="pre">cgnal.data.model.text.Document</span></a></span></span><a class="headerlink" href="#cgnal.data.model.text.Document.removeProperty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate new Document instance without given data element</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>key</strong> – key of data element to remove</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Document without given data element</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.text.Document.setRandomUUID">
+<span class="sig-name descname"><span class="pre">setRandomUUID</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cgnal.data.model.text.Document" title="cgnal.data.model.text.Document"><span class="pre">cgnal.data.model.text.Document</span></a></span></span><a class="headerlink" href="#cgnal.data.model.text.Document.setRandomUUID" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate new document instance with the same data as the current one but with random uuid</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Document instance with the same data as the current one but with random uuid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cgnal.data.model.text.Document.text">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">text</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional[str]</span></em><a class="headerlink" href="#cgnal.data.model.text.Document.text" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve ‘text’ field</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>text data field value</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cgnal.data.model.text.Documents">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">cgnal.data.model.text.</span></span><span class="sig-name descname"><span class="pre">Documents</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cgnal.data.model.text.Documents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cgnal.data.model.core.Iterable" title="cgnal.data.model.core.Iterable"><code class="xref py py-class docutils literal notranslate"><span class="pre">cgnal.data.model.core.Iterable</span></code></a>[<a class="reference internal" href="#cgnal.data.model.text.Document" title="cgnal.data.model.text.Document"><code class="xref py py-class docutils literal notranslate"><span class="pre">cgnal.data.model.text.Document</span></code></a>]</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="cgnal.data.model.text.Documents.documents">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">documents</span></span><em class="property"><span class="pre">:</span> <span class="pre">Iterable[cgnal.data.model.text.Document]</span></em><a class="headerlink" href="#cgnal.data.model.text.Documents.documents" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cgnal.data.model.text.LazyDocuments">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">cgnal.data.model.text.</span></span><span class="sig-name descname"><span class="pre">LazyDocuments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#cgnal.data.model.core.IterGenerator" title="cgnal.data.model.core.IterGenerator"><span class="pre">cgnal.data.model.core.IterGenerator</span></a><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cgnal.data.model.text.LazyDocuments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cgnal.data.model.core.LazyIterable" title="cgnal.data.model.core.LazyIterable"><code class="xref py py-class docutils literal notranslate"><span class="pre">cgnal.data.model.core.LazyIterable</span></code></a>, <a class="reference internal" href="#cgnal.data.model.text.Documents" title="cgnal.data.model.text.Documents"><code class="xref py py-class docutils literal notranslate"><span class="pre">cgnal.data.model.text.Documents</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cgnal.data.model.text.LazyDocuments.toCached">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">toCached</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cgnal.data.model.text.Document" title="cgnal.data.model.text.Document"><span class="pre">cgnal.data.model.text.Document</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cgnal.data.model.text.CachedDocuments" title="cgnal.data.model.text.CachedDocuments"><span class="pre">cgnal.data.model.text.CachedDocuments</span></a></span></span><a class="headerlink" href="#cgnal.data.model.text.LazyDocuments.toCached" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cgnal.data.model.text.generate_random_uuid">
+<span class="sig-prename descclassname"><span class="pre">cgnal.data.model.text.</span></span><span class="sig-name descname"><span class="pre">generate_random_uuid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bytes</span></span></span><a class="headerlink" href="#cgnal.data.model.text.generate_random_uuid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-cgnal.data.model">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-cgnal.data.model" title="Permalink to this headline">¶</a></h2>
+<p>Data model module</p>
+<p>In this module are defined the data types used in CGnal framework</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="cgnal.logging.html" class="btn btn-neutral float-right" title="cgnal.logging package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="cgnal.data.layer.pandas.html" class="btn btn-neutral float-left" title="cgnal.data.layer.pandas package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, CGnal S.r.l..
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

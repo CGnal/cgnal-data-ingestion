@@ -5,3 +5,6 @@ coverage==5.3
 ipykernel==5.3.4
 unittest-xml-reporting>=3.0
 xlrd>=1.2.0
+Sphinx>=4.1.2
+sphinx-rtd-theme>=0.5.2
+recommonmark>=0.7.1
