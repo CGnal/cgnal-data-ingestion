@@ -2,7 +2,7 @@ import os
 import pandas as pd  # type: ignore
 from glob import glob
 
-from typing import List
+from typing import List, Optional
 from cgnal import PathLike
 from cgnal.utils.fs import create_dir_if_not_exists
 from cgnal.data.layer import DatabaseABC, TableABC
@@ -59,7 +59,6 @@ class Database(WithLogging, DatabaseABC):
             return Table(self, table_name)
 
 
-# TODO: this class does not implement to_df abstract method from TableABC
 class Table(WithLogging, TableABC):
 
     def __init__(self, db: Database, table_name: str) -> None:
@@ -85,6 +84,14 @@ class Table(WithLogging, TableABC):
         """
         return os.path.join(self.db.name, '%s.p' % self.name)
 
+    def to_df(self, query: Optional[str] = None) -> pd.DataFrame:
+        """
+        Read pickle
+
+        :return: pd.DataFrame or pd.Series read from pickle
+        """
+        return pd.read_pickle(self.filename).query(query)
+
     @property
     def data(self) -> pd.DataFrame:
         """
@@ -108,7 +115,7 @@ class Table(WithLogging, TableABC):
         #   - KeyError if it tries to read a non-pickle file
         #   - IOError if the file does not exist
         try:
-            _in = self.data if not overwrite else None
+            _in = self.to_df() if not overwrite else None
         except (KeyError, IOError):
             _in = None
 
