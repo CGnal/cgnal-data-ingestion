@@ -139,7 +139,7 @@ class TestDocumentArchivers(TestCase):
 
         self.assertEqual(len(list(docs)), 20)
 
-        self.assertEqual(docs[0], docs.documents[0])
+        self.assertEqual(docs[0], docs.items[0])
 
         doc = docs[0]
 
