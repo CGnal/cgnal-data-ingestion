@@ -1,13 +1,14 @@
 import os
+import unittest
 
 import numpy as np
 import pandas as pd
-import unittest
 
-from cgnal.tests.core import TestCase, logTest
 from cgnal.data.model.ml import LazyDataset, IterGenerator, MultiFeatureSample, Sample, PandasDataset, \
-    PandasTimeIndexedDataset
+    PandasTimeIndexedDataset, CachedDataset
+from cgnal.tests.core import TestCase, logTest
 from data import TMP_FOLDER
+
 
 class LazyDatasetTests(TestCase):
 
@@ -28,12 +29,12 @@ class LazyDatasetTests(TestCase):
                 if not any([np.isnan(x).any() for x in sample.features]):
                     yield sample
 
-        X1 = np.array([[[102., 103.],[104., 105.],[106., 107.]], [[104., 105.],[106., 107.],[108., 109.]],
-                       [[106., 107.],[108., 109.],[110., 111.]], [[108., 109.],[110., 111.],[112., 113.]]])
-        y1 = np.array([[[1.],[2.],[3.]], [[2.],[3.],[4.]], [[3.],[4.],[5.]], [[4.],[5.],[6.]]])
+        X1 = np.array([[[102., 103.], [104., 105.], [106., 107.]], [[104., 105.], [106., 107.], [108., 109.]],
+                       [[106., 107.], [108., 109.], [110., 111.]], [[108., 109.], [110., 111.], [112., 113.]]])
+        y1 = np.array([[[1.], [2.], [3.]], [[2.], [3.], [4.]], [[3.], [4.], [5.]], [[4.], [5.], [6.]]])
         lab1 = np.array([4., 5., 6., 7.])
-        X2 = np.array([[[110., 111.],[112., 113.],[114., 115.]], [[112., 113.],[114., 115.],[116., 117.]]])
-        y2 = np.array([[[5.],[6.],[7.]], [[6.],[7.],[8.]]])
+        X2 = np.array([[[110., 111.], [112., 113.], [114., 115.]], [[112., 113.], [114., 115.], [116., 117.]]])
+        y2 = np.array([[[5.], [6.], [7.]], [[6.], [7.], [8.]]])
         lab2 = np.array([8., 9.])
 
         lookback = 3
@@ -43,8 +44,8 @@ class LazyDatasetTests(TestCase):
         lookbackDat = lazyDat.withLookback(lookback)
         batch_gen = lookbackDat.batch(batch_size)
 
-        batch1=next(batch_gen)
-        batch2=next(batch_gen)
+        batch1: CachedDataset = next(batch_gen)
+        batch2: CachedDataset = next(batch_gen)
 
         tmp1 = batch1.getFeaturesAs("array")
         temp1X = np.array(list(map(lambda x: np.stack(x), tmp1[:, :, 0])))
@@ -59,12 +60,12 @@ class LazyDatasetTests(TestCase):
         tmp2lab = batch2.getLabelsAs("array")
 
         res = res + [np.array_equal(temp2X, X2), np.array_equal(temp2y, y2), np.array_equal(tmp2lab, lab2)]
-        
+
         self.assertTrue(all(res))
 
     @logTest
     def test_withLookback_ArrayFeatureSample(self):
-        
+
         samples = [Sample(features=np.array([100, 101]), label=1),
                    Sample(features=np.array([102, 103]), label=2),
                    Sample(features=np.array([104, 105]), label=3),
@@ -74,17 +75,17 @@ class LazyDatasetTests(TestCase):
                    Sample(features=np.array([112, 113]), label=7),
                    Sample(features=np.array([114, 115]), label=8),
                    Sample(features=np.array([116, 117]), label=9)]
-        
+
         def samples_gen():
             for sample in samples:
                 if not any([np.isnan(x).any() for x in sample.features]):
                     yield sample
 
-        X1 = np.array([[[100, 101],[102, 103],[104, 105]], [[102, 103],[104, 105],[106, 107]],
-                       [[104, 105],[106, 107],[108, 109]], [[106, 107],[108, 109],[110, 111]]])
+        X1 = np.array([[[100, 101], [102, 103], [104, 105]], [[102, 103], [104, 105], [106, 107]],
+                       [[104, 105], [106, 107], [108, 109]], [[106, 107], [108, 109], [110, 111]]])
         lab1 = np.array([3, 4, 5, 6])
-        X2 = np.array([[[108, 109],[110, 111],[112, 113]], [[110, 111], [112, 113],[114, 115]],
-                       [[112, 113],[114, 115],[116, 117]]])
+        X2 = np.array([[[108, 109], [110, 111], [112, 113]], [[110, 111], [112, 113], [114, 115]],
+                       [[112, 113], [114, 115], [116, 117]]])
         lab2 = np.array([7, 8, 9])
 
         lookback = 3
@@ -94,8 +95,8 @@ class LazyDatasetTests(TestCase):
         lookbackDat = lazyDat.withLookback(lookback)
         batch_gen = lookbackDat.batch(batch_size)
 
-        batch1 = next(batch_gen)
-        batch2 = next(batch_gen)
+        batch1: CachedDataset = next(batch_gen)
+        batch2: CachedDataset = next(batch_gen)
 
         tmp1 = batch1.getFeaturesAs("array")
         tmp1lab = batch1.getLabelsAs("array")
@@ -141,8 +142,8 @@ class LazyDatasetTests(TestCase):
         lookbackDat = lazyDat.withLookback(lookback)
         batch_gen = lookbackDat.batch(batch_size)
 
-        batch1 = next(batch_gen)
-        batch2 = next(batch_gen)
+        batch1: CachedDataset = next(batch_gen)
+        batch2: CachedDataset = next(batch_gen)
 
         tmp1 = batch1.getFeaturesAs("array")
         tmp1lab = batch1.getLabelsAs("array")
@@ -158,13 +159,11 @@ class LazyDatasetTests(TestCase):
 
 
 class PandasDatasetTests(TestCase):
-
     dataset = PandasDataset(features=pd.concat([pd.Series([1, np.nan, 2, 3], name="feat1"),
                                                 pd.Series([1, 2, 3, 4], name="feat2")], axis=1))
 
     @logTest
     def test_dropna_none_labels(self):
-
         res = pd.concat([pd.Series([1, 2, 3], name="feat1"), pd.Series([1, 3, 4], name="feat2")], axis=1)
 
         self.assertTrue((self.dataset.dropna(subset=["feat1"]).features.reset_index(drop=True) == res).all().all())
@@ -196,9 +195,45 @@ class PandasDatasetTests(TestCase):
 
         self.assertTrue((self.dataset.features.fillna("NaN") == newDataset.features.fillna("NaN")).all().all())
 
+    @logTest
+    def test_creation_from_samples(self):
+        samples = [Sample(features=[100, 101], label=1, name=1),
+                   Sample(features=[102, 103], label=2, name=2),
+                   Sample(features=[104, 105], label=1, name=3),
+                   Sample(features=[106, 107], label=2, name=4),
+                   Sample(features=[108, 109], label=2, name=5),
+                   Sample(features=[110, 111], label=2, name=6),
+                   Sample(features=[112, 113], label=1, name=7),
+                   Sample(features=[114, 115], label=2, name=8),
+                   Sample(features=[116, 117], label=2, name=9)]
+
+        lazyDataset = CachedDataset(samples).filter(lambda x: x.label <= 5)
+
+        assert isinstance(lazyDataset, LazyDataset)
+
+        for format in ["pandas", "array", "dict"]:
+
+            features1 = lazyDataset.getFeaturesAs(format)
+            labels1 = lazyDataset.getLabelsAs(format)
+
+            cached: CachedDataset = lazyDataset.asCached
+
+            features2 = cached.getFeaturesAs(format)
+            labels2 = cached.getLabelsAs(format)
+
+            self.assertEqual(features1, features2)
+            self.assertEqual(labels1, labels2)
+
+            pandasDataset = cached.asPandasDataset
+
+            features3 = pandasDataset.getFeaturesAs(format)
+            labels3 = pandasDataset.getLabelsAs(format)
+
+            self.assertEqual(features1, features3)
+            self.assertEqual(labels1, labels3)
+
 
 class PandasTimeIndexedDatasetTests(TestCase):
-
     dates = pd.date_range("2010-01-01", "2010-01-04")
 
     dateStr = [str(x) for x in dates]
@@ -209,11 +244,9 @@ class PandasTimeIndexedDatasetTests(TestCase):
             pd.Series([1, 2, 3, 4], index=dateStr, name="feat2")
         ], axis=1))
 
-
     @logTest
     def test_time_index(self):
-
-        #duck-typing check
+        # duck-typing check
         days = [x.day for x in self.dataset.features.index]
 
         self.assertTrue(set(days), set(range(4)))
@@ -228,7 +261,6 @@ class PandasTimeIndexedDatasetTests(TestCase):
 
         self.assertTrue(isinstance(newDataset, PandasTimeIndexedDataset))
         self.assertTrue((self.dataset.features.fillna("NaN") == newDataset.features.fillna("NaN")).all().all())
-
 
 
 if __name__ == "__main__":

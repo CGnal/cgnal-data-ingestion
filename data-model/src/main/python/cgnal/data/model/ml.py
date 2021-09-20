@@ -1,21 +1,28 @@
+try:
+    from itertools import izip as zip  # type: ignore
+except ImportError:  # will be 3.x series
+    pass
+
 import sys
-import pickle
+from abc import ABC
+from typing import Union, Sequence, Optional, TypeVar, Generic, List, Tuple, Any, Type, Dict, \
+    Iterator, overload
+
 import numpy as np  # type: ignore
 import pandas as pd  # type: ignore
-from abc import ABC, abstractmethod
-from typing import Union, Sequence, Optional, TypeVar, Generic, List, Tuple, Any, Iterable as IterableType, Dict, \
-    Iterator, overload
+from pandas import DataFrame, Series
 from typing_extensions import Literal
+
 from cgnal import T, PathLike
-from cgnal.data.model.core import Iterable, LazyIterable, CachedIterable, IterGenerator, PickleSerialization, \
+from cgnal.data.model.core import BaseIterable, LazyIterable, CachedIterable, IterGenerator, PickleSerialization, \
     Serializable
+from cgnal.utils.decorators import lazyproperty as lazy
 from cgnal.utils.pandas import loc
 
 if sys.version_info[0] < 3:
     from itertools import izip as zip, islice
 else:
     from itertools import islice
-
 
 FeatType = TypeVar('FeatType', List[Any], Tuple[Any], np.ndarray, Dict[str, Any])
 LabType = TypeVar('LabType', int, float)
@@ -26,7 +33,6 @@ AllowedTypes = Literal['array', 'pandas', 'dict', 'list']
 
 def features_and_labels_to_dataset(X: Union[pd.DataFrame, pd.Series],
                                    y: Optional[Union[pd.DataFrame, pd.Series]] = None) -> 'CachedDataset':
-
     if y is not None:
         df = pd.concat({"features": X, "labels": y}, axis=1)
     else:
@@ -75,94 +81,27 @@ class MultiFeatureSample(Sample[List[np.ndarray], LabType]):
         :param features: features of the sample
         :param label: labels of the sample (optional)
         :param name: id of the sample (optional)
+
+        :type features: list of lists
+        :type label: float, int or None
+        :type name: object
         """
         self.__check_features__(features)
         super(MultiFeatureSample, self).__init__(features, label, name)
 
 
-Samples = Union[Sample[FeatType, LabType], MultiFeatureSample[LabType]]
+SampleTypes = Union[Sample[FeatType, LabType], MultiFeatureSample[LabType]]
 
 
-# TODO: wouldn't it be better that this class inherits from DillSerializable or PickleSerializable instead of
-#  implementing its own write/read methods?
-class Dataset(ABC, Generic[FeatType, LabType]):
+class Dataset(BaseIterable[SampleTypes], Generic[FeatType, LabType], ABC):
 
     @property
-    @abstractmethod
-    def samples(self) -> IterableType[Samples]: ...
-
-    __default_type__: AllowedTypes = 'pandas'
+    def __lazyType__(self) -> Type[LazyIterable]:
+        return LazyDataset
 
     @property
-    def default_type(self) -> AllowedTypes:
-        return self.__default_type__
-
-    @default_type.setter
-    def default_type(self, value: AllowedTypes) -> None:
-        self.__default_type__ = value
-
-    @property
-    def features(self) -> FeaturesType:
-        return self.getFeaturesAs(self.default_type)
-
-    @property
-    def labels(self) -> LabelsType:
-        return self.getLabelsAs(self.default_type)
-
-    @overload
-    def getFeaturesAs(self, type: Literal['array']) -> np.ndarray: ...
-
-    @overload
-    def getFeaturesAs(self, type: Literal['pandas']) -> pd.DataFrame: ...
-
-    @overload
-    def getFeaturesAs(self, type: Literal['dict']) -> Dict[str, FeatType]: ...
-
-    @overload
-    def getFeaturesAs(self, type: Literal['list']) -> List[FeatType]: ...
-
-    @abstractmethod
-    def getFeaturesAs(self, type: AllowedTypes = 'array') -> FeaturesType: ...
-
-    @overload
-    def getLabelsAs(self, type: Literal['array']) -> np.ndarray: ...
-
-    @overload
-    def getLabelsAs(self, type: Literal['pandas']) -> pd.DataFrame: ...
-
-    @overload
-    def getLabelsAs(self, type: Literal['dict']) -> Dict[str, LabType]: ...
-
-    @overload
-    def getLabelsAs(self, type: Literal['list']) -> List[LabType]: ...
-
-    @abstractmethod
-    def getLabelsAs(self, type: AllowedTypes = 'array') -> LabelsType: ...
-
-    @abstractmethod
-    def union(self, other: 'Dataset') -> 'Dataset': ...
-
-    # TODO: shouldn't this method be abstract other than static?
-    @staticmethod
-    def createObject(features: FeatType, labels: LabType) -> 'Dataset': ...
-
-    def write(self, filename: str) -> None:
-        # TODO: check open mode: mypy suggests that using 'w' creates a fid of type IO[str] while pickle.dump requires
-        #  a IO[butes] second argument. This issue would be solved using 'wb' open mode.
-        with open(filename, 'w') as fid:
-            pickle.dump(self.samples, fid)
-
-
-# TODO: Shouldn't this class be an ABC? It does not implement Iterable's items, take, cached, kfold and filter
-#  abstract methods. Should this class really inherit from Iterable at all?
-class IterableDataset(Iterable[Samples],  Dataset[FeatType, LabType]):
-    """
-    Collection of Sample objects to be used
-    """
-
-    @property
-    def samples(self) -> IterableType[Samples]:
-        return self.items
+    def __cachedType__(self) -> Type[CachedIterable]:
+        return CachedDataset
 
     @staticmethod
     def checkNames(x: Optional[str]) -> str:
@@ -171,34 +110,23 @@ class IterableDataset(Iterable[Samples],  Dataset[FeatType, LabType]):
         else:
             return x
 
-    # TODO: is it correct that a method of a parent class returns an instance of one of its descendants?
-    #  Wouldn't it be better for this method to be abstract and for this class to be an ABC?
-    def union(self, other: Dataset[FeatType, LabType]) -> 'LazyDataset':
-
-        if not isinstance(other, Dataset):
-            raise ValueError(f"Union can only be done between Datasets. Found {type(other)}")
-
-        def __generator__():
-            for sample in self.samples:
-                yield sample
-            for sample in other.samples:
-                yield sample
-
-        return LazyDataset(IterGenerator(__generator__))
+    @overload
+    def getFeaturesAs(self, type: Literal['array']) -> np.ndarray:
+        ...
 
     @overload
-    def getFeaturesAs(self, type: Literal['array']) -> np.ndarray: ...
+    def getFeaturesAs(self, type: Literal['pandas']) -> pd.DataFrame:
+        ...
 
     @overload
-    def getFeaturesAs(self, type: Literal['pandas']) -> pd.DataFrame: ...
+    def getFeaturesAs(self, type: Literal['dict']) -> Dict[str, FeatType]:
+        ...
 
     @overload
-    def getFeaturesAs(self, type: Literal['dict']) -> Dict[str, FeatType]: ...
+    def getFeaturesAs(self, type: Literal['list']) -> List[FeatType]:
+        ...
 
-    @overload
-    def getFeaturesAs(self, type: Literal['list']) -> List[FeatType]: ...
-
-    def getFeaturesAs(self, type: str = 'array') -> FeaturesType:
+    def getFeaturesAs(self, type: AllowedTypes = 'array') -> FeaturesType:
         """
         Object of the specified type containing the feature space
 
@@ -207,11 +135,11 @@ class IterableDataset(Iterable[Samples],  Dataset[FeatType, LabType]):
         """
 
         if type == 'array':
-            return np.array([sample.features for sample in self.samples])
+            return np.array([sample.features for sample in self])
         elif type == 'dict':
-            return {self.checkNames(sample.name): sample.features for sample in self.samples}
+            return {self.checkNames(sample.name): sample.features for sample in self}
         elif type == 'list':
-            return [sample.features for sample in self.samples]
+            return [sample.features for sample in self]
         elif type == 'pandas':
             try:
                 features: Union[Dict[str, FeatType], List[FeatType]] = self.getFeaturesAs('dict')
@@ -230,18 +158,22 @@ class IterableDataset(Iterable[Samples],  Dataset[FeatType, LabType]):
             raise ValueError(f'Type {type} not allowed')
 
     @overload
-    def getLabelsAs(self, type: Literal['array']) -> np.ndarray: ...
+    def getLabelsAs(self, type: Literal['array']) -> np.ndarray:
+        ...
 
     @overload
-    def getLabelsAs(self, type: Literal['pandas']) -> pd.DataFrame: ...
+    def getLabelsAs(self, type: Literal['pandas']) -> pd.DataFrame:
+        ...
 
     @overload
-    def getLabelsAs(self, type: Literal['dict']) -> Dict[str, LabType]: ...
+    def getLabelsAs(self, type: Literal['dict']) -> Dict[str, LabType]:
+        ...
 
     @overload
-    def getLabelsAs(self, type: Literal['list']) -> List[LabType]: ...
+    def getLabelsAs(self, type: Literal['list']) -> List[LabType]:
+        ...
 
-    def getLabelsAs(self, type: str = 'array') -> LabelsType:
+    def getLabelsAs(self, type: AllowedTypes = 'array') -> LabelsType:
         """
         Object of the specified type containing the labels
 
@@ -250,11 +182,11 @@ class IterableDataset(Iterable[Samples],  Dataset[FeatType, LabType]):
         :rtype: np.array/dict/pd.DataFrame
         """
         if type == 'array':
-            return np.array([sample.label for sample in self.samples])
+            return np.array([sample.label for sample in self])
         elif type == 'dict':
-            return {self.checkNames(sample.name): sample.label for sample in self.samples}
+            return {self.checkNames(sample.name): sample.label for sample in self}
         elif type == 'list':
-            return [sample.label for sample in self.samples]
+            return [sample.label for sample in self]
         elif type == 'pandas':
             try:
                 labels: Union[List[LabType], Dict[str, LabType]] = self.getLabelsAs('dict')
@@ -272,13 +204,21 @@ class IterableDataset(Iterable[Samples],  Dataset[FeatType, LabType]):
         else:
             raise ValueError('Type %s not allowed' % type)
 
-    # TODO: Shouldn't this method be implemented or at least made abstract?
-    @staticmethod
-    def createObject(features: FeatType, labels: LabType) -> Dataset[FeatType, LabType]:
-        raise NotImplementedError
+    def union(self, other: 'Dataset') -> 'Dataset':
+
+        if not isinstance(other, Dataset):
+            raise ValueError("Union can only be done between Datasets. Found %s" % str(type(other)))
+
+        def __generator__():
+            for sample in self:
+                yield sample
+            for sample in other:
+                yield sample
+
+        return LazyDataset(IterGenerator(__generator__))
 
 
-class CachedDataset(CachedIterable[Samples], IterableDataset):
+class CachedDataset(CachedIterable[SampleTypes], Dataset):
 
     def to_df(self) -> pd.DataFrame:
         """
@@ -290,33 +230,12 @@ class CachedDataset(CachedIterable[Samples], IterableDataset):
             "features": self.getFeaturesAs('pandas'),
             "labels": self.getLabelsAs('pandas')}, axis=1)
 
+    @property
+    def asPandasDataset(self) -> 'PandasDataset':
+        return PandasDataset(self.getFeaturesAs("pandas"), self.getLabelsAs("pandas"))
 
-class LazyDataset(LazyIterable[Samples], IterableDataset):
 
-    @staticmethod
-    def toCached(items: IterableType[Samples]) -> CachedDataset:
-        return CachedDataset(items)
-
-    def rebalance(self, prob: Dict[LabType, float]) -> 'LazyDataset':
-        """
-        Create a new LazyDataset instance with samples rebalanced according to probabilites given assigned to each value
-        of the labels
-        :param prob: dictionary with probabilities of inclusion in the new instance for each value of labels.
-            If a label value is missing from dictionary keys, all samples with that label value will be excluded.
-        :return:
-        """
-        def __generator__():
-            for sample in self.samples:
-                # TODO why this convoluted form? Wouldn't it be neater to use the commented version?
-                p = prob.get(sample.label, 1)
-                _p = np.random.uniform()
-                if _p > p:
-                    continue
-                yield sample
-                # if np.random.uniform() <= prob.get(sample.label, 1):
-                #     yield sample
-
-        return LazyDataset(IterGenerator(__generator__))
+class LazyDataset(LazyIterable[Sample], Dataset):
 
     def withLookback(self, lookback: int) -> 'LazyDataset':
         """
@@ -327,25 +246,17 @@ class LazyDataset(LazyIterable[Samples], IterableDataset):
         :return: LazyDataset with changed samples
         """
 
-        def __transformed_sample_generator__():
-            slices = [islice(self.samples, n, None) for n in range(lookback)]
+        def __transformed_sample_generator__() -> Iterator[Sample]:
+            slices = [islice(self, n, None) for n in range(lookback)]
             for ss in zip(*slices):
                 yield Sample(features=np.array([s.features for s in ss]), label=ss[-1].label)
+
         return LazyDataset(IterGenerator(__transformed_sample_generator__))
 
 
-# TODO: what is the point of making this class inherit from Serializable and implementing read, write and load methods
-#  instead of inheriting from DillSerializable or PickleSerializable and using theit read/write methods?
+class PandasDataset(Dataset, Serializable):
 
-# TODO: this class' properties 'features' and 'labels' do not necessarily return a pd.DataFrame but all this class'
-#  methods that call them actually assume they are. This must be addressed
-class PandasDataset(Dataset[FeatType, LabType], Serializable):
-
-    __default_type__: AllowedTypes = 'pandas'
-
-    def __init__(self,
-                 features: Union[pd.DataFrame, pd.Series],
-                 labels: Optional[Union[pd.DataFrame, pd.Series]] = None) -> None:
+    def __init__(self, features: Union[DataFrame, Series], labels: Union[DataFrame, Series, None] = None):
 
         if isinstance(features, pd.Series):
             self.__features__ = features.to_frame()
@@ -364,7 +275,7 @@ class PandasDataset(Dataset[FeatType, LabType], Serializable):
             raise ValueError("Labels must be of type pandas.Series or pandas.DataFrame")
 
     @property
-    def samples(self) -> Iterator[Sample[Dict[str, Any], Any]]:
+    def items(self) -> Iterator[Sample]:
         for index, row in self.__features__.to_dict(orient="index").items():
             try:
                 yield Sample(name=index, features=row, label=self.__labels__.loc[index])
@@ -372,11 +283,21 @@ class PandasDataset(Dataset[FeatType, LabType], Serializable):
                 yield Sample(name=index, features=row, label=None)
 
     @property
+    def cached(self) -> bool:
+        return True
+
+    @lazy
+    def features(self) -> pd.DataFrame:
+        return self.getFeaturesAs("pandas")
+
+    @lazy
+    def labels(self) -> pd.DataFrame:
+        return self.getLabelsAs("pandas")
+
+    @property
     def index(self) -> pd.Index:
         return self.intersection().features.index
 
-    # TODO: what is the point with this method?
-    #  Am I missing something or this is just a convoluted way to write an identity?
     @staticmethod
     def __check_none__(lab: Optional[T]) -> Optional[T]:
         return lab if lab is not None else None
@@ -390,8 +311,8 @@ class PandasDataset(Dataset[FeatType, LabType], Serializable):
         return len(self.index)
 
     def take(self, n: int) -> 'PandasDataset':
-        idx = list(self.features.index.intersection(self.labels.index)) if self.labels is not None \
-            else list(self.features.index)
+        idx = list(self.features.index.intersection(self.labels.index)) if self.labels is not None else list(
+            self.features.index)
         return self.loc(idx[:n])
 
     def loc(self, idx: List[Any]) -> 'PandasDataset':
@@ -422,20 +343,25 @@ class PandasDataset(Dataset[FeatType, LabType], Serializable):
 
         :return: PandasDataset with features and labels with intersected indices
         """
-        idx = list(self.features.index.intersection(self.labels.index)) if self.labels is not None else list(self.features.index)
+        idx = list(self.features.index.intersection(self.labels.index)) if self.labels is not None else list(
+            self.features.index)
         return self.loc(idx)
 
     @overload
-    def getFeaturesAs(self, type: Literal['array']) -> np.ndarray: ...
+    def getFeaturesAs(self, type: Literal['array']) -> np.ndarray:
+        ...
 
     @overload
-    def getFeaturesAs(self, type: Literal['pandas']) -> pd.DataFrame: ...
+    def getFeaturesAs(self, type: Literal['pandas']) -> pd.DataFrame:
+        ...
 
     @overload
-    def getFeaturesAs(self, type: Literal['dict']) -> Dict[str, FeatType]: ...
+    def getFeaturesAs(self, type: Literal['dict']) -> Dict[str, FeatType]:
+        ...
 
     @overload
-    def getFeaturesAs(self, type: Literal['list']) -> List[FeatType]: ...
+    def getFeaturesAs(self, type: Literal['list']) -> List[FeatType]:
+        ...
 
     def getFeaturesAs(self, type: AllowedTypes = 'array') -> FeaturesType:
         if type == 'array':
@@ -443,33 +369,42 @@ class PandasDataset(Dataset[FeatType, LabType], Serializable):
         elif type == 'pandas':
             return self.__features__
         elif type == 'dict':
-            return self.__features__.to_dict(orient="index")
+            return {k: list(row) for k, row in self.__features__.iterrows()}
         else:
-            raise ValueError(f'"type" value "{type}" not allowed. Only allowed values for "type" are "array", "dict" or '
-                             f'"pandas"')
+            raise ValueError(
+                f'"type" value "{type}" not allowed. Only allowed values for "type" are "array", "dict" or '
+                f'"pandas"')
 
     @overload
-    def getLabelsAs(self, type: Literal['array']) -> np.ndarray: ...
+    def getLabelsAs(self, type: Literal['array']) -> np.ndarray:
+        ...
 
     @overload
-    def getLabelsAs(self, type: Literal['pandas']) -> pd.DataFrame: ...
+    def getLabelsAs(self, type: Literal['pandas']) -> pd.DataFrame:
+        ...
 
     @overload
-    def getLabelsAs(self, type: Literal['dict']) -> Dict[str, LabType]: ...
+    def getLabelsAs(self, type: Literal['dict']) -> Dict[str, LabType]:
+        ...
 
     @overload
-    def getLabelsAs(self, type: Literal['list']) -> List[LabType]: ...
+    def getLabelsAs(self, type: Literal['list']) -> List[LabType]:
+        ...
 
     def getLabelsAs(self, type: AllowedTypes = 'array') -> LabelsType:
         if type == 'array':
-            return np.array(self.__labels__)
+            nCols = len(self.__labels__.columns)
+            return np.array(self.__labels__) if nCols > 1 else np.array(self.__labels__[self.__labels__.columns[0]])
         elif type == 'pandas':
             return self.__labels__
         elif type == 'dict':
-            return self.__labels__.to_dict(orient="index")
+            nCols = len(self.__labels__.columns)
+            return self.__labels__.to_dict(orient="index") if nCols > 1 \
+                else self.__labels__[self.__labels__.columns[0]].to_dict()
         else:
-            raise ValueError(f'"type" value "{type}" not allowed. Only allowed values for "type" are "array", "dict" or '
-                             f'"pandas"')
+            raise ValueError(
+                f'"type" value "{type}" not allowed. Only allowed values for "type" are "array", "dict" or '
+                f'"pandas"')
 
     def write(self, filename: PathLike, features_cols: str = "features", labels_cols: str = "labels") -> None:
         pd.concat({
@@ -521,5 +456,3 @@ class PandasTimeIndexedDataset(PandasDataset):
     def createObject(features: Union[pd.DataFrame, pd.Series],
                      labels: Optional[Union[pd.DataFrame, pd.Series]] = None) -> 'PandasTimeIndexedDataset':
         return PandasTimeIndexedDataset(features, labels)
-
-

@@ -1,18 +1,18 @@
 import uuid
+from abc import ABC
+from typing import Dict, Any, Optional, Iterator, Tuple, List, Hashable
+
 import numpy as np  # type: ignore
 import pandas as pd  # type: ignore
 
-from typing import Dict, Any, Union, Optional, Iterator, Tuple, Iterable as IterableType, List, Hashable
+from cgnal.data.model.core import BaseIterable, LazyIterable, CachedIterable
 from cgnal.utils.dict import union, unflattenKeys
-from cgnal.data.model.core import Iterable, LazyIterable, CachedIterable
 
 
 def generate_random_uuid() -> bytes:
     return uuid.uuid1().bytes[:12]
 
 
-# TODO: data must be a Dict[str, Any] and not a more general Dict[Hashable, Any] because unflattenKeys requires its
-#  input dictionary to have string keys
 class Document(object):
     """ Document representation as couple of uuid and dictionary of information """
 
@@ -127,25 +127,18 @@ class Document(object):
             yield prop, self[prop]
 
 
-# TODO: Documents.documents returns an IterableType, inherited directly from cgnal.data.ml.core.Iterable class. This is
-#  not compatible with the requirement expressed in Documents.__getitem__ method that requires that Documents.documents
-#  output. Should this class be an ABC, documents method could be made abstract and instantiated appropriately in its
-#  descendants
-class Documents(Iterable[Document]):
+class Documents(BaseIterable[Document], ABC):
 
     @property
-    def documents(self) -> IterableType[Document]:
-        return self.items
+    def __lazyType__(self):
+        return LazyDocuments
 
-    def __getitem__(self, item: Union[int, slice]) -> Document:
-        return self.documents[item]
-
-    def __iter__(self) -> Iterator[Document]:
-        for doc in self.documents:
-            yield doc
+    @property
+    def __cachedType__(self):
+        return CachedDocuments
 
 
-class CachedDocuments(CachedIterable, Documents):
+class CachedDocuments(CachedIterable[Document], Documents):
 
     @staticmethod
     def __get_key__(key: str, dict: Dict[Hashable, Any]) -> Any:
@@ -157,16 +150,12 @@ class CachedDocuments(CachedIterable, Documents):
         except (KeyError, AttributeError):
             return np.nan
 
-    def to_df(self, fields: List[str] = []) -> pd.DataFrame:
+    def to_df(self, fields: Optional[List[str]] = None) -> pd.DataFrame:
+        _fields = fields if fields is not None else []
         return pd.DataFrame.from_dict({doc.uuid: {field: self.__get_key__(field, doc.data)
-                                                  for field in fields}
-                                       for doc in self.documents}, orient='index')
+                                                  for field in _fields}
+                                       for doc in self}, orient='index')
 
 
-class LazyDocuments(LazyIterable, Documents):
-
-    @staticmethod
-    def toCached(items: IterableType[Document]) -> CachedDocuments:
-        return CachedDocuments(list(items))
-
-
+class LazyDocuments(LazyIterable[Document], Documents):
+    ...

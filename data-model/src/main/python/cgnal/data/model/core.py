@@ -1,24 +1,86 @@
-import sys
 import pickle
+import sys
 from abc import ABC, abstractmethod
 from functools import reduce
 from itertools import islice
-from typing import List, Iterator, Tuple, Callable, Iterable as IterableType, Union, Any, overload, Generic, Sequence
+from typing import List, Iterable, Iterator, Tuple, Union, Type, Any
 
 import dill  # type: ignore
 import numpy as np  # type: ignore
 import pandas as pd  # type: ignore
-from pandas.core.tools.datetimes import DatetimeScalar, Timestamp, DatetimeIndex  # type: ignore
+from pandas.core.tools.datetimes import DatetimeScalar, Timestamp  # type: ignore
 
-from cgnal import T, PathLike
+from cgnal import PathLike, T, T_co
 from cgnal.utils.dict import groupIterable
 
 if sys.version_info[0] < 3:
-    from future_builtins import filter
+    pass
+
+from typing import Generic, Callable, Sequence
+
+
+class Serializable(ABC):
+
+    @abstractmethod
+    def write(self, filaname: PathLike) -> None: ...
+
+    @classmethod
+    @abstractmethod
+    def load(cls, filename: PathLike) -> 'Serializable': ...
+
+
+class PickleSerialization(Serializable):
+
+    def write(self, filename: PathLike) -> None:
+        """
+        Write instance as pickle
+
+        :param filename: Name of the file where to save the instance
+
+        :return: None
+        """
+        with open(filename, 'wb') as fid:
+            pickle.dump(self, fid)
+
+    @classmethod
+    def load(cls, filename: PathLike) -> 'PickleSerialization':
+        """
+        Load instance from pickle
+
+        :param filename: Name of the file to be read
+        :return: Instance of the read Model
+        """
+        with open(filename, 'rb') as fid:
+            return pickle.load(fid)
+
+
+class DillSerialization(Serializable):
+
+    def write(self, filename: PathLike) -> None:
+        """
+        Write instance as pickle
+
+        :param filename: Name of the file where to save the instance
+
+        :return: None
+        """
+        with open(filename, 'wb') as fid:
+            dill.dump(self, fid)
+
+    @classmethod
+    def load(cls, filename: PathLike) -> 'DillSerialization':
+        """
+        Load instance from file
+
+        :param filename: Name of the file to be read
+        :return: Instance of the read Model
+        """
+        with open(filename, 'rb') as fid:
+            return dill.load(fid)
 
 
 class IterGenerator(Generic[T]):
-    def __init__(self, generator_function: Callable[[], Iterator[T]]) -> None:
+    def __init__(self, generator_function: Callable[[], Iterator[T]]):
         self.generator_function = generator_function
 
     @property
@@ -26,163 +88,75 @@ class IterGenerator(Generic[T]):
         return self.generator_function()
 
 
-class Iterable(ABC, IterableType[T], Generic[T]):
-
-    # TODO: shouldn't this class have an __init__ like this?
-    #  def __init__(self, items: Union[IterGenerator, IterableType]):
-    #      self.__items__ = items
-
-    # TODO: wouldn't it be better if this becomes a classmethod?
-
-    @overload
-    def __create_instance__(self, items: IterableType) -> 'CachedIterable': ...
-
-    @overload
-    def __create_instance__(self, items: IterGenerator) -> 'LazyIterable': ...
-
-    def __create_instance__(self, items: Union[IterGenerator, IterableType]) -> Union['CachedIterable', 'LazyIterable']:
-        obj = self.__new__(type(self))
-        obj.__init__(items)
-        return obj
+class BaseIterable(Generic[T], ABC):
 
     @property
     @abstractmethod
-    def items(self) -> IterableType[T]: ...
-
-    @abstractmethod
-    def take(self, size: int) -> 'Iterable': ...
-
-    # TODO: shouldn't this method be abstract?
-    def filter(self, f: Callable) -> 'Iterable':
+    def items(self) -> Iterable[T]:
         raise NotImplementedError
 
     @property
     @abstractmethod
-    def cached(self) -> bool: ...
+    def cached(self) -> bool:
+        raise NotImplementedError
 
-    @abstractmethod
-    def kfold(self, folds: int) -> Iterator[Tuple['Iterable', 'Iterable']]: ...
+    @property
+    def __lazyType__(self) -> 'Type[LazyIterable]':
+        return LazyIterable
+
+    @property
+    def __cachedType__(self) -> 'Type[CachedIterable]':
+        return CachedIterable
+
+    @property
+    def asLazy(self) -> 'LazyIterable':
+        def generator():
+            for item in self:
+                yield item
+
+        return self.__lazyType__(IterGenerator(generator))
+
+    @property
+    def asCached(self) -> 'CachedIterable':
+        return self.__cachedType__(list(self.items))
+
+    def take(self, size: int) -> 'Iterable[T]':
+        return self.__cachedType__(list(islice(self, size)))
+
+    def filter(self, f: Callable[[T], T_co]) -> 'LazyIterable[T_co]':
+        def generator():
+            for item in self:
+                if f(item):
+                    yield item
+
+        return self.__lazyType__(IterGenerator(generator))
 
     def __iter__(self) -> Iterator[T]:
         for item in self.items:
             yield item
 
-    def batch(self, size: int = 100) -> Iterator[List[T]]:
-        """
-        Generator that yields batches of items of given size
-        :param size: batch size
-        :return: list of "size" items
-        """
+    def batch(self, size: int = 100) -> 'Iterator[CachedIterable[T]]':
         for batch in groupIterable(self.items, batch_size=size):
-            yield batch
+            yield self.__cachedType__(batch)
 
-    def map(self, f: Callable[[T], Any]) -> Iterator[Any]:
-        for item in self.items:
-            yield f(item)
+    def map(self, f: Callable[[T], T_co]) -> 'LazyIterable[T_co]':
+        def generator():
+            for item in self:
+                yield f(item)
 
-    # TODO why does this method return None? What is the point of this method?
-    def foreach(self, f: Callable[[T], Any]) -> None:
-        for item in self.items:
-            f(item)
+        return self.__lazyType__(IterGenerator(generator))
 
-    # TODO Do we really need this functionality when we have the FeatureProcessing class in cgnal.analytics?
-    def hold_out(self, ratio: float) -> Tuple['Iterable', 'Iterable']:
-        """
-        Train, Test Iterable split
-
-        :param ratio: Int, ratio for splitting
-        :return: (Dataset, Dataset), Train and Test Datasets
-        """
-        fold = int(round(1.0 / ratio))
-        if fold * ratio - 1.0 > 1E-1:
-            print(' Approximating ratio of %f to %f' % (ratio, 1.0 / fold))
-        return next(self.kfold(fold))
+    def foreach(self, f: Callable[[T], Any]):
+        for doc in self.items:
+            f(doc)
 
 
-# TODO wouldn't it be better for this class to inherit from PickleSerialization or DillSerialization instead of
-#  implementing its own save and load methods?
-class CachedIterable(Iterable, Generic[T]):
+class LazyIterable(BaseIterable, Generic[T]):
 
-    def __init__(self, items: IterableType[T]):
-        self.__items__ = list(items)
-
-    def __len__(self) -> int:
-        return len(self.items)
-
-    @property
-    def items(self) -> List[T]:
-        return self.__items__
-
-    @overload
-    def __getitem__(self, item: int) -> T: ...
-
-    @overload
-    def __getitem__(self, item: slice) -> List[T]: ...
-
-    def __getitem__(self, item: Union[int, slice]) -> Union[T, List[T]]:
-        return self.items[item]
-
-    @property
-    def cached(self) -> bool:
-        return True
-
-    # TODO: this method's signature is not coherent with parents' method signature
-    def batch(self, size: int = 100) -> Iterator['CachedIterable']:
-        """
-        Generator that yields batches of given size
-        :param size: batch size
-        :return: CachedIterable with
-        """
-        for batch in super(CachedIterable, self).batch(size=size):
-            yield self.__create_instance__(batch)
-
-    def filter(self, f: Callable[[T], T]) -> 'CachedIterable':
-        return self.__create_instance__(filter(f, self.items))
-
-    # TODO this method seems wrong. size is a range and fold is and int, they cannot be summed. Below the proposed fix
-    def kfold(self, folds: int = 3) -> Iterator[Tuple['CachedIterable', 'CachedIterable']]:
-        """
-        Generator to select
-        :param folds:
-        :return:
-        """
-        array = np.array(self.items)
-        size = range(len(array))
-        for fold in range(folds):
-            iTest = array[((size + fold) % folds == 0)]
-            iTrain = array[((size + fold) % folds != 0)]
-            yield self.__create_instance__(array[iTrain]), self.__create_instance__(array[iTest])
-        # for fold in range(folds):
-        #     yield (self.__create_instance__([x for n, x in enumerate(self.items)
-        #                                      if n not in range(fold, len(self), folds)]),
-        #            self.__create_instance__(self[fold::folds]))
-
-    def take(self, size: int) -> 'CachedIterable':
-        """
-        Get first size elements
-
-        :param size: number of items to take
-        :return: CachedIterable with only chosen items
-        """
-        return self.__create_instance__(self.items[:size])
-
-    def save(self, filename: PathLike) -> PathLike:
-        with open(filename, 'w') as fid:
-            pickle.dump(self.items, fid)  # type: ignore
-        return filename
-
-    @staticmethod
-    def load(filename: PathLike) -> 'CachedIterable':
-        with open(filename, 'r') as fid:
-            items = pickle.load(fid)  # type: ignore
-        return CachedIterable(items)
-
-
-class LazyIterable(Iterable, Generic[T]):
-
-    def __init__(self, items: IterGenerator[T]) -> None:
+    def __init__(self, items: IterGenerator):
         if not isinstance(items, IterGenerator):
-            raise TypeError(f"The input must be an IterGenerator. Input of type {type(items)} passed")
+            raise TypeError("For lazy iterables the input must be an IterGenerator(object). Input of type %s passed"
+                            % type(items))
         self.__items__ = items
 
     @property
@@ -193,54 +167,25 @@ class LazyIterable(Iterable, Generic[T]):
     def cached(self) -> bool:
         return False
 
-    @staticmethod
-    def toCached(items: IterableType[T]) -> CachedIterable:
-        return CachedIterable(items)
 
-    # TODO: this method's signature is not coherent with parents' method signature
-    def batch(self, size: int = 100) -> Iterator['CachedIterable']:
-        for batch in super(LazyIterable, self).batch(size=size):
-            yield self.toCached(batch)
+class CachedIterable(BaseIterable, Generic[T], DillSerialization):
 
-    def cache(self) -> 'CachedIterable':
-        return self.toCached(self.items)
+    def __init__(self, items: Sequence[T]):
+        self.__items__ = list(items)
 
-    def take(self, size: int) -> 'LazyIterable':
-        def generator():
-            return islice(self.items, size)
+    def __len__(self) -> int:
+        return len(self.items)
 
-        return self.__create_instance__(IterGenerator(generator))
+    @property
+    def items(self) -> Sequence[T]:
+        return self.__items__
 
-    def filter(self, f: Callable[[T], T]) -> 'LazyIterable':
-        def generator():
-            return filter(self.items, f)
+    def __getitem__(self, item: int) -> T:
+        return self.items[item]
 
-        return self.__create_instance__(IterGenerator(generator))
-
-    def kfold(self, folds: int = 3) -> Iterator[Tuple['LazyIterable', 'LazyIterable']]:
-        """
-        Kfold iterator of Train, Test Dataset split over the folds
-
-        :param folds: Int, number of folds
-        :return: Iterator(Dataset, Dataset), Iterator over the Train, Test splits for the given fold
-        """
-        for fold in range(folds):
-
-            def test():
-                for istory, story in enumerate(self.items):
-                    if (istory + fold) % folds == 0:
-                        yield story
-                    else:
-                        pass
-
-            def train():
-                for istory, story in enumerate(self.items):
-                    if (istory + fold) % folds != 0:
-                        yield story
-                    else:
-                        pass
-
-            yield self.__create_instance__(IterGenerator(train)), self.__create_instance__(IterGenerator(test))
+    @property
+    def cached(self) -> bool:
+        return True
 
 
 class BaseRange(ABC):
@@ -421,63 +366,3 @@ class CompositeRange(BaseRange):
 
     def overlaps(self, other: 'BaseRange') -> bool:
         return any([r.overlaps(other) for r in self])
-
-
-class Serializable(ABC):
-
-    @abstractmethod
-    def write(self, filaname: PathLike) -> None: ...
-
-    @classmethod
-    @abstractmethod
-    def load(cls, filename: PathLike) -> 'Serializable': ...
-
-
-class PickleSerialization(Serializable):
-
-    def write(self, filename: PathLike) -> None:
-        """
-        Write instance as pickle
-
-        :param filename: Name of the file where to save the instance
-
-        :return: None
-        """
-        with open(filename, 'wb') as fid:
-            pickle.dump(self, fid)
-
-    @classmethod
-    def load(cls, filename: PathLike) -> 'PickleSerialization':
-        """
-        Load instance from pickle
-
-        :param filename: Name of the file to be read
-        :return: Instance of the read Model
-        """
-        with open(filename, 'rb') as fid:
-            return pickle.load(fid)
-
-
-class DillSerialization(Serializable):
-
-    def write(self, filename: PathLike) -> None:
-        """
-        Write instance as pickle
-
-        :param filename: Name of the file where to save the instance
-
-        :return: None
-        """
-        with open(filename, 'wb') as fid:
-            dill.dump(self, fid)
-
-    @classmethod
-    def load(cls, filename: PathLike) -> 'DillSerialization':
-        """
-        Load instance from file
-
-        :param filename: Name of the file to be read
-        :return: Instance of the read Model
-        """
-        with open(filename, 'rb') as fid:
-            return dill.load(fid)
