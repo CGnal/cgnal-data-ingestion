@@ -15,7 +15,7 @@ from typing_extensions import Literal
 
 from cgnal import T, PathLike
 from cgnal.data.model.core import BaseIterable, LazyIterable, CachedIterable, IterGenerator, PickleSerialization, \
-    Serializable
+    DillSerialization
 from cgnal.utils.decorators import lazyproperty as lazy
 from cgnal.utils.pandas import loc
 
@@ -254,9 +254,9 @@ class LazyDataset(LazyIterable[Sample], Dataset):
         return LazyDataset(IterGenerator(__transformed_sample_generator__))
 
 
-class PandasDataset(Dataset, Serializable):
+class PandasDataset(Dataset[FeatType, LabType], DillSerialization):
 
-    def __init__(self, features: Union[DataFrame, Series], labels: Union[DataFrame, Series, None] = None):
+    def __init__(self, features: Union[DataFrame, Series], labels: Union[DataFrame, Series, None] = None) -> None:
 
         if isinstance(features, pd.Series):
             self.__features__ = features.to_frame()
@@ -334,8 +334,12 @@ class PandasDataset(Dataset, Serializable):
 
         :return: PandasDataset with features and labels without NAs
         """
-        return self.createObject(self.features.dropna(**kwargs),
-                                 self.__check_none__(self.labels.dropna(**kwargs) if self.labels is not None else None))
+
+        kwargs_feat = {(k.split('__')[1] if k.startswith('feat__') else k): v for k, v in kwargs.items() if not k.startswith('labs__')}
+        kwargs_labs = {k.split('__')[1]: v for k, v in kwargs.items() if k.startswith('labs__')}
+
+        return self.createObject(self.features.dropna(**kwargs_feat),
+                                 self.__check_none__(self.labels.dropna(**kwargs_labs) if self.labels is not None else None))
 
     def intersection(self) -> 'PandasDataset':
         """
@@ -405,24 +409,6 @@ class PandasDataset(Dataset, Serializable):
             raise ValueError(
                 f'"type" value "{type}" not allowed. Only allowed values for "type" are "array", "dict" or '
                 f'"pandas"')
-
-    def write(self, filename: PathLike, features_cols: str = "features", labels_cols: str = "labels") -> None:
-        pd.concat({
-            features_cols: self.getFeaturesAs("pandas"),
-            labels_cols: self.getLabelsAs("pandas")
-        }, axis=1).to_pickle(filename)
-
-    @classmethod
-    def read(cls, filename: PathLike, features_cols: str = "features", labels_cols: str = "labels") -> 'PandasDataset':
-        _in = pd.read_pickle(filename)
-        return cls.createObject(
-            _in[features_cols] if features_cols in _in else None,
-            _in[labels_cols] if labels_cols in _in else None
-        )
-
-    @classmethod
-    def load(cls, filename: PathLike):
-        return cls.read(filename)
 
     @classmethod
     def from_sequence(cls, datasets: Sequence['PandasDataset']):

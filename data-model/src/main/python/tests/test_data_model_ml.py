@@ -160,13 +160,16 @@ class LazyDatasetTests(TestCase):
 
 class PandasDatasetTests(TestCase):
     dataset = PandasDataset(features=pd.concat([pd.Series([1, np.nan, 2, 3], name="feat1"),
-                                                pd.Series([1, 2, 3, 4], name="feat2")], axis=1))
+                                                pd.Series([1, 2, 3, 4], name="feat2")], axis=1),
+                            labels=pd.Series([0, 0, 0, 1], name="Label"))
 
     @logTest
     def test_dropna_none_labels(self):
         res = pd.concat([pd.Series([1, 2, 3], name="feat1"), pd.Series([1, 3, 4], name="feat2")], axis=1)
 
         self.assertTrue((self.dataset.dropna(subset=["feat1"]).features.reset_index(drop=True) == res).all().all())
+        self.assertTrue((self.dataset.dropna(feat__subset=["feat1"]).features.reset_index(drop=True) == res).all().all())
+        self.assertTrue((self.dataset.dropna(labs__subset=["Label"]).features.reset_index(drop=True) == res).all().all())
 
     @logTest
     def test_from_sequence(self):
@@ -192,7 +195,6 @@ class PandasDatasetTests(TestCase):
         newDataset: PandasDataset = PandasDataset.load(filename)
 
         self.assertTrue(isinstance(newDataset, PandasDataset))
-
         self.assertTrue((self.dataset.features.fillna("NaN") == newDataset.features.fillna("NaN")).all().all())
 
     @logTest
@@ -231,6 +233,39 @@ class PandasDatasetTests(TestCase):
 
             self.assertEqual(features1, features3)
             self.assertEqual(labels1, labels3)
+
+    @logTest
+    def test_union(self):
+        union = self.dataset.union(PandasDataset(features=pd.concat([pd.Series([np.nan, 5, 6, 7], name="feat1"),
+                                                                     pd.Series([7, 8, 9, 10], name="feat2")], axis=1),
+                                                 labels=pd.Series([0, 0, 0, 1], name="Label")))
+
+        self.assertTrue(isinstance(union, PandasDataset))
+        self.assertEqual(union.features.reset_index(drop=True),
+                         pd.concat([pd.Series([1, np.nan, 2, 3, np.nan, 5, 6, 7], name="feat1"),
+                                    pd.Series([1, 2, 3, 4, 7, 8, 9, 10], name="feat2")], axis=1))
+        self.assertEqual(union.labels.Label.reset_index(drop=True), pd.Series([0, 0, 0, 1, 0, 0, 0, 1], name="Label"))
+
+    @logTest
+    def test_intersection(self):
+        other = PandasDataset(features=pd.concat([pd.Series([1, 2, 3, 4], name="feat1"),
+                                                  pd.Series([5, 6, 7, 8], name="feat2")], axis=1),
+                              labels=pd.Series([1, 1, 0, 0], name="Label", index=[0, 1, 4, 5]))
+
+        self.assertEqual(other.intersection().labels.index.to_list(), [0, 1])
+        self.assertEqual(other.intersection().features.index.to_list(), [0, 1])
+
+    @logTest
+    def test_getFeaturesAs(self):
+        self.assertTrue(isinstance(self.dataset.getFeaturesAs('array'), np.ndarray))
+        self.assertTrue(isinstance(self.dataset.getFeaturesAs('pandas'), pd.DataFrame))
+        self.assertTrue(isinstance(self.dataset.getFeaturesAs('dict'), dict))
+    
+    @logTest
+    def test_getLabelsAs(self):
+        self.assertTrue(isinstance(self.dataset.getLabelsAs('array'), np.ndarray))
+        self.assertTrue(isinstance(self.dataset.getLabelsAs('pandas'), pd.DataFrame))
+        self.assertTrue(isinstance(self.dataset.getLabelsAs('dict'), dict))
 
 
 class PandasTimeIndexedDatasetTests(TestCase):
