@@ -8,6 +8,10 @@ from typing import List, Optional, Any, Hashable, Union
 from cfg_load import Configuration
 from functools import reduce
 from cgnal import PathLike
+from datetime import datetime
+import pytz
+from cgnal.utils.dict import union
+
 
 __this_dir__, __this_filename__ = os.path.split(__file__)
 
@@ -89,6 +93,12 @@ class BaseConfig(object):
 
     def safeGetValue(self, name: Hashable) -> Any:
         return self.config.get(name, None)
+
+    def update(self, my_dict: dict) -> 'BaseConfig':
+
+        meta = union(self.config.meta, {"updated_params": my_dict,
+                                        "modification_datetime": datetime.now().astimezone(tz=pytz.timezone('Europe/Rome'))})
+        return type(self)(Configuration(union(dict(self.config), my_dict), meta))
 
 
 class FileSystemConfig(BaseConfig):

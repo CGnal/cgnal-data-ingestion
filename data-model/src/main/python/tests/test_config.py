@@ -76,7 +76,6 @@ class TestBaseConfig(TestCase):
         self.assertEqual(config.sublevel("fs").to_dict(), {"root": root,
                                                            "folders": {"python": "myfolder"},
                                                            "files": {"credentials": credentials}})
-
     @logTest
     def test_getValue(self):
         self.assertEqual(config.getValue("fs")["root"], root)
@@ -86,6 +85,14 @@ class TestBaseConfig(TestCase):
     def test_safeGetValue(self):
         self.assertEqual(config.safeGetValue("fs")["root"], root)
         self.assertIsNone(config.safeGetValue("folders"))
+
+    @logTest
+    def test_update(self):
+
+        new_config = config.update({'test': {'fs': {'root': 'new_folder'}}})
+
+        self.assertEqual(new_config.getValue('test')['fs']['root'], 'new_folder')
+        self.assertEqual(new_config.config.meta['updated_params'], {'test': {'fs': {'root': 'new_folder'}}})
 
 
 class TestFileSystemConfig(TestCase):
