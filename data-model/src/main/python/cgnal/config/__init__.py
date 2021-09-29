@@ -125,11 +125,13 @@ class AuthService(BaseConfig):
     @property
     def url(self) -> str:
         return self.getValue("url")
+
     @property
-    def check(self) -> bool:
+    def check(self) -> str:
         return self.getValue("check")
+
     @property
-    def decode(self) -> bool:
+    def decode(self) -> str:
         return self.getValue("decode")
 
 
@@ -139,17 +141,17 @@ class CheckService(BaseConfig):
         return self.getValue("url")
 
     @property
-    def login(self) -> Any:  # TODO type better than "Any"
+    def login(self) -> str:
         return self.getValue("login")
 
     @property
-    def logout(self) -> Any:  # TODO type better than "Any"
+    def logout(self) -> str:
         return self.getValue("logout")
 
 
 class AuthenticationServiceConfig(BaseConfig):
     @property
-    def secured(self) -> Any:  # TODO type better than "Any"
+    def secured(self) -> bool:
         return self.getValue("secured")
 
     @property
@@ -157,7 +159,7 @@ class AuthenticationServiceConfig(BaseConfig):
         return self.getValue("ap_name")
 
     @property
-    def jwt_free_endpoints(self) -> Any:  # TODO type better than "Any"
+    def jwt_free_endpoints(self) -> List[str]:
         return self.getValue("jwt_free_endpoints")
 
     @property
@@ -169,5 +171,5 @@ class AuthenticationServiceConfig(BaseConfig):
         return CheckService(self.sublevel("check_service"))
 
     @property
-    def cors(self) -> Any:  # TODO type better than "Any"
+    def cors(self) -> str:
         return self.getValue("cors")
