@@ -26,9 +26,9 @@ else:
 
 FeatType = TypeVar('FeatType', List[Any], Tuple[Any], np.ndarray, Dict[str, Any])
 LabType = TypeVar('LabType', int, float)
-FeaturesType = Union[np.ndarray, pd.DataFrame, Dict[str, FeatType], List[FeatType]]
-LabelsType = Union[np.ndarray, pd.DataFrame, Dict[str, LabType], List[LabType]]
-AllowedTypes = Literal['array', 'pandas', 'dict', 'list']
+FeaturesType = Union[np.ndarray, pd.DataFrame, Dict[str, FeatType], List[FeatType], Iterator[FeatType]]
+LabelsType = Union[np.ndarray, pd.DataFrame, Dict[str, LabType], List[LabType], Iterator[LabType]]
+AllowedTypes = Literal['array', 'pandas', 'dict', 'list', 'lazy']
 
 
 def features_and_labels_to_dataset(X: Union[pd.DataFrame, pd.Series],
@@ -126,6 +126,10 @@ class Dataset(BaseIterable[SampleTypes], Generic[FeatType, LabType], ABC):
     def getFeaturesAs(self, type: Literal['list']) -> List[FeatType]:
         ...
 
+    @overload
+    def getFeaturesAs(self, type: Literal['lazy']) -> Iterator[FeatType]:
+        ...
+
     def getFeaturesAs(self, type: AllowedTypes = 'array') -> FeaturesType:
         """
         Object of the specified type containing the feature space
@@ -140,6 +144,8 @@ class Dataset(BaseIterable[SampleTypes], Generic[FeatType, LabType], ABC):
             return {self.checkNames(sample.name): sample.features for sample in self}
         elif type == 'list':
             return [sample.features for sample in self]
+        elif type == 'lazy':
+            return (sample.features for sample in self)
         elif type == 'pandas':
             try:
                 features: Union[Dict[str, FeatType], List[FeatType]] = self.getFeaturesAs('dict')
@@ -173,6 +179,10 @@ class Dataset(BaseIterable[SampleTypes], Generic[FeatType, LabType], ABC):
     def getLabelsAs(self, type: Literal['list']) -> List[LabType]:
         ...
 
+    @overload
+    def getLabelsAs(self, type: Literal['lazy']) -> Iterator[LabType]:
+        ...
+
     def getLabelsAs(self, type: AllowedTypes = 'array') -> LabelsType:
         """
         Object of the specified type containing the labels
@@ -187,6 +197,8 @@ class Dataset(BaseIterable[SampleTypes], Generic[FeatType, LabType], ABC):
             return {self.checkNames(sample.name): sample.label for sample in self}
         elif type == 'list':
             return [sample.label for sample in self]
+        elif type == 'lazy':
+            return (sample.label for sample in self)
         elif type == 'pandas':
             try:
                 labels: Union[List[LabType], Dict[str, LabType]] = self.getLabelsAs('dict')
@@ -252,6 +264,18 @@ class LazyDataset(LazyIterable[Sample], Dataset):
                 yield Sample(features=np.array([s.features for s in ss]), label=ss[-1].label)
 
         return LazyDataset(IterGenerator(__transformed_sample_generator__))
+
+    def features(self) -> Iterator[FeatType]:
+        return self.getFeaturesAs('lazy')
+
+    def labels(self) -> Iterator[LabType]:
+        return self.getLabelsAs('lazy')
+
+    def getFeaturesAs(self, type: AllowedTypes = 'lazy') -> FeaturesType:
+        return super(LazyDataset, self).getFeaturesAs(type)
+
+    def getLabelsAs(self, type: AllowedTypes = 'lazy') -> FeaturesType:
+        return super(LazyDataset, self).getLabelsAs(type)
 
 
 class PandasDataset(Dataset[FeatType, LabType], DillSerialization):
