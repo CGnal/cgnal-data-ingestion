@@ -231,7 +231,7 @@ class BaseRange(ABC):
         """
         Create date range with daily frequency
 
-        :return: pd.date_range from start to end with daily frequency
+        :return: list of pd.Timestamp from start to end with daily frequency
         """
         return self.range(freq="1D")
 
@@ -240,7 +240,7 @@ class BaseRange(ABC):
         """
         Create date range with daily frequency
 
-        :return: pd.date_range from start to end with daily frequency
+        :return: list of pd.Timestamp from start to end with daily frequency including only days from Mon to Fri
         """
         return self.range(freq="1B")
 
@@ -249,7 +249,7 @@ class BaseRange(ABC):
         """
         Create date range with daily frequency
 
-        :return: pd.date_range from start to end with daily frequency
+        :return: list of pd.Timestamp from start to end with 15 minutes frequency
         """
         return self.range(freq="15T")
 
