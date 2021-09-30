@@ -33,7 +33,8 @@ setup(
         "requests>=2.22",
         "cfg-load>=0.8",
         "dill>=0.3",
-        "deprecated>=1.2.12"
+        "deprecated>=1.2.12",
+        "scipy<=1.5.4"
     ],
     test_suite='nose.collector',
     tests_require=['nose'],

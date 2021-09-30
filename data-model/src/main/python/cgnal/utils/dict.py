@@ -82,4 +82,3 @@ def filterNones(_dict: Dict[T, Any]) -> Dict[T, Any]:
 def groupBy(lst: Iterable[T], key: Callable[[T], SupportsLessThan]) -> Iterator[Tuple[SupportsLessThan, List[T]]]:
     for k, it in groupby(sorted(lst, key=key), key=key):
         yield k, list(it)
-
