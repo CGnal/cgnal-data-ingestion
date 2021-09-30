@@ -94,14 +94,6 @@ def configFromFile(path_to_file: PathLike) -> None:
     config.dictConfig(load(path_to_file))
 
 
-def __handle_exception__(exc_type: Type[BaseException], exc_value: BaseException,
-                         exc_traceback: TracebackType, logger: Logger) -> None:
-    if issubclass(exc_type, KeyboardInterrupt):
-        sys.__excepthook__(exc_type, exc_value, exc_traceback)
-        return
-    logger.error(f"{exc_type.__name__}: {exc_value}", exc_info=(exc_type, exc_value, exc_traceback))
-
-
 def configFromFiles(config_files: List[PathLike], capture_warnings: bool = True, catch_exceptions: Optional[str] = None) -> None:
     """
     Configure loggers from configuration obtained merging configuration files.
@@ -123,8 +115,17 @@ def configFromFiles(config_files: List[PathLike], capture_warnings: bool = True,
     config.dictConfig(configuration)
 
     if catch_exceptions is not None:
-        sys.excepthook = lambda exctype, value, traceback: __handle_exception__(exctype, value, traceback,
-                                                                                logger=getLogger(catch_exceptions))
+        except_logger = getLogger(catch_exceptions)
+        print(f'Catching excetptions with {except_logger.name} logger using handlers '
+              f'{", ".join([x.name for x in except_logger.handlers])}')
+
+        def handle_exception(exc_type: Type[BaseException], exc_value: BaseException, exc_traceback: TracebackType) -> None:
+            if issubclass(exc_type, KeyboardInterrupt):
+                sys.__excepthook__(exc_type, exc_value, exc_traceback)
+            else:
+                except_logger.error(f"{exc_type.__name__}: {exc_value}", exc_info=(exc_type, exc_value, exc_traceback))
+
+        sys.excepthook = handle_exception
 
 
 def logger(name: Optional[str] = None) -> Logger:
