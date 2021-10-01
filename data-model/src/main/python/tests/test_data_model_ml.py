@@ -184,6 +184,33 @@ class PandasDatasetTests(TestCase):
         self.assertTrue((self.dataset.dropna(labs__subset=["Label"]).features.reset_index(drop=True) == res).all().all())
 
     @logTest
+    def test_cached(self):
+        self.assertTrue(self.dataset.cached)
+
+    @logTest
+    def test_features_labels(self):
+        self.assertEqual(self.dataset.features, pd.concat([pd.Series([1, np.nan, 2, 3], name="feat1"),
+                                                      pd.Series([1, 2, 3, 4], name="feat2")], axis=1))
+        self.assertTrue((self.dataset.labels['Label'] == pd.Series([0, 0, 0, 1])).all())
+
+    @logTest
+    def test_index(self):
+        self.assertTrue((self.dataset.index == range(4)).all())
+
+    def test_createObject(self):
+
+        self.assertTrue(isinstance(PandasDataset.createObject(features=pd.concat([pd.Series([1, np.nan, 2, 3], name="feat1"),
+                                                                        pd.Series([1, 2, 3, 4], name="feat2")], axis=1),
+                                                    labels=None), PandasDataset))
+        self.assertEqual(PandasDataset.createObject(features=pd.concat([pd.Series([1, np.nan, 2, 3], name="feat1"),
+                                                                        pd.Series([1, 2, 3, 4], name="feat2")], axis=1),
+                                                    labels=None).features, self.dataset_no_label.features)
+        self.assertEqual(PandasDataset.createObject(features=pd.concat([pd.Series([1, np.nan, 2, 3], name="feat1"),
+                                                                        pd.Series([1, 2, 3, 4], name="feat2")], axis=1),
+                                                    labels=None).labels, self.dataset_no_label.labels)
+
+
+    @logTest
     def test_from_sequence(self):
         features_1 = pd.DataFrame({'feat1': [1, 2, 3, 4], 'feat2': [100, 200, 300, 400]}, index=[1, 2, 3, 4])
         features_2 = pd.DataFrame({'feat1': [9, 11, 13, 14], 'feat2': [90, 110, 130, 140]}, index=[10, 11, 12, 13])
