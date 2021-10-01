@@ -197,6 +197,7 @@ class PandasDatasetTests(TestCase):
     def test_index(self):
         self.assertTrue((self.dataset.index == range(4)).all())
 
+    @logTest
     def test_createObject(self):
 
         self.assertTrue(isinstance(PandasDataset.createObject(features=pd.concat([pd.Series([1, np.nan, 2, 3], name="feat1"),
@@ -209,6 +210,11 @@ class PandasDatasetTests(TestCase):
                                                                         pd.Series([1, 2, 3, 4], name="feat2")], axis=1),
                                                     labels=None).labels, self.dataset_no_label.labels)
 
+    @logTest
+    def test_take(self):
+        self.assertTrue(isinstance(self.dataset.take(1), PandasDataset))
+        self.assertEqual(self.dataset.take(1).features.feat2, pd.Series([1], name="feat2"))
+        self.assertEqual(self.dataset.take(1).labels['Label'], pd.Series([0], name="Label"))
 
     @logTest
     def test_from_sequence(self):
