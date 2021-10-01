@@ -303,7 +303,7 @@ class PandasDataset(Dataset[FeatType, LabType], DillSerialization):
         for index, row in self.__features__.to_dict(orient="index").items():
             try:
                 yield Sample(name=index, features=row, label=self.__labels__.loc[index])
-            except KeyError:
+            except AttributeError:
                 yield Sample(name=index, features=row, label=None)
 
     @property

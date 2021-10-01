@@ -6,6 +6,7 @@ import pandas as pd
 
 from cgnal.data.model.ml import LazyDataset, IterGenerator, MultiFeatureSample, Sample, PandasDataset, \
     PandasTimeIndexedDataset, CachedDataset
+from typing import Iterator
 from cgnal.tests.core import TestCase, logTest
 from data import TMP_FOLDER
 
@@ -162,6 +163,17 @@ class PandasDatasetTests(TestCase):
     dataset = PandasDataset(features=pd.concat([pd.Series([1, np.nan, 2, 3], name="feat1"),
                                                 pd.Series([1, 2, 3, 4], name="feat2")], axis=1),
                             labels=pd.Series([0, 0, 0, 1], name="Label"))
+
+    dataset_no_label = PandasDataset(features=pd.concat([pd.Series([1, np.nan, 2, 3], name="feat1"),
+                                                         pd.Series([1, 2, 3, 4], name="feat2")], axis=1))
+    @logTest
+    def test_items(self):
+
+        self.assertTrue(isinstance(self.dataset.items, Iterator))
+        self.assertEqual(next(self.dataset.items).features, {'feat1': 1.0, 'feat2': 1})
+        self.assertEqual(next(self.dataset.items).label['Label'], 0)
+        self.assertEqual(next(self.dataset_no_label.items).features, {'feat1': 1.0, 'feat2': 1})
+        self.assertEqual(next(self.dataset_no_label.items).label, None)
 
     @logTest
     def test_dropna_none_labels(self):
