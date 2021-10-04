@@ -5,10 +5,28 @@ import numpy as np
 import pandas as pd
 
 from cgnal.data.model.ml import LazyDataset, IterGenerator, MultiFeatureSample, Sample, PandasDataset, \
-    PandasTimeIndexedDataset, CachedDataset
+    PandasTimeIndexedDataset, CachedDataset, features_and_labels_to_dataset
 from typing import Iterator
 from cgnal.tests.core import TestCase, logTest
 from data import TMP_FOLDER
+from typing import Generator
+
+samples = [Sample(features=[100, 101], label=1),
+           Sample(features=[102, 103], label=2),
+           Sample(features=[104, 105], label=3),
+           Sample(features=[106, 107], label=4),
+           Sample(features=[108, 109], label=5),
+           Sample(features=[110, 111], label=6),
+           Sample(features=[112, 113], label=7),
+           Sample(features=[114, 115], label=8),
+           Sample(features=[116, 117], label=9)]
+
+def samples_gen():
+    for sample in samples:
+        if not any([np.isnan(x).any() for x in sample.features]):
+            yield sample
+
+lazyDat = LazyDataset(IterGenerator(samples_gen))
 
 
 class LazyDatasetTests(TestCase):
@@ -158,6 +176,36 @@ class LazyDatasetTests(TestCase):
 
         self.assertTrue(all(res))
 
+    @logTest
+    def test_features_labels(self):
+
+        self.assertTrue(isinstance(lazyDat.features(), Generator))
+        self.assertTrue(isinstance(lazyDat.labels(), Generator))
+        self.assertTrue(isinstance(lazyDat.getFeaturesAs(), Generator))
+        self.assertTrue(isinstance(lazyDat.getLabelsAs(), Generator))
+        self.assertEqual(next(lazyDat.getFeaturesAs()), samples[0].features)
+        self.assertEqual(next(lazyDat.getLabelsAs()), samples[0].label)
+        self.assertEqual(next(lazyDat.features()), samples[0].features)
+        self.assertEqual(next(lazyDat.labels()), samples[0].label)
+
+
+class CachedDatasetTests(TestCase):
+
+
+    @logTest
+    def test_to_df(self):
+
+        self.assertTrue(isinstance(CachedDataset(lazyDat).to_df(), pd.DataFrame))
+        self.assertTrue((CachedDataset(lazyDat).to_df()['features'][0].values == [100, 102, 104, 106, 108, 110, 112, 114, 116]).all())
+        self.assertTrue((CachedDataset(lazyDat).to_df()['labels'][0].values == [1, 2, 3, 4, 5, 6, 7, 8, 9]).all())
+
+    @logTest
+    def test_asPandasDataset(self):
+
+        self.assertTrue(isinstance(CachedDataset(lazyDat).asPandasDataset, PandasDataset))
+        self.assertTrue((CachedDataset(lazyDat).asPandasDataset.features[0].values == [100, 102, 104, 106, 108, 110, 112, 114, 116]).all())
+        self.assertTrue((CachedDataset(lazyDat).asPandasDataset.labels[0].values == [1, 2, 3, 4, 5, 6, 7, 8, 9]).all())
+
 
 class PandasDatasetTests(TestCase):
     dataset = PandasDataset(features=pd.concat([pd.Series([1, np.nan, 2, 3], name="feat1"),
@@ -166,6 +214,16 @@ class PandasDatasetTests(TestCase):
 
     dataset_no_label = PandasDataset(features=pd.concat([pd.Series([1, np.nan, 2, 3], name="feat1"),
                                                          pd.Series([1, 2, 3, 4], name="feat2")], axis=1))
+
+    @logTest
+    def test__check_none__(self):
+        self.assertEqual(self.dataset.__check_none__(None), None)
+        self.assertEqual(self.dataset.__check_none__('test'), 'test')
+
+    @logTest
+    def test__len__(self):
+        self.assertEqual(self.dataset.__len__(), 4)
+
     @logTest
     def test_items(self):
 
@@ -215,6 +273,13 @@ class PandasDatasetTests(TestCase):
         self.assertTrue(isinstance(self.dataset.take(1), PandasDataset))
         self.assertEqual(self.dataset.take(1).features.feat2, pd.Series([1], name="feat2"))
         self.assertEqual(self.dataset.take(1).labels['Label'], pd.Series([0], name="Label"))
+
+    @logTest
+    def test_loc(self):
+        self.assertEqual(self.dataset.loc(2).features[2]['feat1'], 2)
+        self.assertEqual(self.dataset.loc(2).features[2]['feat2'], 3)
+        self.assertEqual(self.dataset.loc(2).labels[2]['Label'], 0)
+        self.assertTrue(self.dataset_no_label.loc(2).labels is None)
 
     @logTest
     def test_from_sequence(self):
@@ -341,6 +406,22 @@ class PandasTimeIndexedDatasetTests(TestCase):
 
         self.assertTrue(isinstance(newDataset, PandasTimeIndexedDataset))
         self.assertTrue((self.dataset.features.fillna("NaN") == newDataset.features.fillna("NaN")).all().all())
+
+    def test_createObject(self):
+
+        NewDataset = self.dataset.createObject(features=pd.concat([
+            pd.Series([1, 3], index=self.dateStr[0:2], name="feat1"),
+            pd.Series([1, 2], index=self.dateStr[0:2], name="feat2")
+        ], axis=1), labels=pd.Series([0, 0], index=self.dateStr[0:2], name="Label"))
+
+
+        self.assertTrue(isinstance(NewDataset, PandasTimeIndexedDataset))
+        self.assertTrue((NewDataset.features == pd.concat([
+            pd.Series([1, 3], index=self.dateStr[0:2], name="feat1"),
+            pd.Series([1, 2], index=self.dateStr[0:2], name="feat2")
+        ], axis=1)).all().all())
+        self.assertTrue((NewDataset.labels.values == pd.Series([0, 0], index=self.dateStr[0:2], name="Label").values).all())
+
 
 
 if __name__ == "__main__":
