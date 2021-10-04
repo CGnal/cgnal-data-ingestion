@@ -29,6 +29,23 @@ def samples_gen():
 lazyDat = LazyDataset(IterGenerator(samples_gen))
 
 
+class features_and_labels_to_datasetTests(TestCase):
+
+    def test_features_and_labels_to_dataset(self):
+
+        dataset = features_and_labels_to_dataset(pd.concat([pd.Series([1, 0, 2, 3], name="feat1"),
+                   pd.Series([1, 2, 3, 4], name="feat2")], axis=1), pd.Series([0, 0, 0, 1], name="Label"))
+
+        dataset_no_labels = features_and_labels_to_dataset(pd.concat([pd.Series([1, 0, 2, 3], name="feat1"),
+                   pd.Series([1, 2, 3, 4], name="feat2")], axis=1), None)
+
+        self.assertTrue(isinstance(dataset_no_labels, CachedDataset))
+        self.assertTrue(isinstance(dataset, CachedDataset))
+        self.assertTrue((dataset.getFeaturesAs('pandas') == pd.concat([pd.Series([1, 0, 2, 3], name="feat1"),
+                                                       pd.Series([1, 2, 3, 4], name="feat2")], axis=1)).all().all())
+        self.assertTrue((dataset.getLabelsAs('pandas') == pd.DataFrame(pd.Series([1, 2, 3, 4], name="Label"))).all().all())
+
+
 class LazyDatasetTests(TestCase):
 
     @logTest
