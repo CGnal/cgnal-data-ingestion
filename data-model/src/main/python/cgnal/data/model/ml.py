@@ -35,12 +35,11 @@ def features_and_labels_to_dataset(X: Union[pd.DataFrame, pd.Series],
                                    y: Optional[Union[pd.DataFrame, pd.Series]] = None) -> 'CachedDataset':
     if y is not None:
         df = pd.concat({"features": X, "labels": y}, axis=1)
+        return CachedDataset(
+            [Sample(df['features'].loc[i].to_dict(), df['labels'].loc[i].to_dict(), i) for i in df.index])
     else:
         df = pd.concat({"features": X}, axis=1)
-        df["labels"] = None
-
-    return CachedDataset([Sample(features, label, name)
-                          for features, label, name in zip(np.array(df["features"]), np.array(df["labels"]), df.index)])
+        return CachedDataset([Sample(df['features'].loc[i].to_dict(), None, i) for i in df.index])
 
 
 class Sample(PickleSerialization, Generic[FeatType, LabType]):
@@ -274,7 +273,7 @@ class LazyDataset(LazyIterable[Sample], Dataset):
     def getFeaturesAs(self, type: AllowedTypes = 'lazy') -> FeaturesType:
         return super(LazyDataset, self).getFeaturesAs(type)
 
-    def getLabelsAs(self, type: AllowedTypes = 'lazy') -> FeaturesType:
+    def getLabelsAs(self, type: AllowedTypes = 'lazy') -> LabelsType:
         return super(LazyDataset, self).getLabelsAs(type)
 
 
