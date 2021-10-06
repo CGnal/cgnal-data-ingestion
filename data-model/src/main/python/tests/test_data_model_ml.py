@@ -6,10 +6,9 @@ import pandas as pd
 
 from cgnal.data.model.ml import LazyDataset, IterGenerator, MultiFeatureSample, Sample, PandasDataset, \
     PandasTimeIndexedDataset, CachedDataset, features_and_labels_to_dataset
-from typing import Iterator
+from typing import Iterator, Generator
 from cgnal.tests.core import TestCase, logTest
 from data import TMP_FOLDER
-from typing import Generator
 
 samples = [Sample(features=[100, 101], label=1),
            Sample(features=[102, 103], label=2),
