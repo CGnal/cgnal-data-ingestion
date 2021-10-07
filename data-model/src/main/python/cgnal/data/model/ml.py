@@ -270,8 +270,48 @@ class LazyDataset(LazyIterable[Sample], Dataset):
     def labels(self) -> Iterator[LabType]:
         return self.getLabelsAs('lazy')
 
+    @overload
+    def getFeaturesAs(self, type: Literal['array']) -> np.ndarray:
+        ...
+
+    @overload
+    def getFeaturesAs(self, type: Literal['pandas']) -> pd.DataFrame:
+        ...
+
+    @overload
+    def getFeaturesAs(self, type: Literal['dict']) -> Dict[str, FeatType]:
+        ...
+
+    @overload
+    def getFeaturesAs(self, type: Literal['list']) -> List[FeatType]:
+        ...
+
+    @overload
+    def getFeaturesAs(self, type: Literal['lazy']) -> Iterator[FeatType]:
+        ...
+
     def getFeaturesAs(self, type: AllowedTypes = 'lazy') -> FeaturesType:
         return super(LazyDataset, self).getFeaturesAs(type)
+
+    @overload
+    def getLabelsAs(self, type: Literal['array']) -> np.ndarray:
+        ...
+
+    @overload
+    def getLabelsAs(self, type: Literal['pandas']) -> pd.DataFrame:
+        ...
+
+    @overload
+    def getLabelsAs(self, type: Literal['dict']) -> Dict[str, LabType]:
+        ...
+
+    @overload
+    def getLabelsAs(self, type: Literal['list']) -> List[LabType]:
+        ...
+
+    @overload
+    def getLabelsAs(self, type: Literal['lazy']) -> Iterator[LabType]:
+        ...
 
     def getLabelsAs(self, type: AllowedTypes = 'lazy') -> LabelsType:
         return super(LazyDataset, self).getLabelsAs(type)
@@ -390,6 +430,10 @@ class PandasDataset(Dataset[FeatType, LabType], DillSerialization):
     def getFeaturesAs(self, type: Literal['list']) -> List[FeatType]:
         ...
 
+    @overload
+    def getFeaturesAs(self, type: Literal['lazy']) -> Iterator[FeatType]:
+        ...
+
     def getFeaturesAs(self, type: AllowedTypes = 'array') -> FeaturesType:
         if type == 'array':
             return np.array(self.__features__)
@@ -416,6 +460,10 @@ class PandasDataset(Dataset[FeatType, LabType], DillSerialization):
 
     @overload
     def getLabelsAs(self, type: Literal['list']) -> List[LabType]:
+        ...
+
+    @overload
+    def getLabelsAs(self, type: Literal['lazy']) -> Iterator[LabType]:
         ...
 
     def getLabelsAs(self, type: AllowedTypes = 'array') -> LabelsType:
