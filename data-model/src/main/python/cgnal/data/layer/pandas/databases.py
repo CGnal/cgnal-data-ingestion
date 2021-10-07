@@ -90,7 +90,8 @@ class Table(WithLogging, TableABC):
 
         :return: pd.DataFrame or pd.Series read from pickle
         """
-        return pd.read_pickle(self.filename).query(query)
+        df = pd.read_pickle(self.filename)
+        return df if query is None else df.query(query)
 
     @property
     def data(self) -> pd.DataFrame:
