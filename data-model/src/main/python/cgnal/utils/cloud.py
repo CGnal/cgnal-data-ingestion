@@ -5,7 +5,7 @@ import cgi
 import requests
 
 from typing import Callable
-from cgnal import PathLike
+from cgnal.typing import PathLike
 from cgnal.logging.defaults import WithLogging
 from cgnal.utils.fs import create_dir_if_not_exists
 

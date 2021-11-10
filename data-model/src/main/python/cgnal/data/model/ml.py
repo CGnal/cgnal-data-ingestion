@@ -13,7 +13,7 @@ import pandas as pd  # type: ignore
 from pandas import DataFrame, Series
 from typing_extensions import Literal
 
-from cgnal import T, PathLike
+from cgnal.typing import T, PathLike
 from cgnal.data.model.core import BaseIterable, LazyIterable, CachedIterable, IterGenerator, PickleSerialization, \
     DillSerialization
 from cgnal.utils.decorators import lazyproperty as lazy

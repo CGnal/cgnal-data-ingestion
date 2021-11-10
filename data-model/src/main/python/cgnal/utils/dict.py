@@ -9,7 +9,7 @@ from typing import Iterator, Iterable, List, Tuple, Dict, Any, Callable, Optiona
 from copy import deepcopy as copy
 from collections import Mapping
 from operator import add
-from cgnal import SupportsLessThan, T
+from cgnal.typing import SupportsLessThan, T
 
 
 def groupIterable(iterable: Iterable[T], batch_size: int = 10000) -> Iterator[List[T]]:

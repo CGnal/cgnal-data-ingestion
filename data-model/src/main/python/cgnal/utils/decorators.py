@@ -5,7 +5,7 @@ from glob import glob
 from functools import wraps, partial
 
 from typing import Callable, Any, Union, Dict
-from cgnal import PathLike, T
+from cgnal.typing import PathLike, T
 from cgnal.utils.dict import union
 from cgnal.utils.fs import create_dir_if_not_exists
 

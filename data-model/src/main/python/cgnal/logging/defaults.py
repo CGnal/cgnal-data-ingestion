@@ -6,7 +6,7 @@ from typing import Optional, List, Callable, Union, Any, Type
 from logging import getLogger, basicConfig, config, captureWarnings, Logger, FileHandler
 from deprecated import deprecated
 
-from cgnal import PathLike
+from cgnal.typing import PathLike
 from cgnal.config import load, merge_confs
 from cgnal.logging import WithLoggingABC, DEFAULT_LOG_LEVEL, LevelsDict, LevelTypes, StrLevelTypes
 from cgnal.utils.fs import create_dir_if_not_exists

@@ -3,7 +3,7 @@ from pandas.errors import EmptyDataError  # type: ignore
 from abc import abstractmethod, ABC
 from collections import Iterable
 from typing import Optional, Union, Iterator, Callable, TypeVar, Iterable as IterableType
-from cgnal import PathLike
+from cgnal.typing import PathLike
 from cgnal.data.model.core import IterGenerator
 from cgnal.data.layer import DAO, Archiver, DataVal
 from cgnal.data.layer.pandas.dao import DataFrameDAO, SeriesDAO, DocumentDAO

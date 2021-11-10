@@ -1,7 +1,7 @@
 import errno
 import os
 
-from cgnal import PathLike
+from cgnal.typing import PathLike
 
 
 def mkdir(path: PathLike) -> None:

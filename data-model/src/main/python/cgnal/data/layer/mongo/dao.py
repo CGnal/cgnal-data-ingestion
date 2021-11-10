@@ -2,7 +2,7 @@ from bson.objectid import ObjectId  # type: ignore
 import pandas as pd  # type: ignore
 
 from typing import Dict, Union, Generic, TypeVar, Hashable
-from cgnal import T
+from cgnal.typing import T
 from cgnal.data.layer import DAO
 from cgnal.utils.dict import union
 from cgnal.data.model.text import Document

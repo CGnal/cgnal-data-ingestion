@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from logging import Logger
 from typing_extensions import Literal, TypedDict
-from cgnal import PathLike
+from cgnal.typing import PathLike
 from cgnal.config import BaseConfig
 
 LevelTypes = Literal["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG", "NOTSET", 50, 40, 30, 20, 10, 0]

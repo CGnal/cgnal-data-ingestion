@@ -3,7 +3,7 @@ from abc import abstractmethod, ABC
 from bson.objectid import ObjectId  # type: ignore
 from typing import Any, Callable, Optional, Iterator, TypeVar, Union, Hashable, Dict
 
-from cgnal import T
+from cgnal.typing import T
 from cgnal.data.model.text import Document
 from cgnal.data.model.core import IterGenerator
 from cgnal.data.exceptions import NoTableException

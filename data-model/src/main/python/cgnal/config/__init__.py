@@ -7,7 +7,7 @@ from yaml import Loader, add_implicit_resolver, add_constructor, Node, FullLoade
 from typing import List, Optional, Any, Hashable, Union
 from cfg_load import Configuration
 from functools import reduce
-from cgnal import PathLike
+from cgnal.typing import PathLike
 from datetime import datetime
 import pytz
 from cgnal.utils.dict import union

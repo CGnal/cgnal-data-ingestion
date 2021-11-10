@@ -3,7 +3,7 @@ import pandas as pd  # type: ignore
 from glob import glob
 
 from typing import List, Optional
-from cgnal import PathLike
+from cgnal.typing import PathLike
 from cgnal.utils.fs import create_dir_if_not_exists
 from cgnal.data.layer import DatabaseABC, TableABC
 from cgnal.logging.defaults import WithLogging

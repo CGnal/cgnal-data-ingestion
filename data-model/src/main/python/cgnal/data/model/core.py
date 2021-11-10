@@ -10,7 +10,7 @@ import numpy as np  # type: ignore
 import pandas as pd  # type: ignore
 from pandas.core.tools.datetimes import DatetimeScalar, Timestamp  # type: ignore
 
-from cgnal import PathLike, T, T_co
+from cgnal.typing import PathLike, T, T_co
 from cgnal.utils.dict import groupIterable
 
 if sys.version_info[0] < 3:
