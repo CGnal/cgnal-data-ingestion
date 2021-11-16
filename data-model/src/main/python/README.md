@@ -6,7 +6,7 @@ Package with core abstraction developed by CGnal team
 This library is thought to be run with [pre-commit](https://pre-commit.com/) and [pip-tools](https://github.com/jazzband/pip-tools).
 Follow the subsequent procedure to correctly configure the local repository for development. From root folder run:
 1. `pip install -r requirements/requirements_dev.txt` install development requirements
-2. `bash update_pkg.sh` to install current development version of cgnal-analytics
+2. `bash bin/update_pkg.sh` to install current development version of cgnal-analytics
 3. `pre-commit install` to configure pre-commit for current folder
 
 Optionally, to automate pre-commit configuration for future repos using it, you can run also

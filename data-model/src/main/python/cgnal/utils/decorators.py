@@ -1,10 +1,12 @@
-import os
 import inspect
-import pandas as pd
-from glob import glob
+import os
 from functools import wraps, partial
-
+from glob import glob
 from typing import Callable, Any, Union, Dict
+
+import pandas as pd
+from deprecated import deprecated
+
 from cgnal.typing import PathLike, T
 from cgnal.utils.dict import union
 from cgnal.utils.fs import create_dir_if_not_exists
@@ -17,6 +19,7 @@ def cache(func: Callable[..., T]) -> Callable[..., T]:
     :param func: input function
     :return: function wrapper
     """
+
     @wraps(func)
     def _wrap(obj):
         try:
@@ -25,6 +28,7 @@ def cache(func: Callable[..., T]) -> Callable[..., T]:
             score = func(obj)
             obj.__dict__[func.__name__] = score
             return score
+
     _wrap.__name__ = func.__name__
     return _wrap
 
@@ -104,7 +108,6 @@ class Cached(object):
 
 
 def paramCheck(function: Callable[..., T], allow_none: bool = True) -> Callable[..., T]:
-
     @wraps(function)
     def check(*arguments, **kwargs):
 
@@ -118,7 +121,7 @@ def paramCheck(function: Callable[..., T], allow_none: bool = True) -> Callable[
 
         arg_dict = union({argument: {'type': annotations[argument], 'value': None} for argument in non_default_args},
                          {argument: {'type': annotations.get(argument) if annotations.get(argument)
-                                     else type(default_values[index]), 'value': default_values[index]}
+                         else type(default_values[index]), 'value': default_values[index]}
                           for index, argument in enumerate(default_args)}
                          )
         for index, arg in enumerate(inspect.getfullargspec(function).args):
@@ -129,12 +132,15 @@ def paramCheck(function: Callable[..., T], allow_none: bool = True) -> Callable[
                     if allow_none is False:
                         raise ValueError(f"{arg} cannot be None")
                 else:
-                    if (not isinstance(argIn, arg_dict[arg]['type'])) and (arg_dict[arg]['type'].__name__ != 'NoneType'):
+                    if (not isinstance(argIn, arg_dict[arg]['type'])) and (
+                            arg_dict[arg]['type'].__name__ != 'NoneType'):
                         raise TypeError(f"{arg} parameter must be of type {arg_dict[arg]['type'].__name__}")
 
         return function(*arguments, **kwargs)
+
     return check
 
 
+@deprecated("This decorator is deprecated and will be removed in future versions. Use typeguard library instead")
 def param_check(with_none: bool) -> Callable[..., Any]:
     return partial(paramCheck, allow_none=with_none)

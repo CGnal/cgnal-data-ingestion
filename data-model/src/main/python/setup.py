@@ -34,7 +34,8 @@ setup(
         "cfg-load>=0.8",
         "dill>=0.3",
         "deprecated>=1.2.12",
-        "scipy<=1.5.4"
+        "scipy<=1.5.4",
+        "typeguard>=2.13.0"
     ],
     test_suite='nose.collector',
     tests_require=['nose'],

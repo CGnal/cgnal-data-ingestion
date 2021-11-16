@@ -1,5 +1,6 @@
 import os
 import unittest
+from typeguard import typechecked
 from typing import List, Dict
 
 import pandas as pd
@@ -141,6 +142,18 @@ class TestPandas(TestCase):
                                                     'v2': pd.arrays.SparseArray([1, 0, 0, 0, 1]),
                                                     'v3': pd.arrays.SparseArray([1, 0, 0, 0, 0])}), [0])))
 
+@typechecked
+class MyTestClass:
+    def __init__(self, param: str = 'test'):
+        self.param = param
+
+    @lazy
+    def list_param(self) -> List:
+        return [1, 2, 3]
+
+    def dict_constructor(self, k_vals: List[str], v_vals: List[List[int]]) -> Dict:
+        return {k: v for k, v in zip(k_vals, v_vals)}
+
 
 class MyClass:
     def __init__(self, param: str = 'test'):
@@ -180,6 +193,15 @@ class TestDecorators(TestCase):
         self.assertRaises(TypeError, ex.dict_constructor, k_vals='a', v_vals=[1, 2, 3])
         self.assertRaises(ValueError, ex.dict_constructor, k_vals=None, v_vals=[1, 2, 3])
 
+
+    @logTest
+    def test_param_check_with_typeguard(self):
+        ex = MyTestClass()
+
+        self.assertEqual(ex.dict_constructor(k_vals=['a', 'b', 'c'], v_vals=[[1, 2, 3], [4, 5, 6], [7, 8, 9]]),
+                         {'a': [1, 2, 3], 'b': [4, 5, 6], 'c': [7, 8, 9]})
+        self.assertRaises(TypeError, ex.dict_constructor, k_vals='a', v_vals=[1, 2, 3])
+        self.assertRaises(TypeError, ex.dict_constructor, k_vals=None, v_vals=[1, 2, 3])
 
 class TestDocumentArchivers(TestCase):
 
