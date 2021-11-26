@@ -37,7 +37,7 @@ class DatabaseTests(TestCase):
 
     @logTest
     def test_tables(self):
-        self.assertEqual(db.tables, ['df2', 'df1'])
+        self.assertEqual(set(db.tables), set(['df2', 'df1']))
 
 
 class TableTests(TestCase):
