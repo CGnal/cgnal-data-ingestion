@@ -295,10 +295,11 @@ class TestCsvArchiver(TestCase):
         def update_data(data):
             df = data.copy()
             df.iloc[0]['symbols'] = ["test_symbol_6"]
+            df.iloc[0]['user'] = '007BondJames'
             return df
 
         self.assertEqual(next(self.a.retrieve(update_data)).data['symbols'], ['test_symbol_6'])
-
+        self.assertEqual(next(self.a.retrieve(condition=update_data, sort_by=['user'])).data['user'], '007BondJames')
 
     @logTest
     def test_archiveOne(self):

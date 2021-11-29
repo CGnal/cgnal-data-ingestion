@@ -1,7 +1,8 @@
 import pandas as pd  # type: ignore
 from abc import abstractmethod, ABC
 from bson.objectid import ObjectId  # type: ignore
-from typing import Any, Callable, Optional, Iterator, TypeVar, Union, Hashable, Dict
+from typing import Any, Callable, Optional, Iterator, TypeVar, Union, Hashable, Dict, List
+from pymongo.collection import UpdateResult
 
 from cgnal.typing import T
 from cgnal.data.model.text import Document
@@ -28,13 +29,11 @@ class DAO(ABC):
 class Archiver(ABC):
     """ Object that retrieve data from source and stores it in memory """
 
-    def dao(self) -> DAO: ...
+    @abstractmethod
+    def retrieve(self, condition: Any, sort_by: Any) -> Iterator[Union[pd.Series, pd.DataFrame, Document]]: ...
 
     @abstractmethod
-    def retrieve(self, *args: Any, **kwargs: Any) -> Iterator[Union[pd.Series, pd.DataFrame, Document]]: ...
-
-    @abstractmethod
-    def archive(self, obj: DataVal) -> 'Archiver': ...
+    def archive(self, obj: DataVal) -> Union['Archiver', UpdateResult, List[UpdateResult]]: ...
 
     def map(self, f: Callable[[DataVal], T], *args: Any, **kwargs: Any) -> Iterator[T]:
         for obj in self.retrieve(*args, **kwargs):  # type: DataVal
@@ -44,9 +43,9 @@ class Archiver(ABC):
         for obj in self.retrieve(*args, **kwargs):  # type: DataVal
             f(obj)
 
-    def retrieveGenerator(self, *args: Any, **kwargs: Any) -> IterGenerator[DataVal]:
+    def retrieveGenerator(self, condition: Any, sort_by: Any) -> IterGenerator[DataVal]:
         def __iterator__():
-            return self.retrieve(*args, **kwargs)
+            return self.retrieve(condition=condition, sort_by=sort_by)
         return IterGenerator(__iterator__)
 
 
