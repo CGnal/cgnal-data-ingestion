@@ -2,7 +2,7 @@ import pandas as pd  # type: ignore
 from pandas.errors import EmptyDataError  # type: ignore
 from abc import abstractmethod, ABC
 from collections import Iterable
-from typing import Optional, Union, Iterator, Callable, TypeVar, Iterable as IterableType
+from typing import Optional, Union, Iterator, Callable, List, Iterable as IterableType
 from cgnal.typing import PathLike
 from cgnal.data.model.core import IterGenerator
 from cgnal.data.layer import DAO, Archiver, DataVal
@@ -45,17 +45,16 @@ class PandasArchiver(Archiver, ABC):
         row = self.data.loc[uuid]
         return self.dao.parse(row)
 
-    # TODO: the signature of this method is not compatible with the one of Archiver, since Archive.retrieve requires
-    #  *args and **kwargs
-    def retrieve(self, condition: Optional[Callable[[pd.DataFrame], pd.DataFrame]] = None) -> Iterator[DataVal]:
+    def retrieve(self, condition: Optional[Callable[[pd.DataFrame], pd.DataFrame]] = None,
+                 sort_by: Optional[Union[str, List[str]]] = None) -> Iterator[DataVal]:
         rows = self.data if condition is None else condition(self.data)
+        rows = rows.sort_values(sort_by) if sort_by is not None else rows
         return (self.dao.parse(row) for _, row in rows.iterrows())
 
-    # TODO: the signature of this method is not compatible with the one of Archiver, since Archive.retrieve requires
-    #  *args and **kwargs
-    def retrieveGenerator(self, condition: Optional[Callable[[pd.DataFrame], pd.DataFrame]] = None) -> IterGenerator[DataVal]:
+    def retrieveGenerator(self, condition: Optional[Callable[[pd.DataFrame], pd.DataFrame]] = None,
+                          sort_by: Optional[Union[str, List[str]]] = None) -> IterGenerator[DataVal]:
         def __iterator__():
-            return self.retrieve(condition=condition)
+            return self.retrieve(condition=condition, sort_by=sort_by)
         return IterGenerator(__iterator__)
 
     def archiveOne(self, obj: DataVal):
