@@ -33,6 +33,14 @@ AllowedTypes = Literal['array', 'pandas', 'dict', 'list', 'lazy']
 
 def features_and_labels_to_dataset(X: Union[pd.DataFrame, pd.Series],
                                    y: Optional[Union[pd.DataFrame, pd.Series]] = None) -> 'CachedDataset':
+    """
+    Packs features and labels into a CachedDataset
+
+    :param X: features which can be a pandas dataframe or a pandas series object
+    :param y: labels which can be a pandas dataframe or a pandas series object
+    :return: an instance of :class:`cgnal.data.model.ml.CachedDataset`
+
+    """
     if y is not None:
         df = pd.concat({"features": X, "labels": y}, axis=1)
         return CachedDataset(
@@ -93,6 +101,10 @@ SampleTypes = Union[Sample[FeatType, LabType], MultiFeatureSample[LabType]]
 
 
 class Dataset(BaseIterable[SampleTypes], Generic[FeatType, LabType], ABC):
+    """
+    Base class for representing datasets to be fed to machine learning models, i.e. an
+    iterable over Samples
+    """
 
     @property
     def __lazyType__(self) -> Type[LazyIterable]:
@@ -216,6 +228,11 @@ class Dataset(BaseIterable[SampleTypes], Generic[FeatType, LabType], ABC):
             raise ValueError('Type %s not allowed' % type)
 
     def union(self, other: 'Dataset') -> 'Dataset':
+        """
+        Union of datasets
+        :param other: Dataset
+        :return: LazyDataset
+        """
 
         if not isinstance(other, Dataset):
             raise ValueError("Union can only be done between Datasets. Found %s" % str(type(other)))
@@ -230,6 +247,9 @@ class Dataset(BaseIterable[SampleTypes], Generic[FeatType, LabType], ABC):
 
 
 class CachedDataset(CachedIterable[SampleTypes], Dataset):
+    """
+    Class that represents dataset cached in-memory, derived by a cached iterables of samples
+    """
 
     def to_df(self) -> pd.DataFrame:
         """
@@ -247,14 +267,18 @@ class CachedDataset(CachedIterable[SampleTypes], Dataset):
 
 
 class LazyDataset(LazyIterable[Sample], Dataset):
+    """
+    Class that represents lazy dataset based an generators over samples, i.e. derived by a lazy iterables
+    of samples
+    """
 
     def withLookback(self, lookback: int) -> 'LazyDataset':
         """
-        Create a LazyDataset with features that are an array of lookback lists of samples' features.
+        Create a LazyDataset with features that are an array of ``lookback`` lists of samples' features.
 
         :param lookback: number of samples' features to look at
 
-        :return: LazyDataset with changed samples
+        :return: ``LazyDataset`` with changed samples
         """
 
         def __transformed_sample_generator__() -> Iterator[Sample]:
@@ -265,9 +289,17 @@ class LazyDataset(LazyIterable[Sample], Dataset):
         return LazyDataset(IterGenerator(__transformed_sample_generator__))
 
     def features(self) -> Iterator[FeatType]:
+        """
+        Iterator over sample features
+        :return: iterable of features
+        """
         return self.getFeaturesAs('lazy')
 
     def labels(self) -> Iterator[LabType]:
+        """
+        Iterator over sample labels
+        :return: iterable of labels
+        """
         return self.getLabelsAs('lazy')
 
     @overload
@@ -320,6 +352,14 @@ class LazyDataset(LazyIterable[Sample], Dataset):
 class PandasDataset(Dataset[FeatType, LabType], DillSerialization):
 
     def __init__(self, features: Union[DataFrame, Series], labels: Union[DataFrame, Series, None] = None) -> None:
+        """
+        A datastructure built on top of pandas dataframes that allows to pack features and labels together and
+        obtain features and labels  as a pandas dataframe, numpy array or a dictionary. For unsupervised learning
+        tasks the labels are left as None
+
+        :param features: a dataframe or a series of features
+        :param labels: a dataframe or a series of labels. None in case no labels are present.
+        """
 
         if isinstance(features, pd.Series):
             self.__features__ = features.to_frame()
@@ -339,6 +379,11 @@ class PandasDataset(Dataset[FeatType, LabType], DillSerialization):
 
     @property
     def items(self) -> Iterator[Sample]:
+        """
+        Get features as an iterator of Samples
+
+        :return: Iterator of objects of :class:`cgnal.data.model.ml.Sample`
+        """
         for index, row in self.__features__.to_dict(orient="index").items():
             try:
                 yield Sample(name=index, features=row, label=self.__labels__.loc[index])
@@ -347,18 +392,38 @@ class PandasDataset(Dataset[FeatType, LabType], DillSerialization):
 
     @property
     def cached(self) -> bool:
+        """
+        Tells if dataset is cached
+
+        :return: boolean
+        """
         return True
 
     @lazy
     def features(self) -> pd.DataFrame:
+        """
+        Gets features as pandas dataframe
+
+        :return: pd.DataFrame
+        """
         return self.getFeaturesAs("pandas")
 
     @lazy
     def labels(self) -> pd.DataFrame:
+        """
+        Gets labels as a pandas dataframe
+
+        :return: pd.DataFrame
+        """
         return self.getLabelsAs("pandas")
 
     @property
     def index(self) -> pd.Index:
+        """
+        Property to access index of Dataset
+
+        :return: pd.Index
+        """
         return self.intersection().features.index
 
     @staticmethod
@@ -368,12 +433,30 @@ class PandasDataset(Dataset[FeatType, LabType], DillSerialization):
     @staticmethod
     def createObject(features: Union[pd.DataFrame, pd.Series],
                      labels: Optional[Union[pd.DataFrame, pd.Series]]) -> 'PandasDataset':
+        """
+        Method to create a PandasDataset object
+
+        :param features: features as pandas dataframe/series
+        :param labels: labels as pandas dataframe/series
+        :return: a ``PandasDataset`` object
+        """
         return PandasDataset(features, labels)
 
     def __len__(self) -> int:
+        """
+        Get number of records in the dataset
+
+        :return: int, length of the dataset
+        """
         return len(self.index)
 
     def take(self, n: int) -> 'PandasDataset':
+        """
+        Returns top n records as a PandasDataset
+
+        :param n: int specifying number of records to output
+        :return: ``PandasDataset`` of length n
+        """
         idx = list(self.features.index.intersection(self.labels.index)) if self.labels is not None else list(
             self.features.index)
         return self.loc(idx[:n])
@@ -383,7 +466,7 @@ class PandasDataset(Dataset[FeatType, LabType], DillSerialization):
         Find given indices in features and labels
 
         :param idx: input indices
-        :return: PandasDataset with features and labels filtered on input indices
+        :return: ``PandasDataset`` with features and labels filtered on input indices
         """
 
         features = loc(self.features, idx) if isinstance(self.features, pd.DataFrame) else self.features.loc[idx]
@@ -395,7 +478,7 @@ class PandasDataset(Dataset[FeatType, LabType], DillSerialization):
         """
         Drop NAs from feature and labels
 
-        :return: PandasDataset with features and labels without NAs
+        :return: ``PandasDataset`` with features and labels without NAs
         """
 
         kwargs_feat = {(k.split('__')[1] if k.startswith('feat__') else k): v for k, v in kwargs.items() if not k.startswith('labs__')}
@@ -408,7 +491,7 @@ class PandasDataset(Dataset[FeatType, LabType], DillSerialization):
         """
         Intersect feature and labels indices
 
-        :return: PandasDataset with features and labels with intersected indices
+        :return: ``PandasDataset`` with features and labels with intersected indices
         """
         idx = list(self.features.index.intersection(self.labels.index)) if self.labels is not None else list(
             self.features.index)
@@ -435,6 +518,12 @@ class PandasDataset(Dataset[FeatType, LabType], DillSerialization):
         ...
 
     def getFeaturesAs(self, type: AllowedTypes = 'array') -> FeaturesType:
+        """
+        Get features as numpy array, pandas dataframe or dictionary
+
+        :param type: str, default is 'array', can be 'array','pandas','dict'
+        :return: features according to the given type
+        """
         if type == 'array':
             return np.array(self.__features__)
         elif type == 'pandas':
@@ -467,6 +556,12 @@ class PandasDataset(Dataset[FeatType, LabType], DillSerialization):
         ...
 
     def getLabelsAs(self, type: AllowedTypes = 'array') -> LabelsType:
+        """
+        Get labels as numpy array, pandas dataframe or dictionary
+
+        :param type: str, default is 'array', can be 'array','pandas','dict'
+        :return: labels according to the given type
+        """
         if type == 'array':
             nCols = len(self.__labels__.columns)
             return np.array(self.__labels__) if nCols > 1 else np.array(self.__labels__[self.__labels__.columns[0]])
@@ -483,6 +578,12 @@ class PandasDataset(Dataset[FeatType, LabType], DillSerialization):
 
     @classmethod
     def from_sequence(cls, datasets: Sequence['PandasDataset']):
+        """
+        Method to create a PandasDataset from a list of pandas datasets using pd.concat
+
+        :param datasets: list of PandasDatasets
+        :return: ``PandasDataset``
+        """
         features_iter, labels_iter = zip(*[(dataset.features, dataset.labels) for dataset in datasets])
         labels = None if all([lab is None for lab in labels_iter]) else pd.concat(labels_iter)
         features = pd.concat(features_iter)
@@ -504,6 +605,14 @@ class PandasTimeIndexedDataset(PandasDataset):
     def __init__(self,
                  features: Union[pd.DataFrame, pd.Series],
                  labels: Optional[Union[pd.DataFrame, pd.Series]] = None) -> None:
+        """
+        A datastructure built on top of pandas dataframes that allows to pack features and labels together in a dataset
+        which is time indexed. Features and labels can be obtained as a pandas dataframe, numpy array or a dictionary.
+        For unsupervised learning tasks the labels are left as None.
+
+        :param features: pandas dataframe/series where index elements are dates in string format
+        :param labels: pandas dataframe/series where index elements are dates in string format
+        """
         super(PandasTimeIndexedDataset, self).__init__(features, labels)
         self.__features__.rename(index=pd.to_datetime, inplace=True)
         if self.labels is not None:
@@ -512,4 +621,11 @@ class PandasTimeIndexedDataset(PandasDataset):
     @staticmethod
     def createObject(features: Union[pd.DataFrame, pd.Series],
                      labels: Optional[Union[pd.DataFrame, pd.Series]] = None) -> 'PandasTimeIndexedDataset':
+        """
+        Method to create a PandasTimeIndexedDataset object
+
+        :param features: features as pandas dataframe/series where index elements are dates in string format
+        :param labels: labels as pandas dataframe/series where index elements are dates in string format
+        :return: PandasTimeIndexedDataset
+        """
         return PandasTimeIndexedDataset(features, labels)

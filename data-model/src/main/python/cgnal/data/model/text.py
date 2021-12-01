@@ -128,6 +128,9 @@ class Document(object):
 
 
 class Documents(BaseIterable[Document], ABC):
+    """
+    Base class representing a collection of documents, that is a corpus
+    """
 
     @property
     def __lazyType__(self):
@@ -139,6 +142,9 @@ class Documents(BaseIterable[Document], ABC):
 
 
 class CachedDocuments(CachedIterable[Document], Documents):
+    """
+    Class representing a collection of documents cached in memory
+    """
 
     @staticmethod
     def __get_key__(key: str, dict: Dict[Hashable, Any]) -> Any:
@@ -151,6 +157,12 @@ class CachedDocuments(CachedIterable[Document], Documents):
             return np.nan
 
     def to_df(self, fields: Optional[List[str]] = None) -> pd.DataFrame:
+        """
+        Represent the corpus of documents as a table by unpacking provided fields as columns
+
+        :param fields: Name of the document property to be unpacked as columns
+        :return: dataframe representing the corpus with the given fields
+        """
         _fields = fields if fields is not None else []
         return pd.DataFrame.from_dict({doc.uuid: {field: self.__get_key__(field, doc.data)
                                                   for field in _fields}
@@ -158,4 +170,7 @@ class CachedDocuments(CachedIterable[Document], Documents):
 
 
 class LazyDocuments(LazyIterable[Document], Documents):
+    """
+    Class representing a collection of documents provided by a generator
+    """
     ...
