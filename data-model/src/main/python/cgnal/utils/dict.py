@@ -13,6 +13,12 @@ from cgnal.typing import SupportsLessThan, T
 
 
 def groupIterable(iterable: Iterable[T], batch_size: int = 10000) -> Iterator[List[T]]:
+    """
+    Splits a given iterable into batches of given `batch_size`
+    :param iterable: iterable
+    :param batch_size: int
+    :return: Iterator
+    """
     iterable = iter(iterable)
     return iter(lambda: list(islice(iterable, batch_size)), [])
 
@@ -25,14 +31,22 @@ def pairwise(iterable: Iterable[T]) -> zip:
 
 
 def union(*dicts: dict) -> dict:
+    """
+    Recursive dict merge
+
+    :param dicts: list of dicts
+    :return: merged dict
+    """
     def __dict_merge(dct: dict, merge_dct: dict):
         """ Recursive dict merge. Inspired by :meth:``dict.update()``, instead of
         updating only top-level keys, dict_merge recurses down into dicts nested
         to an arbitrary depth, updating keys. The ``merge_dct`` is merged into
         ``dct``.
+
         :param dct: dict onto which the merge is executed
         :param merge_dct: dct merged into dct
         :return: None
+
         """
         merged = copy(dct)
         for k, v in merge_dct.items():
@@ -47,6 +61,14 @@ def union(*dicts: dict) -> dict:
 
 
 def flattenKeys(input_dict: Dict[str, T], sep: str = ".") -> Dict[str, T]:
+    """
+    Recursively flatten a multilevel nested dict into a single level dict with flattened keys and corresponding values.
+    The keys are joined by the given separator.
+
+    :param input_dict: a multilevel dict ex `{"a": {"b": {"c": 2}}, "d": 2, "e": 3}`
+    :param sep: str delimiter to join keys
+    :return: dict with flattened keys
+    """
     def _flatten_(key: str, value: T) -> List[Tuple[str, T]]:
         if isinstance(value, dict) and (len(value) > 0):
             return reduce(add, [_flatten_(sep.join([key, name]), item) for name, item in value.items()])
@@ -56,6 +78,14 @@ def flattenKeys(input_dict: Dict[str, T], sep: str = ".") -> Dict[str, T]:
 
 
 def unflattenKeys(input_dict: Dict[str, Any], sep: str = ".") -> Dict[str, Any]:
+    """
+    Transforms a dict into a nested dict by splitting keys on the given separator. A dict with key as `{'a.b':2}` will be
+    transformed into a dict of dicts as `{'a':{'b':2}}`
+
+    :param input_dict: dict
+    :param sep: str delimiter to split keys
+    :return: dict
+    """
     def __translate(key: str, value: Any) -> Dict[str, Any]:
         levels = key.split(sep)
         out = value
@@ -70,6 +100,12 @@ def __check(value: Optional[T]) -> bool:
 
 
 def filterNones(_dict: Dict[T, Any]) -> Dict[T, Any]:
+    """
+    Utility function to recursively filter key,value pairs where value is None
+
+    :param _dict: dict with Nones
+    :return: dict without Nones
+    """
     agg = {}
     for k, v in _dict.items():
         if isinstance(v, dict):
@@ -80,5 +116,13 @@ def filterNones(_dict: Dict[T, Any]) -> Dict[T, Any]:
 
 
 def groupBy(lst: Iterable[T], key: Callable[[T], SupportsLessThan]) -> Iterator[Tuple[SupportsLessThan, List[T]]]:
+    """
+    Performs groupBy operation on a list according to the given key. The function uses itertools groupby but on a sorted
+    list.
+
+    :param lst: List
+    :param key: function to be used as a key to perform groupby operation
+    :return: Iterator
+    """
     for k, it in groupby(sorted(lst, key=key), key=key):
         yield k, list(it)

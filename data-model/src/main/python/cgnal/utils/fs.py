@@ -15,6 +15,11 @@ def mkdir(path: PathLike) -> None:
 
 
 def create_dir_if_not_exists(directory: PathLike) -> PathLike:
+    """
+    Creates a directory if it does not exist
+    :param directory: path
+    :return: directory, str
+    """
     if not os.path.exists(directory):
         os.makedirs(directory)
     return directory

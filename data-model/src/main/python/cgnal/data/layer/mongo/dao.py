@@ -43,6 +43,12 @@ class DocumentDAO(DAO, Generic[K, V]):
         return {self.inverse_mapping.get(k, k): v for k, v in d.items()}
 
     def __init__(self, uuid: str = "_id") -> None:
+        """
+        Serializes a Domain object into a Document. A document is an instantiated object of
+        :class:`cgnal.data.model.text.Document`
+
+        :param uuid: sets the name of the uuid field as str
+        """
         self.uuid = uuid
 
     # TODO the output value of this method is a bit inconsistent with the one of following class (SeriesDao) and
@@ -60,24 +66,58 @@ class DocumentDAO(DAO, Generic[K, V]):
         return {"_id": ObjectId(obj.uuid)}
 
     def get(self, obj: Document) -> Dict[Union[K, V], T]:
+        """
+        Get a document as a dictionary
+        :param obj: a Document object to be transformed into a dictionary
+        :return: document object as a dictionary
+        """
         return self.conversion(union(obj.data, self.computeKey(obj)))
 
     def parse(self, json: Dict[K, T]) -> Document:
+        """
+        Get a dictionary as a Document object
+
+        :param json: a json/dictionary to be parsed
+        :return: an object of :class:`cgnal.data.model.text.Document`
+        """
         translated = self.translate(json)
         return Document(str(translated[self.uuid]), self.translate(json))
 
 
 class SeriesDAO(DAO):
     def __init__(self, key_field: str = "_id") -> None:
+        """
+        Serializes a Domain object into a pandas series object. The serialized object is of the :class: pd.Series
+
+        :param key_field: sets the name of the key_field field as str
+        """
         self.key_field = key_field
 
     def computeKey(self, serie: pd.Series) -> Dict[str, ObjectId]:
+        """
+        Get series id as a dictionary. The id is key_field.
+
+        :param serie: the series whose id is to be retrieved
+        :return: dictionary with self.key_field as key and name of the series as value
+        """
         return {self.key_field: ObjectId(serie.name)}
 
     def get(self, serie: pd.Series) -> Dict[K, V]:
+        """
+        Get a series as a dictionary
+
+        :param serie: pd.Series
+        :return: dictionary
+        """
         return serie.to_dict()
 
     def parse(self, json: Dict[K, V]) -> pd.Series:
+        """
+        Get a json as a pd.Series
+
+        :param json: dictionary
+        :return: pd.Series
+        """
         s = pd.Series(json)
         s.name = s.pop(self.key_field)
         return s

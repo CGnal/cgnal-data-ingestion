@@ -11,6 +11,13 @@ from cgnal.data.layer.mongo.dao import DocumentDAO, SeriesDAO
 
 class MongoArchiver(Archiver):
     def __init__(self, collection: Union[Collection, MockCollection], dao: Union[DocumentDAO, SeriesDAO]) -> None:
+        """
+        Archiver to access and modify Mongodb collections via a DAO object.
+
+        :param collection: A Mongodb collection
+        :param dao: An instance of :class:`cgnal.data.layer.mongo.dao.DocumentDao` or
+            :class:`cgnal.data.layer.mongo.dao.SeriesDAO`  that helps to retrieve/archive a document.
+        """
         if not isinstance(collection, Collection) and not isinstance(collection, MockCollection):
             raise TypeError(f"Collection {collection} is not a MongoDb collection")
 
@@ -48,7 +55,7 @@ class MongoArchiver(Archiver):
         Archive one document in collection
 
         :param obj: document to archive
-        :return: an instance of :class:`~pymongo.results.UpdateResult with update operation's results
+        :return: an instance of :class:`pymongo.results.UpdateResult` with update operation's results
         """
         return self.__insert__(obj)
 
@@ -57,7 +64,7 @@ class MongoArchiver(Archiver):
         Insert one document in collection
 
         :param obj: document to archive
-        :return: an instance of :class:`~pymongo.results.UpdateResult with update operation's results
+        :return: an instance of :class:`pymongo.results.UpdateResult` with update operation's results
         """
         return self.collection.update_one(self.dao.computeKey(obj), {"$set": self.dao.get(obj)}, upsert=True)
 
@@ -66,7 +73,7 @@ class MongoArchiver(Archiver):
         Insert many documents in collection
 
         :param objs: documents to archive
-        :return: list of instances of :class:`~pymongo.results.UpdateResult with update operations' results
+        :return: list of instances of :class:`pymongo.results.UpdateResult` with update operations' results
         """
         return [self.__insert__(obj) for obj in objs]
 
@@ -76,7 +83,7 @@ class MongoArchiver(Archiver):
         Archive one or more documents in collection
 
         :param objs: documents to archive
-        :return: list of instances of :class:`~pymongo.results.UpdateResult with update operations' results
+        :return: list of instances of :class:`pymongo.results.UpdateResult` with update operations' results
         """
         if isinstance(objs, Iterable):
             return self.archiveMany(objs)
@@ -97,7 +104,7 @@ class MongoArchiver(Archiver):
         Aggregate collection's documents using given aggregation steps
 
         :param pipeline: a list of aggregation pipeline stages
-        :param allowDiskUse: Enables writing to temporary files. When set to True, aggregation stages can write data to
+        :param allowDiskUse: Enables writing to temporary files. When set to `True`, aggregation stages can write data to
             the _tmp subdirectory of the --dbpath directory. The default is False.
         :return: iterator with parsed aggregated documents
         """

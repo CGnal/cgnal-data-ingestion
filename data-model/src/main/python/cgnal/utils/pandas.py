@@ -4,6 +4,11 @@ from pandas.core.arrays.sparse.dtype import SparseDtype
 
 
 def is_sparse(df: DataFrame) -> bool:
+    """
+    Returns `True` if a dataframe is sparse
+    :param df: pandas dataframe
+    :return: bool
+    """
     return all([isinstance(v, SparseDtype) for k, v in df.dtypes.items()])
 
 
