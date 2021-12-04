@@ -433,8 +433,8 @@ class PandasTimeIndexedDatasetTests(TestCase):
 
         self.assertTrue(isinstance(NewDataset, PandasTimeIndexedDataset))
         self.assertTrue((NewDataset.features == pd.concat([
-            pd.Series([1, 3], index=self.dateStr[0:2], name="feat1"),
-            pd.Series([1, 2], index=self.dateStr[0:2], name="feat2")
+            pd.Series([1, 3], index=map(pd.to_datetime, self.dateStr[0:2]), name="feat1"),
+            pd.Series([1, 2], index=map(pd.to_datetime, self.dateStr[0:2]), name="feat2")
         ], axis=1)).all().all())
         self.assertTrue((NewDataset.labels.values == pd.Series([0, 0], index=self.dateStr[0:2], name="Label").values).all())
 
