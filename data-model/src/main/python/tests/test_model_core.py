@@ -58,11 +58,11 @@ class TestLazyIterable(TestCase):
 
     @logTest
     def test__lazyType__(self):
-        self.assertEqual(str(lazy.__lazyType__), 'cgnal.data.model.core.LazyIterable')
+        self.assertEqual(lazy.__lazyType__, LazyIterable)
 
     @logTest
     def test__cachedType__(self):
-        self.assertEqual(str(lazy.__cachedType__), 'cgnal.data.model.core.CachedIterable')
+        self.assertEqual(lazy.__cachedType__, CachedIterable)
 
     @logTest
     def test_filter(self):
@@ -137,11 +137,11 @@ class TestCachedIterables(TestCase):
 
     @logTest
     def test__lazyType__(self):
-        self.assertEqual(str(lazy.__lazyType__), 'cgnal.data.model.core.LazyIterable')
+        self.assertEqual(lazy.__lazyType__, LazyIterable)
 
     @logTest
     def test__cachedType__(self):
-        self.assertTrue(str(cached.__cachedType__), 'cgnal.data.model.core.CachedIterable')
+        self.assertTrue(cached.__cachedType__, CachedIterable)
 
     @logTest
     def test_take(self):

@@ -124,6 +124,9 @@ def paramCheck(function: Callable[..., T], allow_none: bool = True) -> Callable[
                          else type(default_values[index]), 'value': default_values[index]}
                           for index, argument in enumerate(default_args)}
                          )
+
+        NoneType = type(None)
+
         for index, arg in enumerate(inspect.getfullargspec(function).args):
 
             if arg != 'self':
@@ -133,8 +136,8 @@ def paramCheck(function: Callable[..., T], allow_none: bool = True) -> Callable[
                         raise ValueError(f"{arg} cannot be None")
                 else:
                     if (not isinstance(argIn, arg_dict[arg]['type'])) and (
-                            arg_dict[arg]['type'].__name__ != 'NoneType'):
-                        raise TypeError(f"{arg} parameter must be of type {arg_dict[arg]['type'].__name__}")
+                            arg_dict[arg]['type'] != NoneType):
+                        raise TypeError(f"{arg} parameter must be of type {str(arg_dict[arg]['type'])}")
 
         return function(*arguments, **kwargs)
 
