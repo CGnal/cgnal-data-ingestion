@@ -1,23 +1,18 @@
-import unittest
-import os
-import numpy as np # type: ignore
-import pandas as pd
 import json
+import unittest
 
-from cgnal.tests.core import logTest, TestCase
-
-from cgnal.data.layer.pandas.databases import *
-from cgnal.logging.defaults import getDefaultLogger
+import numpy as np  # type: ignore
 
 from cgnal.data.layer.pandas.dao import DataFrameDAO, SeriesDAO, DocumentDAO
+from cgnal.data.layer.pandas.databases import *
 from cgnal.data.model.text import Document
-
+from cgnal.logging.defaults import getDefaultLogger
+from cgnal.tests.core import logTest, TestCase
 
 logger = getDefaultLogger()
 
 
 class TestDocumentDAO(TestCase):
-
     dict_doc = {"name": "Bob", "languages": ["English", "Fench"]}
     key_doc = '123'
     doc = Document(key_doc, dict_doc)
@@ -33,19 +28,19 @@ class TestDocumentDAO(TestCase):
 
     @logTest
     def test_parse(self):
-        self.assertTrue(isinstance(DocumentDAO().parse(self.series_doc),Document))
+        self.assertTrue(isinstance(DocumentDAO().parse(self.series_doc), Document))
         self.assertTrue(DocumentDAO().parse(self.series_doc).data == self.doc.data)
 
 
 class TestDataFrameDAO(TestCase):
-
-    df1 = pd.DataFrame([[1, 2, 3], [6, 5, 4]], columns = ['a', 'b', 'c'])
-    key_df1 = hash(json.dumps({str(k): str(v) for k, v in df1.to_dict().items()})) # type: ignore
+    df1 = pd.DataFrame([[1, 2, 3], [6, 5, 4]], columns=['a', 'b', 'c'])
+    key_df1 = hash(json.dumps({str(k): str(v) for k, v in df1.to_dict().items()}))  # type: ignore
     index = [
         np.array(["a", "a", "b", "b", "c", "c"]),
         np.array([0, 1, 0, 1, 0, 1]),
     ]
     series_df1 = pd.Series([1, 6, 2, 5, 3, 4], index=index)
+    series_df1.name = key_df1
 
     @logTest
     def test_computeKey(self):
@@ -70,16 +65,16 @@ class TestDataFrameDAO(TestCase):
         DataFrameDAO().addName(df3, 'df1_name')
         self.assertEqual(df3.name, 'df1_name')
 
-class TestSeriesDAO(TestCase):
 
+class TestSeriesDAO(TestCase):
     name_s1 = 'test_series'
-    s1 = pd.Series(np.ones(5), index = range(5), name = name_s1)
+    s1 = pd.Series(np.ones(5), index=range(5), name=name_s1)
     s2 = pd.Series(np.zeros(5), index=range(5))
 
     @logTest
     def test_computeKey(self):
         self.assertEqual(SeriesDAO().computeKey(self.s1), self.name_s1)
-        self.assertEqual(SeriesDAO().computeKey(self.s2), None)
+        self.assertRaises(ValueError, lambda: SeriesDAO().computeKey(self.s2))
 
     @logTest
     def test_get(self):
@@ -91,6 +86,28 @@ class TestSeriesDAO(TestCase):
         self.assertTrue(isinstance(SeriesDAO().get(self.s1), pd.Series))
         self.assertEqual(SeriesDAO().parse(self.s1), self.s1)
 
+    @logTest
+    def test_mapping(self):
+        mappings = {k: k + 1 for k in self.s1.index}
+
+        dao = SeriesDAO(mapping=mappings)
+
+        parsed = dao.parse(self.s1)
+
+        self.assertEqual(parsed, self.s1.rename(mappings))
+        self.assertEqual(dao.get(parsed), self.s1)
+
+    @logTest
+    def test_keys(self):
+        keys = [0, 1]
+
+        dao = SeriesDAO(keys=keys)
+
+        parsed = dao.parse(self.s1)
+
+        self.assertEqual(parsed.to_dict(), self.s1.drop(keys).to_dict())
+        self.assertEqual(dao.get(parsed).to_dict(), self.s1.to_dict())
+
+
 if __name__ == "__main__":
     unittest.main()
-

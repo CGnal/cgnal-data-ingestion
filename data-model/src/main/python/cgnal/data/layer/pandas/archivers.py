@@ -82,6 +82,7 @@ class PandasArchiver(Archiver[T], ABC):
         :return: generator of rows satisfying given condition. The generator is of the the type
             :class:`cgnal.data.model.core.IterGenerator` (ordered)
         """
+
         def __iterator__():
             return self.retrieve(condition=condition, sort_by=sort_by)
 
@@ -106,12 +107,7 @@ class PandasArchiver(Archiver[T], ABC):
         :return: self i.e. an instance of ``PandasArchiver`` with updated self.data object
 
         """
-        def create_df(obj):
-            s = self.dao.get(obj)
-            s.name = self.dao.computeKey(obj)
-            return s.to_frame().T
-
-        new = pd.concat([create_df(obj) for obj in objs], sort=True)
+        new = pd.concat([self.dao.get(obj).to_frame().T for obj in objs], sort=True)
         self.data = pd.concat([self.data.loc[set(self.data.index).difference(new.index)], new], sort=True)
         return self
 

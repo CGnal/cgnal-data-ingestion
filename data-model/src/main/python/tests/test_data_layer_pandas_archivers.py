@@ -1,25 +1,23 @@
-import unittest
 import os
-import numpy as np # type: ignore
-import pandas as pd
 import shutil
+import unittest
 
-from data import TMP_FOLDER, DATA_FOLDER
-from cgnal.tests.core import TestCase, logTest
+import numpy as np  # type: ignore
+import pandas as pd
 
-from cgnal.logging.defaults import getDefaultLogger
-
+from cgnal.data.layer.pandas.archivers import TableArchiver, PickleArchiver, CsvArchiver
 from cgnal.data.layer.pandas.dao import DataFrameDAO, SeriesDAO, DocumentDAO
 from cgnal.data.layer.pandas.databases import Database
-from cgnal.data.layer.pandas.archivers import TableArchiver, PickleArchiver, CsvArchiver, PandasArchiver
 from cgnal.data.model.core import IterGenerator
+from cgnal.logging.defaults import getDefaultLogger
+from cgnal.tests.core import TestCase, logTest
+from data import TMP_FOLDER, DATA_FOLDER
 
 TEST_DATA_PATH = DATA_FOLDER
 logger = getDefaultLogger()
 
 
 class TestTableArchiver(TestCase):
-
     db = Database(TMP_FOLDER)
     table1 = db.table("my_table_1")
     table2 = db.table("my_table_2")
@@ -38,7 +36,6 @@ class TestTableArchiver(TestCase):
 
     @logTest
     def test_write_read(self):
-
         table3 = self.db.table("my_table_3")
         a = TableArchiver(table3, self.dao_df)
         a.archive([self.df1]).__write__()
@@ -57,13 +54,12 @@ class TestTableArchiver(TestCase):
         self.assertEqual(self.df1, next(a.retrieve()))
 
         def multiply(df):
-            return df*2
+            return df * 2
 
-        self.assertEqual(self.df1*2, next(a.retrieve(multiply)))
+        self.assertEqual(self.df1 * 2, next(a.retrieve(multiply)))
 
     @logTest
     def test_data(self):
-
         table3 = self.db.table("my_table_3")
         a = TableArchiver(table3, self.dao_df)
         a.archive([self.df1]).__write__()
@@ -79,7 +75,6 @@ class TestTableArchiver(TestCase):
 
     @logTest
     def test_archiveOne(self):
-
         a = TableArchiver(self.table1, self.dao_df)
         a.archiveOne(self.df1)
         retrieved = a.retrieveById(self.df1.name)
@@ -92,7 +87,6 @@ class TestTableArchiver(TestCase):
 
     @logTest
     def test_archiveMany(self):
-
         a = TableArchiver(self.table1, self.dao_df)
         a.archiveMany([self.df1, self.df2])
         retrieved = a.retrieve()
@@ -107,7 +101,6 @@ class TestTableArchiver(TestCase):
 
     @logTest
     def test_archive(self):
-
         a = TableArchiver(self.table1, self.dao_df)
         a.archive([self.df1, self.df2])
         retrieved = a.retrieve()
@@ -161,12 +154,11 @@ class TestTableArchiver(TestCase):
 
 
 class TestPickleArchiver(TestCase):
-
-    df1 = pd.DataFrame({"row1": np.ones(5), "row2": 2*np.ones(5)}).T
-    df2 = pd.DataFrame({"a": 5*np.ones(5), "b": 6*np.ones(5)})
+    df1 = pd.DataFrame({"row1": np.ones(5), "row2": 2 * np.ones(5)}).T
+    df2 = pd.DataFrame({"a": 5 * np.ones(5), "b": 6 * np.ones(5)})
     df2.name = 'row1'
-    s1 = pd.Series(3*np.ones(5), index=np.arange(0, 5), name='row3')
-    s2 = pd.Series(4*np.ones(5), index=np.arange(0, 5), name='row4')
+    s1 = pd.Series(3 * np.ones(5), index=np.arange(0, 5), name='row3')
+    s2 = pd.Series(4 * np.ones(5), index=np.arange(0, 5), name='row4')
     dao_series = SeriesDAO()
     dao_df = DataFrameDAO()
 
@@ -207,14 +199,14 @@ class TestPickleArchiver(TestCase):
         self.df1.to_pickle(TMP_FOLDER + '/df1.pkl')
         a = PickleArchiver(TMP_FOLDER + "/df1.pkl", SeriesDAO())
         retrieved = a.retrieve()
-        row1 = pd.Series(np.ones(5), index=np.arange(0, 5), name = 'row1')
+        row1 = pd.Series(np.ones(5), index=np.arange(0, 5), name='row1')
         self.assertEqual(next(retrieved), row1)
-        self.assertEqual(next(retrieved), pd.Series(2*np.ones(5), index=np.arange(0, 5), name='row2'))
+        self.assertEqual(next(retrieved), pd.Series(2 * np.ones(5), index=np.arange(0, 5), name='row2'))
 
         def multiply(series):
-            return series*2
+            return series * 2
 
-        self.assertEqual(row1*2, next(a.retrieve(multiply)))
+        self.assertEqual(row1 * 2, next(a.retrieve(multiply)))
 
     @logTest
     def test_archiveOne(self):
@@ -244,11 +236,11 @@ class TestPickleArchiver(TestCase):
         self.assertEqual(next(retrieved), a.retrieveById('row2'))
 
         def multiply(series):
-            return series*2
+            return series * 2
 
         retrieved = a.retrieveGenerator(multiply).iterator
-        self.assertEqual(next(retrieved), a.retrieveById('row1')*2)
-        self.assertEqual(next(retrieved), a.retrieveById('row2')*2)
+        self.assertEqual(next(retrieved), a.retrieveById('row1') * 2)
+        self.assertEqual(next(retrieved), a.retrieveById('row2') * 2)
 
     @logTest
     def test_retrieveById(self):
@@ -257,16 +249,56 @@ class TestPickleArchiver(TestCase):
         self.assertEqual(a.retrieveById('row1'), pd.Series(np.ones(5), index=np.arange(0, 5), name='row1'))
         self.assertEqual(a.retrieveById('row2'), pd.Series(2 * np.ones(5), index=np.arange(0, 5), name='row2'))
 
+    @logTest
+    def test_archive_not_existing_file(self):
+        filename = os.path.join(TMP_FOLDER, "test.p")
+        self.assertFalse(os.path.exists(filename))
+
+        serie = pd.Series({"b": 1, "c": 2})
+        archiver = PickleArchiver(filename, SeriesDAO(mapping={"a": "b"}))
+
+        archiver.archiveOne(serie)
+        archiver.commit()
+
+        self.assertTrue(os.path.exists(filename))
+        self.assertTrue("a" in pd.read_pickle(filename).columns)
+
+        os.remove(filename)
+        self.assertFalse(os.path.exists(filename))
+
+    @logTest
+    def test_multikey_index(self):
+        filename = os.path.join(TMP_FOLDER, "test.p")
+        self.assertFalse(os.path.exists(filename))
+
+        serie = pd.Series({"b": 1, "c": 2}, name=(2,))
+        archiver = PickleArchiver(filename, SeriesDAO(mapping={"a": "b"}, keys=["f"]))
+
+        archiver.archiveOne(serie)
+        archiver.commit()
+
+        self.assertTrue(os.path.exists(filename))
+
+        data: pd.DataFrame = pd.read_pickle(filename)
+        self.assertEqual(data.iloc[0]["f"], 2)
+
+        retrieved = next(archiver.retrieve())
+
+        self.assertEqual(serie, retrieved)
+
+        os.remove(filename)
+        self.assertFalse(os.path.exists(filename))
+
 
 class TestCsvArchiver(TestCase):
-
     dao = DocumentDAO()
     shutil.copy(DATA_FOLDER + '/test.csv', TMP_FOLDER + '/test_copy.csv')
     a = CsvArchiver(os.path.join(TMP_FOLDER, 'test_copy.csv'), dao)
 
     @logTest
     def test_data(self):
-        self.assertTrue((self.a.data.columns == ['date', 'hashtags', 'reply_to', 'symbols', 'text', 'user', 'user_mentions']).all())
+        self.assertTrue(
+            (self.a.data.columns == ['date', 'hashtags', 'reply_to', 'symbols', 'text', 'user', 'user_mentions']).all())
         self.assertEqual(len(self.a.data), 20)
         self.assertEqual(self.a.data.loc[974782389837844480]['user'], 'MasteredMedia')
 
