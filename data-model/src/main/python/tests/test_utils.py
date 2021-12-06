@@ -203,6 +203,41 @@ class TestDecorators(TestCase):
         self.assertRaises(TypeError, ex.dict_constructor, k_vals='a', v_vals=[1, 2, 3])
         self.assertRaises(TypeError, ex.dict_constructor, k_vals=None, v_vals=[1, 2, 3])
 
+    def test_cache_io(self):
+        from cgnal.utils.decorators import Cached
+        # from time import sleep
+
+        class A(Cached):
+            def __init__(self, cnt):
+                self.cnt = cnt
+
+            @Cached.cache
+            def my_long_computation(self):
+                # _ = sleep(1)
+                self.cnt = self.cnt + 1
+                return self.cnt
+
+        a = A(0)
+
+        # This should compute the value
+        self.assertEqual(a.my_long_computation, 1)
+        # This should get the retrieve data
+        self.assertEqual(a.my_long_computation, 1)
+
+        filename = os.path.join(TMP_FOLDER, "save_pickles_test")
+
+        a.save_pickles(filename)
+
+        b = A(1)
+
+        b.load(filename)
+        # This should get the retrieve data
+        self.assertEqual(b.my_long_computation, 1)
+        b.clear_cache()
+        # This should compute the value
+        self.assertEqual(b.my_long_computation, 2)
+
+
 class TestDocumentArchivers(TestCase):
 
     url = "http://192.168.2.110:8686"

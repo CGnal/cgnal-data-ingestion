@@ -40,6 +40,25 @@ def lazyproperty(obj: Any) -> property:
 class Cached(object):
     __cache__: dict = {}
 
+    @staticmethod
+    def cache(func: Callable[['Cached'], T]) -> property:
+        """
+        Decorator to cache function return values
+
+        :param func: input function
+        :return: function wrapper
+        """
+
+        @wraps(func)
+        def _wrap(obj: 'Cached'):
+            try:
+                return obj.__cache__[func.__name__]
+            except KeyError:
+                score = func(obj)
+                obj.__cache__[func.__name__] = score
+                return score
+        return property(_wrap)
+
     def clear_cache(self) -> None:
         """
         Clear cache of the object
@@ -57,8 +76,7 @@ class Cached(object):
         """
         path = create_dir_if_not_exists(path)
 
-        for k, _ in self.__cache__.items():
-            data = getattr(self, k)
+        for k, data in self.__cache__.items():
             Cached.save_element(os.path.join(path, k), data)
 
     @staticmethod
@@ -76,7 +94,15 @@ class Cached(object):
         elif isinstance(obj, pd.DataFrame) or isinstance(obj, pd.Series):
             pd.to_pickle(obj, "%s.p" % filename)
         else:
-            raise ValueError("Cannot save input of type %s" % str(obj.__class__))
+            try:
+                pd.to_pickle(obj, "%s.p" % filename)
+            except:
+                raise ValueError("Cannot save input of type %s" % str(obj.__class__))
+
+    @classmethod
+    def load(cls, filename: PathLike) -> None:
+        _ = cls.load_element(filename)
+        return None
 
     @staticmethod
     def load_element(filename: PathLike) -> Union[Dict[str, pd.DataFrame], pd.DataFrame]:
