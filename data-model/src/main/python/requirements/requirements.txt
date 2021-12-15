@@ -4,21 +4,25 @@
 #
 #    pip-compile --no-emit-index-url --output-file=requirements/requirements.txt setup.py
 #
---trusted-host 192.168.2.110
-
-certifi==2021.5.30
+backports.zoneinfo==0.2.1
+    # via
+    #   pytz-deprecation-shim
+    #   tzlocal
+certifi==2021.10.8
     # via requests
 cfg-load==0.9.0
     # via cgnal-core (setup.py)
-chardet==4.0.0
+charset-normalizer==2.0.9
     # via requests
-deprecated==1.2.12
+deprecated==1.2.13
     # via cgnal-core (setup.py)
-dill==0.3.3
+dill==0.3.4
     # via cgnal-core (setup.py)
-idna==2.10
+idna==3.3
     # via requests
-mongomock==3.22.1
+importlib-resources==5.4.0
+    # via backports.zoneinfo
+mongomock==3.23.0
     # via cgnal-core (setup.py)
 mpu[io]==0.23.1
     # via cfg-load
@@ -26,25 +30,30 @@ numpy==1.19.5
     # via
     #   cgnal-core (setup.py)
     #   pandas
+    #   scipy
 pandas==1.1.5
     # via cgnal-core (setup.py)
-pymongo==3.11.4
+pymongo==4.0.1
     # via cgnal-core (setup.py)
-python-dateutil==2.8.1
+python-dateutil==2.8.2
     # via pandas
-pytz==2021.1
+pytz-deprecation-shim==0.1.0.post0
+    # via tzlocal
+pytz==2021.3
     # via
     #   cfg-load
     #   mpu
     #   pandas
-pyyaml==5.4.1
+pyyaml==6.0
     # via
     #   cfg-load
     #   cgnal-core (setup.py)
-requests==2.25.1
+requests==2.26.0
     # via
     #   cfg-load
     #   cgnal-core (setup.py)
+scipy==1.5.4
+    # via cgnal-core (setup.py)
 sentinels==1.0.0
     # via mongomock
 six==1.16.0
@@ -52,12 +61,18 @@ six==1.16.0
     #   cfg-load
     #   mongomock
     #   python-dateutil
-tzlocal==2.1
+typeguard==2.13.3
+    # via cgnal-core (setup.py)
+tzdata==2021.5
+    # via pytz-deprecation-shim
+tzlocal==4.1
     # via mpu
-urllib3==1.26.5
+urllib3==1.26.7
     # via requests
-wrapt==1.12.1
+wrapt==1.13.3
     # via deprecated
+zipp==3.6.0
+    # via importlib-resources
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools

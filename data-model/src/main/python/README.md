@@ -17,7 +17,7 @@ The aim of the library is to provide extensive
 support for developing machine learning based applications with a focus on practicing clean code and modular design. 
 
 ## Supported Python version
-Currently the library supports Python 3.6.x 
+Currently the library supports Python 3.6+
 
 ## Features
 Some cool features that we are proud to mention : 
