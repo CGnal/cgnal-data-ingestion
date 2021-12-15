@@ -6,7 +6,11 @@ def readme():
         return f.read()
 
 
-def get_version(VERSIONFILE = "cgnal/_version.py"):
+with open("requirements/requirements.in", "r") as fid:
+    reqs = [line.replace("\n", "") for line in fid.readlines()]
+
+
+def get_version(VERSIONFILE="cgnal/_version.py"):
     import re
     verstrline = open(VERSIONFILE, "rt").read()
     VSRE = r"^__version__: str = ['\"]([^'\"]*)['\"]"
@@ -23,20 +27,7 @@ setup(
     description='Python Core Functionalities Package',
     long_description=readme(),
     packages=find_packages(exclude=['contrib', 'docs', 'tests']),
-    install_requires=[
-        "pymongo>=3.6",
-        "mongomock>=3.19",
-        "numpy>=1.16",
-        "setuptools>=40.3",
-        "PyYAML>=5.1",
-        "pandas>=1.0",
-        "requests>=2.22",
-        "cfg-load>=0.8",
-        "dill>=0.3",
-        "deprecated>=1.2.12",
-        "scipy<=1.5.4",
-        "typeguard>=2.13.0"
-    ],
+    install_requires=reqs,
     test_suite='nose.collector',
     tests_require=['nose'],
     classifiers=[

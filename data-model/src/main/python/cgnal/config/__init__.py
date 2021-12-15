@@ -24,7 +24,11 @@ def path_constructor(loader: Union[Loader, FullLoader, UnsafeLoader], node: Node
     """
     value = node.value
     match = path_matcher.match(value)
-    env_var = match.group()[2:-1]  # TODO: make the solution work also when match is None
+
+    if match is None:
+        raise SyntaxError("Can't match pattern")
+
+    env_var = match.group()[2:-1]
     return os.environ.get(env_var) + value[match.end():]
 
 
