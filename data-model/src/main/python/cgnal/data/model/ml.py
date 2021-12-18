@@ -24,10 +24,10 @@ if sys.version_info[0] < 3:
 else:
     from itertools import islice
 
-FeatType = TypeVar('FeatType', List[Any], Tuple[Any], np.ndarray, Dict[str, Any])
+FeatType = TypeVar('FeatType', bound=Union[List[Any], Tuple[Any], np.ndarray, Dict[str, Any]])
 LabType = TypeVar('LabType', int, float)
-FeaturesType = Union[np.ndarray, pd.DataFrame, Dict[str, FeatType], List[FeatType], Iterator[FeatType]]
-LabelsType = Union[np.ndarray, pd.DataFrame, Dict[str, LabType], List[LabType], Iterator[LabType]]
+FeaturesType = Union[np.ndarray, pd.DataFrame, Dict[Union[str, int], FeatType], List[FeatType], Iterator[FeatType]]
+LabelsType = Union[np.ndarray, pd.DataFrame, Dict[Union[str, int], LabType], List[LabType], Iterator[LabType]]
 AllowedTypes = Literal['array', 'pandas', 'dict', 'list', 'lazy']
 
 
@@ -51,7 +51,7 @@ def features_and_labels_to_dataset(X: Union[pd.DataFrame, pd.Series],
 
 
 class Sample(PickleSerialization, Generic[FeatType, LabType]):
-    def __init__(self, features: FeatType, label: Optional[LabType] = None, name: Optional[str] = None) -> None:
+    def __init__(self, features: FeatType, label: Optional[LabType] = None, name: Optional[Union[int, str, Any]] = None) -> None:
         """
         Object representing a single sample of a training or test set
 
@@ -61,7 +61,7 @@ class Sample(PickleSerialization, Generic[FeatType, LabType]):
         """
         self.features: FeatType = features
         self.label: Optional[LabType] = label
-        self.name: Optional[str] = name
+        self.name: Optional[Union[str, int, Any]] = name
 
 
 class MultiFeatureSample(Sample[List[np.ndarray], LabType]):
@@ -115,11 +115,11 @@ class Dataset(BaseIterable[SampleTypes], Generic[FeatType, LabType], ABC):
         return CachedDataset
 
     @staticmethod
-    def checkNames(x: Optional[str]) -> str:
+    def checkNames(x: Optional[Union[str, int, Any]]) -> Union[str, int]:
         if x is None:
             raise AttributeError("With type 'dict' all samples must have a name")
         else:
-            return x
+            return x if isinstance(x, int) else str(x)
 
     @overload
     def getFeaturesAs(self, type: Literal['array']) -> np.ndarray:
@@ -130,7 +130,7 @@ class Dataset(BaseIterable[SampleTypes], Generic[FeatType, LabType], ABC):
         ...
 
     @overload
-    def getFeaturesAs(self, type: Literal['dict']) -> Dict[str, FeatType]:
+    def getFeaturesAs(self, type: Literal['dict']) -> Dict[Union[str, int], FeatType]:
         ...
 
     @overload
@@ -159,7 +159,7 @@ class Dataset(BaseIterable[SampleTypes], Generic[FeatType, LabType], ABC):
             return (sample.features for sample in self)
         elif type == 'pandas':
             try:
-                features: Union[Dict[str, FeatType], List[FeatType]] = self.getFeaturesAs('dict')
+                features: Union[Dict[Union[str, int], FeatType], List[FeatType]] = self.getFeaturesAs('dict')
                 try:
                     return pd.DataFrame(features).T
                 except ValueError:
@@ -183,7 +183,7 @@ class Dataset(BaseIterable[SampleTypes], Generic[FeatType, LabType], ABC):
         ...
 
     @overload
-    def getLabelsAs(self, type: Literal['dict']) -> Dict[str, LabType]:
+    def getLabelsAs(self, type: Literal['dict']) -> Dict[Union[str, int], LabType]:
         ...
 
     @overload
@@ -194,7 +194,7 @@ class Dataset(BaseIterable[SampleTypes], Generic[FeatType, LabType], ABC):
     def getLabelsAs(self, type: Literal['lazy']) -> Iterator[LabType]:
         ...
 
-    def getLabelsAs(self, type: AllowedTypes = 'array') -> LabelsType:
+    def getLabelsAs(self, type: AllowedTypes = 'array') -> Optional[LabelsType]:
         """
         Object of the specified type containing the labels
 
@@ -212,7 +212,7 @@ class Dataset(BaseIterable[SampleTypes], Generic[FeatType, LabType], ABC):
             return (sample.label for sample in self)
         elif type == 'pandas':
             try:
-                labels: Union[List[LabType], Dict[str, LabType]] = self.getLabelsAs('dict')
+                labels: Union[List[LabType], Dict[Union[str, int], LabType]] = self.getLabelsAs('dict')
                 try:
                     return pd.DataFrame(labels).T
                 except ValueError:
@@ -311,7 +311,7 @@ class LazyDataset(LazyIterable[Sample], Dataset):
         ...
 
     @overload
-    def getFeaturesAs(self, type: Literal['dict']) -> Dict[str, FeatType]:
+    def getFeaturesAs(self, type: Literal['dict']) -> Dict[Union[str, int], FeatType]:
         ...
 
     @overload
@@ -334,7 +334,7 @@ class LazyDataset(LazyIterable[Sample], Dataset):
         ...
 
     @overload
-    def getLabelsAs(self, type: Literal['dict']) -> Dict[str, LabType]:
+    def getLabelsAs(self, type: Literal['dict']) -> Dict[Union[str, int], LabType]:
         ...
 
     @overload
@@ -351,7 +351,7 @@ class LazyDataset(LazyIterable[Sample], Dataset):
 
 class PandasDataset(Dataset[FeatType, LabType], DillSerialization):
 
-    def __init__(self, features: Union[DataFrame, Series], labels: Union[DataFrame, Series, None] = None) -> None:
+    def __init__(self, features: Union[DataFrame, Series], labels: Optional[Union[DataFrame, Series]] = None) -> None:
         """
         A datastructure built on top of pandas dataframes that allows to pack features and labels together and
         obtain features and labels  as a pandas dataframe, numpy array or a dictionary. For unsupervised learning
@@ -373,9 +373,9 @@ class PandasDataset(Dataset[FeatType, LabType], DillSerialization):
         elif isinstance(labels, pd.DataFrame):
             self.__labels__ = labels
         elif labels is None:
-            self.__labels__ = labels
+            self.__labels__ = labels # type: ignore
         else:
-            raise ValueError("Labels must be of type pandas.Series or pandas.DataFrame")
+            raise ValueError("Labels must be of type pandas.Series or pandas.DataFrame or None")
 
     @property
     def items(self) -> Iterator[Sample]:
@@ -384,9 +384,10 @@ class PandasDataset(Dataset[FeatType, LabType], DillSerialization):
 
         :return: Iterator of objects of :class:`cgnal.data.model.ml.Sample`
         """
-        for index, row in self.__features__.to_dict(orient="index").items():
+        for index, row in dict(self.__features__.to_dict(orient="index")).items():
             try:
-                yield Sample(name=index, features=row, label=self.__labels__.loc[index])
+                yield Sample(name=index, features=row,
+                             label=self.__labels__.loc[index] if self.__labels__ is not None else None)
             except AttributeError:
                 yield Sample(name=index, features=row, label=None)
 
@@ -506,7 +507,7 @@ class PandasDataset(Dataset[FeatType, LabType], DillSerialization):
         ...
 
     @overload
-    def getFeaturesAs(self, type: Literal['dict']) -> Dict[str, FeatType]:
+    def getFeaturesAs(self, type: Literal['dict']) -> Dict[Union[str, int], FeatType]:
         ...
 
     @overload
@@ -529,7 +530,7 @@ class PandasDataset(Dataset[FeatType, LabType], DillSerialization):
         elif type == 'pandas':
             return self.__features__
         elif type == 'dict':
-            return {k: list(row) for k, row in self.__features__.iterrows()}
+            return {self.checkNames(k): list(row) for k, row in self.__features__.iterrows()}
         else:
             raise ValueError(
                 f'"type" value "{type}" not allowed. Only allowed values for "type" are "array", "dict" or '
@@ -544,7 +545,7 @@ class PandasDataset(Dataset[FeatType, LabType], DillSerialization):
         ...
 
     @overload
-    def getLabelsAs(self, type: Literal['dict']) -> Dict[str, LabType]:
+    def getLabelsAs(self, type: Literal['dict']) -> Dict[Union[str, int], LabType]:
         ...
 
     @overload
@@ -562,19 +563,24 @@ class PandasDataset(Dataset[FeatType, LabType], DillSerialization):
         :param type: str, default is 'array', can be 'array','pandas','dict'
         :return: labels according to the given type
         """
-        if type == 'array':
-            nCols = len(self.__labels__.columns)
-            return np.array(self.__labels__) if nCols > 1 else np.array(self.__labels__[self.__labels__.columns[0]])
-        elif type == 'pandas':
-            return self.__labels__
-        elif type == 'dict':
-            nCols = len(self.__labels__.columns)
-            return self.__labels__.to_dict(orient="index") if nCols > 1 \
-                else self.__labels__[self.__labels__.columns[0]].to_dict()
+        if self.__labels__ is None:
+            return None
+        elif isinstance(self.__labels__, pd.DataFrame):
+            if type == 'array':
+                nCols = len(self.__labels__.columns)
+                return np.array(self.__labels__) if nCols > 1 else np.array(self.__labels__[self.__labels__.columns[0]])
+            elif type == 'pandas':
+                return self.__labels__
+            elif type == 'dict':
+                nCols = len(self.__labels__.columns)
+                return dict(self.__labels__.to_dict(orient="index")) if nCols > 1 \
+                    else self.__labels__[self.__labels__.columns[0]].to_dict()
+            else:
+                raise ValueError(
+                    f'"type" value "{type}" not allowed. Only allowed values for "type" are "array", "dict" or '
+                    f'"pandas"')
         else:
-            raise ValueError(
-                f'"type" value "{type}" not allowed. Only allowed values for "type" are "array", "dict" or '
-                f'"pandas"')
+            raise ValueError("type of labels not allowed for this function")
 
     @classmethod
     def from_sequence(cls, datasets: Sequence['PandasDataset']):

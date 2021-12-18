@@ -117,10 +117,12 @@ def configFromFiles(config_files: List[PathLike], capture_warnings: bool = True,
     if catch_exceptions is not None:
         except_logger = getLogger(catch_exceptions)
         print(f'Catching excetptions with {except_logger.name} logger using handlers '
-              f'{", ".join([x.name for x in except_logger.handlers])}')
+              f'{", ".join([x.name for x in except_logger.handlers if x.name is not None])}')
 
-        def handle_exception(exc_type: Type[BaseException], exc_value: BaseException, exc_traceback: TracebackType) -> None:
-            if issubclass(exc_type, KeyboardInterrupt):
+        def handle_exception(
+                exc_type: Type[BaseException], exc_value: BaseException, exc_traceback: Optional[TracebackType]
+        ) -> Any:
+            if issubclass(exc_type, KeyboardInterrupt) and exc_traceback is not None:
                 sys.__excepthook__(exc_type, exc_value, exc_traceback)
             else:
                 except_logger.error(f"{exc_type.__name__}: {exc_value}", exc_info=(exc_type, exc_value, exc_traceback))

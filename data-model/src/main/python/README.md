@@ -59,9 +59,27 @@ bash bin/run_tests.sh
 ```
 
 ## Mypy 
+
+To run static-typing we advise to use the following command
+
 ```
 mypy --follow-imports silent path/to/python/file.py
 ```
+
+If you want to perform static-typing over the entire project, do issue
+
+```
+mypy --follow-imports silent cgnal
+```
+
+In order to run `mypy` smoothly over the entire package, you may need to install appropriate stubs
+for some packages. In order to do so, type
+
+```
+mypy --install-types
+```
+
+and follow the instructions provided by `mypy`.
 
 ## Examples 
 

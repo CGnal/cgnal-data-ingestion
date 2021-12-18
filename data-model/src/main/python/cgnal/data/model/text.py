@@ -1,10 +1,11 @@
 import uuid
 from abc import ABC
-from typing import Dict, Any, Optional, Iterator, Tuple, List, Hashable
+from typing import Dict, Any, Optional, Iterator, Tuple, List, Hashable, Generic
 
 import numpy as np  # type: ignore
 import pandas as pd  # type: ignore
 
+from cgnal.typing import K
 from cgnal.data.model.core import BaseIterable, LazyIterable, CachedIterable
 from cgnal.utils.dict import union, unflattenKeys
 
@@ -13,10 +14,10 @@ def generate_random_uuid() -> bytes:
     return uuid.uuid1().bytes[:12]
 
 
-class Document(object):
+class Document(Generic[K]):
     """ Document representation as couple of uuid and dictionary of information """
 
-    def __init__(self, uuid: Hashable, data: Dict[Hashable, Any]):
+    def __init__(self, uuid: K, data: Dict[str, Any]):
         """
 
         :param uuid: document id
@@ -28,7 +29,7 @@ class Document(object):
     def __str__(self) -> str:
         return f"Id: {self.uuid}"
 
-    def getOrThrow(self, key: Hashable, default: Any = None) -> Any:
+    def getOrThrow(self, key: str, default: Optional[Any] = None) -> Optional[Any]:
         """
         Retrieve value associated to given key or return default value
 
@@ -44,7 +45,7 @@ class Document(object):
             else:
                 raise e
 
-    def removeProperty(self, key: Hashable) -> 'Document':
+    def removeProperty(self, key: str) -> 'Document':
         """
         Generate new Document instance without given data element
 
@@ -98,7 +99,7 @@ class Document(object):
         """
         return self.getOrThrow('language')
 
-    def __getitem__(self, item: Hashable) -> Any:
+    def __getitem__(self, item: str) -> Any:
         """
         Get given item from data
 
@@ -108,7 +109,7 @@ class Document(object):
         return self.data[item]
 
     @property
-    def properties(self) -> Iterator[Hashable]:
+    def properties(self) -> Iterator[str]:
         """
         Yield data properties names
 
@@ -117,7 +118,7 @@ class Document(object):
         for prop in self.data.keys():
             yield prop
 
-    def items(self) -> Iterator[Tuple[Hashable, Any]]:
+    def items(self) -> Iterator[Tuple[str, Any]]:
         """
         Yield data items
 

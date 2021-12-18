@@ -1,10 +1,9 @@
 import pandas as pd  # type: ignore
 import numpy as np  # type: ignore
 from time import time
-from typing import Callable
+from typing import Callable, TypeVar
 from unittest import TestCase as CoreTestCase
 from cgnal.logging.defaults import WithLogging
-
 
 class TestCase(CoreTestCase, WithLogging):
 
@@ -48,8 +47,10 @@ class TestCase(CoreTestCase, WithLogging):
         self.addTypeEqualityFunc(np.ndarray, self.compareArrays)
 
 
-def logTest(test: Callable[[TestCase], None]) -> Callable[[TestCase], None]:
-    def wrap(obj):
+T = TypeVar("T", bound=WithLogging)
+
+def logTest(test: Callable[[T], None]) -> Callable[[T], None]:
+    def wrap(obj: T) -> None:
         t0 = time()
         obj.logger.info(f"Executing Test {str(test.__name__)}")
         test(obj)

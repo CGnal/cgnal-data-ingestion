@@ -2,7 +2,7 @@ import inspect
 import os
 from functools import wraps, partial
 from glob import glob
-from typing import Callable, Any, Union, Dict
+from typing import Callable, Any, Dict, Iterable, Tuple
 
 import pandas as pd
 from deprecated import deprecated
@@ -38,7 +38,14 @@ def lazyproperty(obj: Any) -> property:
 
 
 class Cached(object):
-    __cache__: dict = {}
+
+    @property
+    def __cache__(self):
+        try:
+            return self.__cache
+        except AttributeError:
+            self.__cache = {}
+            return self.__cache__
 
     @staticmethod
     def cache(func: Callable[['Cached'], T]) -> property:
@@ -65,7 +72,7 @@ class Cached(object):
 
         :return: None
         """
-        self.__cache__ = {}
+        self.__cache__.clear()
 
     def save_pickles(self, path: PathLike) -> None:
         """
@@ -99,25 +106,24 @@ class Cached(object):
             except:
                 raise ValueError("Cannot save input of type %s" % str(obj.__class__))
 
-    @classmethod
-    def load(cls, filename: PathLike) -> None:
-        _ = cls.load_element(filename)
-        return None
-
-    @staticmethod
-    def load_element(filename: PathLike) -> Union[Dict[str, pd.DataFrame], pd.DataFrame]:
+    def load(self, filename: PathLike) -> None:
         """
         Load pickle at given path (or all pickles in given folder)
 
         :param filename: path to pickles
-        :return: content of the read pickle
+        :return: None
         """
+        self.__cache__.update(dict(self.load_element(filename, "")))
+        return None
+
+    @classmethod
+    def load_element(cls, filename, prefix="") -> Iterable[Tuple[str, Any]]:
         if os.path.isdir(filename):
-            return {Cached.__reformat_name(path): Cached.load_element(os.path.splitext(path)[0])
-                    for path in glob(os.path.join(filename, "*"))}
+            for path in glob(os.path.join(filename, "*")):
+                for name, object in cls.load_element(path, f"{cls.__reformat_name(filename)}_"):
+                    yield (f"{prefix}{name}", object)
         else:
-            # TODO do we really want to force the file extension to be .p? Wouldn't it be better keep only filename?
-            return pd.read_pickle(filename + ".p")  # type: ignore
+            yield (str(cls.__reformat_name(filename)), pd.read_pickle(filename))
 
     @staticmethod
     def __reformat_name(filename: PathLike) -> PathLike:

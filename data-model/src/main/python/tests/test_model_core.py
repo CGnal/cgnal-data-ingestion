@@ -6,19 +6,19 @@ from cgnal.data.model.core import Range, CompositeRange, CachedIterable, LazyIte
 from cgnal.logging.defaults import getDefaultLogger
 from cgnal.tests.core import logTest, TestCase
 from data import TMP_FOLDER
-from typing import Iterator, Sequence
+from typing import Iterator, Sequence, Generator
 
 logger = getDefaultLogger()
 
 n = 10
 
 
-def generator():
+def generator() -> Iterator[int]:
     for i in range(n):
         yield i
 
 
-lazy = LazyIterable(IterGenerator(generator))
+lazy = LazyIterable[int](IterGenerator(generator))
 cached = CachedIterable([i for i in range(n)])
 
 

@@ -62,11 +62,6 @@ importlib-metadata==4.8.3
     #   pep517
     #   pre-commit
     #   virtualenv
-importlib-resources==5.4.0
-    # via
-    #   -c requirements/requirements.txt
-    #   pre-commit
-    #   virtualenv
 ipykernel==5.3.4
     # via -r requirements/requirements_dev.in
 ipython-genutils==0.2.0
@@ -105,7 +100,7 @@ pexpect==4.8.0
     # via ipython
 pickleshare==0.7.5
     # via ipython
-pip-tools==6.1.0
+pip-tools==6.4.0
     # via -r requirements/requirements_dev.in
 platformdirs==2.4.0
     # via virtualenv
@@ -190,6 +185,7 @@ types-pyyaml==6.0.1
     # via -r requirements/requirements_dev.in
 typing-extensions==4.0.1
     # via
+    #   -c requirements/requirements.txt
     #   importlib-metadata
     #   mypy
     #   pandas-stubs
@@ -203,13 +199,13 @@ virtualenv==20.10.0
     # via pre-commit
 wcwidth==0.2.5
     # via prompt-toolkit
+wheel==0.37.1
+    # via pip-tools
 xlrd==2.0.1
     # via -r requirements/requirements_dev.in
 zipp==3.6.0
     # via
-    #   -c requirements/requirements.txt
     #   importlib-metadata
-    #   importlib-resources
     #   pep517
 
 # The following packages are considered to be unsafe in a requirements file:

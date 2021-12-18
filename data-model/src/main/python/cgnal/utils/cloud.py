@@ -86,11 +86,11 @@ class CloudSync(WithLogging):
             return requests.post(f"{self.url}/{filename}", files=files)
 
 
-class HTTPRequestHandler(http.server.SimpleHTTPRequestHandler, WithLogging):
+class HTTPRequestHandler(WithLogging, http.server.SimpleHTTPRequestHandler):
     """Performs POST operation"""
     def do_POST(self) -> None:
 
-        path = self.translate_path(self.path)
+        path = self.translate_path(self.path) # type: ignore
 
         dirname = os.path.dirname(path)
 
@@ -101,7 +101,7 @@ class HTTPRequestHandler(http.server.SimpleHTTPRequestHandler, WithLogging):
 
         form = cgi.FieldStorage(
                     fp=self.rfile,
-                    headers=self.headers,
+                    headers=self.headers, # type: ignore
                     environ={'REQUEST_METHOD':'POST',
                              'CONTENT_TYPE':self.headers['Content-Type'],
                              })
@@ -120,10 +120,11 @@ class HTTPRequestHandler(http.server.SimpleHTTPRequestHandler, WithLogging):
 
 if __name__ == '__main__':
     """
-    python - m cgnal.utils.cloud - -bind [IP_ADDRESS] [PORT]
+    python - m cgnal.utils.cloud --bind [IP_ADDRESS] [PORT]
     """
 
     import argparse
+    from http.server import test # type: ignore
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--bind', '-b', default='', metavar='ADDRESS',
@@ -135,4 +136,4 @@ if __name__ == '__main__':
                         help='Specify alternate port [default: 8000]')
     args = parser.parse_args()
 
-    http.server.test(HandlerClass=HTTPRequestHandler, port=args.port, bind=args.bind)
+    test(HandlerClass=HTTPRequestHandler, port=args.port, bind=args.bind)

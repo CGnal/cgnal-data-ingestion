@@ -1,12 +1,13 @@
 import json
-import pandas as pd  # type: ignore
+import pandas as pd
+# type: ignore
 
 from typing import Hashable, Optional
 from cgnal.data.model.text import Document
 from cgnal.data.layer import DAO
 
 
-class DocumentDAO(DAO):
+class DocumentDAO(DAO[Document, pd.Series]):
     """Data access object for documents"""
 
     def computeKey(self, doc: Document) -> Hashable:
@@ -34,10 +35,12 @@ class DocumentDAO(DAO):
         :param row: pd.Series, row of a pd.DataFrame
         :return: :class:`cgnal.data.model.text.Document`, a Document object
         """
-        return Document(row.name, row.to_dict())
+        from typing import Dict, Any
+        data: Dict = row.to_dict() # type: ignore
+        return Document(row.name, data)
 
 
-class DataFrameDAO(DAO):
+class DataFrameDAO(DAO[pd.DataFrame, pd.Series]):
     """Data Access Object for pd.DataFrames"""
 
     def computeKey(self, df: pd.DataFrame) -> Hashable:
@@ -50,7 +53,7 @@ class DataFrameDAO(DAO):
         try:
             return df.name
         except AttributeError:
-            return hash(json.dumps({str(k): str(v) for k, v in df.to_dict().items()}))
+            return hash(json.dumps({str(k): str(v) for k, v in df.to_dict().items()})) # type: ignore
 
     def get(self, df: pd.DataFrame) -> pd.Series:
         """
@@ -68,7 +71,10 @@ class DataFrameDAO(DAO):
         :param row: pd.Series, row of a pd.DataFrame
         :return: pd.DataFrame, a pandas dataframe object
         """
-        return pd.concat({c: row[c] for c in row.index.levels[0]}, axis=1)
+        if isinstance(row.index, pd.MultiIndex):
+            return pd.concat({c: row[c] for c in row.index.levels[0]}, axis=1) # type: ignore
+        else:
+            return row.to_frame()
 
     @staticmethod
     def addName(df: pd.DataFrame, name: Optional[Hashable]) -> pd.DataFrame:
@@ -83,7 +89,7 @@ class DataFrameDAO(DAO):
         return df
 
 
-class SeriesDAO(DAO):
+class SeriesDAO(DAO[pd.Series, pd.Series]):
     """Data Access Object for pd.Series"""
 
     def computeKey(self, df: pd.Series) -> Hashable:

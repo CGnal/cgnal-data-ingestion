@@ -60,7 +60,7 @@ def union(*dicts: dict) -> dict:
     return reduce(__dict_merge, dicts)
 
 
-def flattenKeys(input_dict: Dict[str, T], sep: str = ".") -> Dict[str, T]:
+def flattenKeys(input_dict: Dict[str, Any], sep: str = ".") -> Dict[str, Any]:
     """
     Recursively flatten a multilevel nested dict into a single level dict with flattened keys and corresponding values.
     The keys are joined by the given separator.
@@ -69,7 +69,7 @@ def flattenKeys(input_dict: Dict[str, T], sep: str = ".") -> Dict[str, T]:
     :param sep: str delimiter to join keys
     :return: dict with flattened keys
     """
-    def _flatten_(key: str, value: T) -> List[Tuple[str, T]]:
+    def _flatten_(key: str, value: Any) -> List[Tuple[str, Any]]:
         if isinstance(value, dict) and (len(value) > 0):
             return reduce(add, [_flatten_(sep.join([key, name]), item) for name, item in value.items()])
         else:
@@ -87,11 +87,8 @@ def unflattenKeys(input_dict: Dict[str, Any], sep: str = ".") -> Dict[str, Any]:
     :return: dict
     """
     def __translate(key: str, value: Any) -> Dict[str, Any]:
-        levels = key.split(sep)
-        out = value
-        for level in reversed(levels):
-            out = {level: out}
-        return out
+        levels = list(reversed(key.split(sep)))
+        return reduce(lambda agg, level: {level: agg}, levels[1:], {levels[0]: value})
     return union(*[__translate(key, value) for key, value in input_dict.items()])
 
 
