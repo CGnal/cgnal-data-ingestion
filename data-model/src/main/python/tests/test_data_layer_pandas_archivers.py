@@ -1,6 +1,6 @@
 import unittest
 import os
-import numpy as np
+import numpy as np # type: ignore
 import pandas as pd
 import shutil
 

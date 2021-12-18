@@ -1,49 +1,49 @@
 import pandas as pd  # type: ignore
 from abc import abstractmethod, ABC
 from bson.objectid import ObjectId  # type: ignore
-from typing import Any, Callable, Optional, Iterator, TypeVar, Union, Hashable, Dict, List
-from pymongo.collection import UpdateResult
+from typing import Any, Callable, Optional, Iterator, TypeVar, Union, Hashable, Dict, List, Generic
+from pymongo.collection import UpdateResult # type: ignore
 
 from cgnal.typing import T
 from cgnal.data.model.text import Document
 from cgnal.data.model.core import IterGenerator
 from cgnal.data.exceptions import NoTableException
 
+DataVal = Union[Document, pd.DataFrame, pd.Series]
 
-DataVal = TypeVar('DataVal', Document, pd.DataFrame, pd.Series)
+V = TypeVar("V")
 
-
-class DAO(ABC):
+class DAO(Generic[T, V], ABC):
     """ Data Access Object"""
 
     @abstractmethod
-    def computeKey(self, obj: DataVal) -> Union[Hashable, Dict[str, ObjectId]]: ...
+    def computeKey(self, obj: T) -> Union[Hashable, Dict[str, ObjectId]]: ...
 
     @abstractmethod
-    def get(self, obj: DataVal) -> Union[pd.Series, dict]: ...
+    def get(self, obj: T) -> V: ...
 
     @abstractmethod
-    def parse(self, row: Any) -> Union[Document, pd.DataFrame, pd.Series]: ...
+    def parse(self, row: V) -> T: ...
 
 
-class Archiver(ABC):
+class Archiver(Generic[T], ABC):
     """ Object that retrieve data from source and stores it in memory """
 
     @abstractmethod
-    def retrieve(self, condition: Any, sort_by: Any) -> Iterator[Union[pd.Series, pd.DataFrame, Document]]: ...
+    def retrieve(self, condition: Any, sort_by: Any) -> Iterator[T]: ...
 
     @abstractmethod
-    def archive(self, obj: DataVal) -> Union['Archiver', UpdateResult, List[UpdateResult]]: ...
+    def archive(self, obj: T) -> Union['Archiver', None, UpdateResult, List[UpdateResult]]: ...
 
-    def map(self, f: Callable[[DataVal], T], *args: Any, **kwargs: Any) -> Iterator[T]:
-        for obj in self.retrieve(*args, **kwargs):  # type: DataVal
+    def map(self, f: Callable[[T], V], *args: Any, **kwargs: Any) -> Iterator[V]:
+        for obj in self.retrieve(*args, **kwargs):  # type: T
             yield f(obj)
 
-    def foreach(self, f: Callable[[DataVal], T], *args, **kwargs) -> None:
-        for obj in self.retrieve(*args, **kwargs):  # type: DataVal
+    def foreach(self, f: Callable[[T], None], *args, **kwargs) -> None:
+        for obj in self.retrieve(*args, **kwargs):  # type: T
             f(obj)
 
-    def retrieveGenerator(self, condition: Any, sort_by: Any) -> IterGenerator[DataVal]:
+    def retrieveGenerator(self, condition: Any, sort_by: Any) -> IterGenerator[T]:
         def __iterator__():
             return self.retrieve(condition=condition, sort_by=sort_by)
         return IterGenerator(__iterator__)

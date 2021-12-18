@@ -1,5 +1,5 @@
 -c requirements.txt
-pip-tools==6.1.0
+pip-tools==6.4.0
 pre-commit==2.13.0
 coverage==5.3
 ipykernel==5.3.4

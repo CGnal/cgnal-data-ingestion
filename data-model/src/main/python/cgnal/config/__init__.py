@@ -4,7 +4,7 @@ import sys
 import cfg_load  # type: ignore
 
 from yaml import Loader, add_implicit_resolver, add_constructor, Node, FullLoader, UnsafeLoader
-from typing import List, Optional, Any, Hashable, Union
+from typing import Optional, Any, Hashable, Union, Sequence, List
 from cfg_load import Configuration
 from functools import reduce
 from cgnal.typing import PathLike
@@ -57,7 +57,7 @@ def load(filename: PathLike) -> Configuration:
         return cfg_load.load(filename)
 
 
-def get_all_configuration_file(application_file: PathLike = "application.yml", name_env: str = "CONFIG_FILE") -> List[str]:
+def get_all_configuration_file(application_file: PathLike = "application.yml", name_env: str = "CONFIG_FILE") -> Sequence[str]:
     """
     Retrieve all configuration files from system path, including the one in environment variable
 
@@ -72,7 +72,7 @@ def get_all_configuration_file(application_file: PathLike = "application.yml", n
     return confs + env
 
 
-def merge_confs(filenames: List[PathLike], default: Optional[str] = "defaults.yml") -> Configuration:
+def merge_confs(filenames: Sequence[PathLike], default: Optional[str] = "defaults.yml") -> Configuration:
     """
     Merge configurations in given files
 

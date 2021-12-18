@@ -116,13 +116,13 @@ class Table(WithLogging, TableABC):
         #   - KeyError if it tries to read a non-pickle file
         #   - IOError if the file does not exist
         try:
-            _in = self.to_df() if not overwrite else None
+            _in = [self.to_df()] if not overwrite else []
         except (KeyError, IOError):
-            _in = None
+            _in = []
 
         # pd.concat can fail with a TypeError if df is not an NDFrame object
         try:
-            _df = pd.concat([_in, df])
+            _df = pd.concat(_in + [df])
         except TypeError:
             _df = df
 

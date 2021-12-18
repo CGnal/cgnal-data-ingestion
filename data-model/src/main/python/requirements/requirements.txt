@@ -20,8 +20,6 @@ dill==0.3.4
     # via cgnal-core (setup.py)
 idna==3.3
     # via requests
-importlib-resources==5.4.0
-    # via backports.zoneinfo
 mongomock==3.23.0
     # via cgnal-core (setup.py)
 mpu[io]==0.23.1
@@ -63,6 +61,8 @@ six==1.16.0
     #   python-dateutil
 typeguard==2.13.3
     # via cgnal-core (setup.py)
+typing-extensions==4.0.1
+    # via cgnal-core (setup.py)
 tzdata==2021.5
     # via pytz-deprecation-shim
 tzlocal==4.1
@@ -71,8 +71,6 @@ urllib3==1.26.7
     # via requests
 wrapt==1.13.3
     # via deprecated
-zipp==3.6.0
-    # via importlib-resources
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools

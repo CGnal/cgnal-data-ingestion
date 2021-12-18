@@ -11,7 +11,7 @@ logger = getDefaultLogger()
 
 db = Database(TMP_FOLDER + '/db')
 df1 = pd.DataFrame([[1, 2, 3], [6, 5, 4]], columns=['a', 'b', 'c'])
-df2 = pd.Series({'a': 1, 'b': 2, 'c': 3}, name='df2')
+df2 = pd.Series({'a': 1, 'b': 2, 'c': 3}, name="df2").to_frame()
 df3 = pd.DataFrame([[1, 1, 1], [0, 0, 0]], columns=['a', 'b', 'c'])
 table1 = db.table('df1')
 table1.write(df1)
@@ -50,7 +50,7 @@ class TableTests(TestCase):
     @logTest
     def test_to_df(self):
         self.assertIsInstance(db.table('df1').to_df(), pd.DataFrame)
-        self.assertIsInstance(db.table('df2').to_df(), pd.Series)
+        self.assertIsInstance(db.table('df2').to_df(), pd.DataFrame)
         self.assertEqual(db.table('df1').to_df(), df1)
         self.assertEqual(db.table('df2').to_df(), df2)
         self.assertEqual(db.table('df1').to_df('b > a'),
@@ -59,7 +59,7 @@ class TableTests(TestCase):
     @logTest
     def test_data(self):
         self.assertIsInstance(db.table('df1').to_df(), pd.DataFrame)
-        self.assertIsInstance(db.table('df2').to_df(), pd.Series)
+        self.assertIsInstance(db.table('df2').to_df(), pd.DataFrame)
         self.assertEqual(db.table('df1').to_df(), df1)
         self.assertEqual(db.table('df2').to_df(), df2)
 

@@ -1,6 +1,6 @@
 import unittest
 import os
-import numpy as np
+import numpy as np # type: ignore
 import pandas as pd
 import json
 
@@ -40,7 +40,7 @@ class TestDocumentDAO(TestCase):
 class TestDataFrameDAO(TestCase):
 
     df1 = pd.DataFrame([[1, 2, 3], [6, 5, 4]], columns = ['a', 'b', 'c'])
-    key_df1 = hash(json.dumps({str(k): str(v) for k, v in df1.to_dict().items()}))
+    key_df1 = hash(json.dumps({str(k): str(v) for k, v in df1.to_dict().items()})) # type: ignore
     index = [
         np.array(["a", "a", "b", "b", "c", "c"]),
         np.array([0, 1, 0, 1, 0, 1]),

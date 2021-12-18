@@ -1,22 +1,22 @@
 from bson.objectid import ObjectId  # type: ignore
 import pandas as pd  # type: ignore
 
-from typing import Dict, Union, Generic, TypeVar, Hashable
+from typing import Dict, Generic, TypeVar, Hashable, Any
 from cgnal.typing import T
 from cgnal.data.layer import DAO
 from cgnal.utils.dict import union
 from cgnal.data.model.text import Document
 
 K = TypeVar('K', Hashable, Hashable)
-V = TypeVar('V', Hashable, Hashable)
 
+class MongoDAO(DAO[T, dict]): ...
 
-class DocumentDAO(DAO, Generic[K, V]):
+class DocumentDAO(MongoDAO[Document]):
 
-    mapping: Dict[K, V] = {}
+    mapping: Dict[str, str] = {}
 
     @property
-    def inverse_mapping(self) -> Dict[V, K]:
+    def inverse_mapping(self) -> Dict[str, Any]:
         """
         Apply inverse of self.mapping
 
@@ -24,7 +24,7 @@ class DocumentDAO(DAO, Generic[K, V]):
         """
         return {v: k for k, v in self.mapping.items()}
 
-    def translate(self, d: Dict[K, T]) -> Dict[Union[K, V], T]:
+    def translate(self, d: Dict[str, Any]) -> Dict[str, Any]:
         """
         Map dictionary keys according to self.mapping
 
@@ -33,7 +33,7 @@ class DocumentDAO(DAO, Generic[K, V]):
         """
         return {self.mapping.get(k, k): v for k, v in d.items()}
 
-    def conversion(self, d: Dict[V, T]) -> Dict[Union[K, V], T]:
+    def conversion(self, d: Dict[str, Any]) -> Dict[str, Any]:
         """
         Map dictionary keys according to the inverse of self.mapping
 
@@ -65,7 +65,7 @@ class DocumentDAO(DAO, Generic[K, V]):
         """
         return {"_id": ObjectId(obj.uuid)}
 
-    def get(self, obj: Document) -> Dict[Union[K, V], T]:
+    def get(self, obj: Document) -> Dict[str, Any]:
         """
         Get a document as a dictionary
         :param obj: a Document object to be transformed into a dictionary
@@ -73,7 +73,7 @@ class DocumentDAO(DAO, Generic[K, V]):
         """
         return self.conversion(union(obj.data, self.computeKey(obj)))
 
-    def parse(self, json: Dict[K, T]) -> Document:
+    def parse(self, json: Dict[str, Any]) -> Document:
         """
         Get a dictionary as a Document object
 
@@ -84,7 +84,7 @@ class DocumentDAO(DAO, Generic[K, V]):
         return Document(str(translated[self.uuid]), self.translate(json))
 
 
-class SeriesDAO(DAO):
+class SeriesDAO(DAO, Generic[K, T]):
     def __init__(self, key_field: str = "_id") -> None:
         """
         Serializes a Domain object into a pandas series object. The serialized object is of the :class: pd.Series
@@ -102,16 +102,17 @@ class SeriesDAO(DAO):
         """
         return {self.key_field: ObjectId(serie.name)}
 
-    def get(self, serie: pd.Series) -> Dict[K, V]:
+    def get(self, serie: pd.Series) -> Dict[K, T]:
         """
         Get a series as a dictionary
 
         :param serie: pd.Series
         :return: dictionary
         """
-        return serie.to_dict()
+        data: Dict[K, T] = serie.to_dict()  # type: ignore
+        return data
 
-    def parse(self, json: Dict[K, V]) -> pd.Series:
+    def parse(self, json: Dict[K, T]) -> pd.Series:
         """
         Get a json as a pd.Series
 

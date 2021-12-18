@@ -1,7 +1,7 @@
 import os
 import unittest
 
-import numpy as np
+import numpy as np # type: ignore
 import pandas as pd
 
 from cgnal.data.model.ml import LazyDataset, IterGenerator, MultiFeatureSample, Sample, PandasDataset, \
@@ -224,11 +224,11 @@ class CachedDatasetTests(TestCase):
 
 
 class PandasDatasetTests(TestCase):
-    dataset = PandasDataset(features=pd.concat([pd.Series([1, np.nan, 2, 3], name="feat1"),
+    dataset: PandasDataset = PandasDataset(features=pd.concat([pd.Series([1, np.nan, 2, 3], name="feat1"),
                                                 pd.Series([1, 2, 3, 4], name="feat2")], axis=1),
                             labels=pd.Series([0, 0, 0, 1], name="Label"))
 
-    dataset_no_label = PandasDataset(features=pd.concat([pd.Series([1, np.nan, 2, 3], name="feat1"),
+    dataset_no_label: PandasDataset = PandasDataset(features=pd.concat([pd.Series([1, np.nan, 2, 3], name="feat1"),
                                                          pd.Series([1, 2, 3, 4], name="feat2")], axis=1))
 
     @logTest
