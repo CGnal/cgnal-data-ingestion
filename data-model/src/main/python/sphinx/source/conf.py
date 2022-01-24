@@ -13,28 +13,29 @@
 import os
 import sys
 from cgnal.utils.fs import create_dir_if_not_exists
-sys.path.insert(0, os.path.abspath('../../'))
+
+sys.path.insert(0, os.path.abspath("../../"))
 
 
 # -- Project information -----------------------------------------------------
 
-project = 'CGnal Core'
-copyright = '2021, CGnal S.r.l.'
-author = 'CGnal S.r.l.'
+project = "CGnal Core"
+copyright = "2021, CGnal S.r.l."
+author = "CGnal S.r.l."
 
 # The full version, including alpha/beta/rc tags
-release = '1.10.0'
+release = "1.10.0"
 
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.autodoc', 'recommonmark']
-autoclass_content = 'both'
+extensions = ["sphinx.ext.autodoc", "recommonmark"]
+autoclass_content = "both"
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = [create_dir_if_not_exists('_templates')]
+templates_path = [create_dir_if_not_exists("_templates")]
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -42,7 +43,7 @@ templates_path = [create_dir_if_not_exists('_templates')]
 exclude_patterns = []
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = "sphinx"
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
@@ -58,7 +59,6 @@ html_theme = "sphinx_rtd_theme"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = [create_dir_if_not_exists('_static')]
+html_static_path = [create_dir_if_not_exists("_static")]
 
-html_theme_options = {'navigation_depth': 6,
-                      "sticky_navigation": True}
+html_theme_options = {"navigation_depth": 6, "sticky_navigation": True}

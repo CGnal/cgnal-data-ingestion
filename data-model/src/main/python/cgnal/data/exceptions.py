@@ -6,4 +6,3 @@ class NoTableException(BaseException):
         :param message: output message
         """
         super(NoTableException, self).__init__(message)
-

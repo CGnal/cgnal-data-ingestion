@@ -1,4 +1,3 @@
-
 import unittest
 from typing import Iterator
 
@@ -6,13 +5,18 @@ import pandas as pd
 from cgnal.tests.core import TestCase, logTest
 
 from data import TMP_FOLDER
-from cgnal.data.model.text import generate_random_uuid, Document, CachedDocuments, LazyDocuments
+from cgnal.data.model.text import (
+    generate_random_uuid,
+    Document,
+    CachedDocuments,
+    LazyDocuments,
+)
 from cgnal.data.model.core import IterGenerator
 
 dict_doc1 = {"name": "Bob", "language": ["English", "French"]}
-key_doc1 = '123'
+key_doc1 = "123"
 dict_doc2 = {"name": "Alice", "language": ["Spanish", "German"]}
-key_doc2 = '456'
+key_doc2 = "456"
 doc1 = Document(key_doc1, dict_doc1)
 doc2 = Document(key_doc2, dict_doc2)
 
@@ -36,27 +40,27 @@ class TestGenerate_random_uuid(TestCase):
 class TestDocument(TestCase):
 
     dict_doc = {"name": "Bob", "language": ["English", "French"]}
-    key_doc = '123'
+    key_doc = "123"
     doc = Document(key_doc, dict_doc)
 
     @logTest
     def test__str__(self):
-        self.assertEqual(self.doc.__str__(), 'Id: 123')
+        self.assertEqual(self.doc.__str__(), "Id: 123")
 
     @logTest
     def test_getOrThrow(self):
-        self.assertEqual(self.doc.getOrThrow('name', 'empty'), 'Bob')
-        self.assertEqual(self.doc.getOrThrow('age', 'empty'), 'empty')
+        self.assertEqual(self.doc.getOrThrow("name", "empty"), "Bob")
+        self.assertEqual(self.doc.getOrThrow("age", "empty"), "empty")
 
     @logTest
     def test_removeProperty(self):
-        doc_new = self.doc.removeProperty('name')
-        self.assertEqual(doc_new.getOrThrow('name', 'empty'), 'empty')
+        doc_new = self.doc.removeProperty("name")
+        self.assertEqual(doc_new.getOrThrow("name", "empty"), "empty")
 
     @logTest
     def test_addProperty(self):
-        doc_new = self.doc.addProperty('age', '25')
-        self.assertEqual(doc_new.getOrThrow('age', 'empty'), '25')
+        doc_new = self.doc.addProperty("age", "25")
+        self.assertEqual(doc_new.getOrThrow("age", "empty"), "25")
 
     @logTest
     def test_setRandomUUID(self):
@@ -66,13 +70,13 @@ class TestDocument(TestCase):
 
     @logTest
     def author(self):
-        doc_new = self.doc.addProperty('author', 'Gioia')
-        self.assertEqual(doc_new.author, 'Gioia')
+        doc_new = self.doc.addProperty("author", "Gioia")
+        self.assertEqual(doc_new.author, "Gioia")
 
     @logTest
     def test_text(self):
-        doc_new = self.doc.addProperty('text', 'hello')
-        self.assertEqual(doc_new.text, 'hello')
+        doc_new = self.doc.addProperty("text", "hello")
+        self.assertEqual(doc_new.text, "hello")
 
     @logTest
     def test_language(self):
@@ -80,23 +84,26 @@ class TestDocument(TestCase):
 
     @logTest
     def test__getitem__(self):
-        self.assertEqual(self.doc.__getitem__('name'), 'Bob')
+        self.assertEqual(self.doc.__getitem__("name"), "Bob")
 
     @logTest
     def test_properties(self):
-        self.assertEqual(list(self.doc.properties), ['name', 'language'])
+        self.assertEqual(list(self.doc.properties), ["name", "language"])
 
     @logTest
     def test_items(self):
-        self.assertEqual(list(self.doc.items()), [('name', 'Bob'), ('language', ['English', 'French'])])
+        self.assertEqual(
+            list(self.doc.items()),
+            [("name", "Bob"), ("language", ["English", "French"])],
+        )
 
 
 class TestCachedDocuments(TestCase):
-
-
     @logTest
     def test__lazyType__(self):
-        self.assertIsInstance(cached_doc.__lazyType__(IterGenerator(samples_gen)), LazyDocuments)
+        self.assertIsInstance(
+            cached_doc.__lazyType__(IterGenerator(samples_gen)), LazyDocuments
+        )
 
     @logTest
     def test__cachedType__(self):
@@ -119,9 +126,8 @@ class TestCachedDocuments(TestCase):
 
     @logTest
     def test_filter(self):
-
         def func(doc):
-            if doc.language == ['English', 'French']:
+            if doc.language == ["English", "French"]:
                 return True
 
         self.assertEqual(len(list(cached_doc.filter(func))), 1)
@@ -141,38 +147,41 @@ class TestCachedDocuments(TestCase):
 
     @logTest
     def test_map(self):
-
         def func(doc: Document):
-            if doc.language == ['English', 'French']:
-                return doc.addProperty('language', ['Italian'])
+            if doc.language == ["English", "French"]:
+                return doc.addProperty("language", ["Italian"])
 
-        self.assertEqual(list(cached_doc.map(func).items)[0].language, ['Italian'])
+        self.assertEqual(list(cached_doc.map(func).items)[0].language, ["Italian"])
 
     @logTest
     def test_foreach(self):
 
         lst = []
+
         def func(doc):
-            lst.append(doc.data['name'])
+            lst.append(doc.data["name"])
 
         cached_doc.foreach(func)
-        self.assertEqual(lst, ['Bob', 'Alice'])
+        self.assertEqual(lst, ["Bob", "Alice"])
 
     @logTest
     def test_write_load(self):
-        cached_doc.write(TMP_FOLDER + '/test_file.pkl')
+        cached_doc.write(TMP_FOLDER + "/test_file.pkl")
         dict_doc3 = {"name": "Bob"}
-        new_doc = CachedDocuments(dict_doc3).load(TMP_FOLDER + '/test_file.pkl')
+        new_doc = CachedDocuments(dict_doc3).load(TMP_FOLDER + "/test_file.pkl")
         self.assertEqual(new_doc.items[0].data, dict_doc1)
         self.assertEqual(new_doc.items[1].data, dict_doc2)
 
     @logTest
     def test__get_key__(self):
-        self.assertEqual(cached_doc.__get_key__('name', dict_doc1), 'Bob')
+        self.assertEqual(cached_doc.__get_key__("name", dict_doc1), "Bob")
 
     @logTest
     def test_to_df(self):
-        self.assertEqual(cached_doc.to_df(['name', 'language']), pd.DataFrame([dict_doc1, dict_doc2], index=[key_doc1, key_doc2]))
+        self.assertEqual(
+            cached_doc.to_df(["name", "language"]),
+            pd.DataFrame([dict_doc1, dict_doc2], index=[key_doc1, key_doc2]),
+        )
 
     def test__len__(self):
         self.assertEqual(cached_doc.__len__(), 2)
@@ -190,14 +199,17 @@ class TestCachedDocuments(TestCase):
 
 
 class TestLazyDocuments(TestCase):
-
     @logTest
     def test__lazyType__(self):
-        self.assertIsInstance(lazy_doc.__lazyType__(IterGenerator(samples_gen)), LazyDocuments)
+        self.assertIsInstance(
+            lazy_doc.__lazyType__(IterGenerator(samples_gen)), LazyDocuments
+        )
 
     @logTest
     def test__cachedType__(self):
-        self.assertIsInstance(lazy_doc.__cachedType__([dict_doc1, dict_doc2]), CachedDocuments)
+        self.assertIsInstance(
+            lazy_doc.__cachedType__([dict_doc1, dict_doc2]), CachedDocuments
+        )
 
     @logTest
     def test_asLazy(self):
@@ -216,9 +228,8 @@ class TestLazyDocuments(TestCase):
 
     @logTest
     def test_filter(self):
-
         def func(doc):
-            if doc.language == ['English', 'French']:
+            if doc.language == ["English", "French"]:
                 return True
 
         self.assertEqual(len(list(lazy_doc.filter(func))), 1)
@@ -238,22 +249,22 @@ class TestLazyDocuments(TestCase):
 
     @logTest
     def test_map(self):
-
         def func(doc: Document):
-            if doc.language == ['English', 'French']:
-                return doc.addProperty('language', ['Italian'])
+            if doc.language == ["English", "French"]:
+                return doc.addProperty("language", ["Italian"])
 
-        self.assertEqual(list(lazy_doc.map(func).items)[0].language, ['Italian'])
+        self.assertEqual(list(lazy_doc.map(func).items)[0].language, ["Italian"])
 
     @logTest
     def test_foreach(self):
 
         lst = []
+
         def func(doc):
-            lst.append(doc.data['name'])
+            lst.append(doc.data["name"])
 
         lazy_doc.foreach(func)
-        self.assertEqual(lst, ['Bob', 'Alice'])
+        self.assertEqual(lst, ["Bob", "Alice"])
 
     def test_items(self):
         generator = lazy_doc.items

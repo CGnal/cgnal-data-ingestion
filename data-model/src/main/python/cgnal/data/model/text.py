@@ -14,7 +14,7 @@ def generate_random_uuid() -> bytes:
 
 
 class Document(object):
-    """ Document representation as couple of uuid and dictionary of information """
+    """Document representation as couple of uuid and dictionary of information"""
 
     def __init__(self, uuid: Hashable, data: Dict[Hashable, Any]):
         """
@@ -44,7 +44,7 @@ class Document(object):
             else:
                 raise e
 
-    def removeProperty(self, key: Hashable) -> 'Document':
+    def removeProperty(self, key: Hashable) -> "Document":
         """
         Generate new Document instance without given data element
 
@@ -53,7 +53,7 @@ class Document(object):
         """
         return Document(self.uuid, {k: v for k, v in self.data.items() if k != key})
 
-    def addProperty(self, key: str, value: Any) -> 'Document':
+    def addProperty(self, key: str, value: Any) -> "Document":
         """
         Generate new Document instance with given new data element
 
@@ -63,7 +63,7 @@ class Document(object):
         """
         return Document(self.uuid, union(self.data, unflattenKeys({key: value})))
 
-    def setRandomUUID(self) -> 'Document':
+    def setRandomUUID(self) -> "Document":
         """
         Generate new document instance with the same data as the current one but with random uuid
 
@@ -78,7 +78,7 @@ class Document(object):
 
         :return: author data field value
         """
-        return self.getOrThrow('author')
+        return self.getOrThrow("author")
 
     @property
     def text(self) -> Optional[str]:
@@ -87,7 +87,7 @@ class Document(object):
 
         :return: text data field value
         """
-        return self.getOrThrow('text')
+        return self.getOrThrow("text")
 
     @property
     def language(self) -> Optional[str]:
@@ -96,7 +96,7 @@ class Document(object):
 
         :return: language data field value
         """
-        return self.getOrThrow('language')
+        return self.getOrThrow("language")
 
     def __getitem__(self, item: Hashable) -> Any:
         """
@@ -128,7 +128,6 @@ class Document(object):
 
 
 class Documents(BaseIterable[Document], ABC):
-
     @property
     def __lazyType__(self):
         return LazyDocuments
@@ -139,7 +138,6 @@ class Documents(BaseIterable[Document], ABC):
 
 
 class CachedDocuments(CachedIterable[Document], Documents):
-
     @staticmethod
     def __get_key__(key: str, dict: Dict[Hashable, Any]) -> Any:
         try:
@@ -152,9 +150,15 @@ class CachedDocuments(CachedIterable[Document], Documents):
 
     def to_df(self, fields: Optional[List[str]] = None) -> pd.DataFrame:
         _fields = fields if fields is not None else []
-        return pd.DataFrame.from_dict({doc.uuid: {field: self.__get_key__(field, doc.data)
-                                                  for field in _fields}
-                                       for doc in self}, orient='index')
+        return pd.DataFrame.from_dict(
+            {
+                doc.uuid: {
+                    field: self.__get_key__(field, doc.data) for field in _fields
+                }
+                for doc in self
+            },
+            orient="index",
+        )
 
 
 class LazyDocuments(LazyIterable[Document], Documents):

@@ -8,7 +8,13 @@ from deprecated import deprecated
 
 from cgnal.typing import PathLike
 from cgnal.config import load, merge_confs
-from cgnal.logging import WithLoggingABC, DEFAULT_LOG_LEVEL, LevelsDict, LevelTypes, StrLevelTypes
+from cgnal.logging import (
+    WithLoggingABC,
+    DEFAULT_LOG_LEVEL,
+    LevelsDict,
+    LevelTypes,
+    StrLevelTypes,
+)
 from cgnal.utils.fs import create_dir_if_not_exists
 
 
@@ -18,12 +24,11 @@ levels: LevelsDict = {
     "WARNING": 30,
     "INFO": 20,
     "DEBUG": 10,
-    "NOTSET": 0
+    "NOTSET": 0,
 }
 
 
 class WithLogging(WithLoggingABC):
-
     @property
     def logger(self) -> Logger:
         """
@@ -34,13 +39,16 @@ class WithLogging(WithLoggingABC):
         nameLogger = str(self.__class__).replace("<class '", "").replace("'>", "")
         return getLogger(nameLogger)
 
-    def logResult(self, msg: Union[Callable[..., str], str], level: StrLevelTypes = "INFO") -> Callable[..., Any]:
+    def logResult(
+        self, msg: Union[Callable[..., str], str], level: StrLevelTypes = "INFO"
+    ) -> Callable[..., Any]:
         def wrap(x: Any) -> Any:
             if isinstance(msg, str):
                 self.logger.log(levels[level], msg)
             else:
                 self.logger.log(levels[level], msg(x))
             return x
+
         return wrap
 
 
@@ -58,7 +66,9 @@ def getDefaultLogger(level: LevelTypes = levels[DEFAULT_LOG_LEVEL]) -> Logger:
     return getLogger()
 
 
-@deprecated("This function is deprecated and will be removed in future versions. Use configFromFiles instead")
+@deprecated(
+    "This function is deprecated and will be removed in future versions. Use configFromFiles instead"
+)
 def configFromJson(path_to_file: PathLike) -> None:
     """
     Configure logger from json
@@ -70,7 +80,9 @@ def configFromJson(path_to_file: PathLike) -> None:
     config.dictConfig(load(path_to_file))
 
 
-@deprecated("This function is deprecated and will be removed in future versions. Use configFromFiles instead")
+@deprecated(
+    "This function is deprecated and will be removed in future versions. Use configFromFiles instead"
+)
 def configFromYaml(path_to_file: PathLike) -> None:
     """
     Configure logger from yaml
@@ -82,7 +94,9 @@ def configFromYaml(path_to_file: PathLike) -> None:
     config.dictConfig(load(path_to_file))
 
 
-@deprecated("This function is deprecated and will be removed in future versions. Use configFromFiles instead")
+@deprecated(
+    "This function is deprecated and will be removed in future versions. Use configFromFiles instead"
+)
 def configFromFile(path_to_file: PathLike) -> None:
     """
     Configure logger from file
@@ -94,7 +108,11 @@ def configFromFile(path_to_file: PathLike) -> None:
     config.dictConfig(load(path_to_file))
 
 
-def configFromFiles(config_files: List[PathLike], capture_warnings: bool = True, catch_exceptions: Optional[str] = None) -> None:
+def configFromFiles(
+    config_files: List[PathLike],
+    capture_warnings: bool = True,
+    catch_exceptions: Optional[str] = None,
+) -> None:
     """
     Configure loggers from configuration obtained merging configuration files.
     If any handler inherits from FileHandler create the directory for its output files if it does not exist yet.
@@ -108,22 +126,33 @@ def configFromFiles(config_files: List[PathLike], capture_warnings: bool = True,
     captureWarnings(capture_warnings)
 
     configuration = merge_confs(filenames=config_files, default=None)
-    for v in configuration.to_dict()['handlers'].values():
-        splitted = v['class'].split('.')
-        if issubclass(getattr(import_module('.'.join(splitted[:-1])), splitted[-1]), FileHandler):
-            create_dir_if_not_exists(os.path.dirname(v['filename']))
+    for v in configuration.to_dict()["handlers"].values():
+        splitted = v["class"].split(".")
+        if issubclass(
+            getattr(import_module(".".join(splitted[:-1])), splitted[-1]), FileHandler
+        ):
+            create_dir_if_not_exists(os.path.dirname(v["filename"]))
     config.dictConfig(configuration)
 
     if catch_exceptions is not None:
         except_logger = getLogger(catch_exceptions)
-        print(f'Catching excetptions with {except_logger.name} logger using handlers '
-              f'{", ".join([x.name for x in except_logger.handlers])}')
+        print(
+            f"Catching excetptions with {except_logger.name} logger using handlers "
+            f'{", ".join([x.name for x in except_logger.handlers])}'
+        )
 
-        def handle_exception(exc_type: Type[BaseException], exc_value: BaseException, exc_traceback: TracebackType) -> None:
+        def handle_exception(
+            exc_type: Type[BaseException],
+            exc_value: BaseException,
+            exc_traceback: TracebackType,
+        ) -> None:
             if issubclass(exc_type, KeyboardInterrupt):
                 sys.__excepthook__(exc_type, exc_value, exc_traceback)
             else:
-                except_logger.error(f"{exc_type.__name__}: {exc_value}", exc_info=(exc_type, exc_value, exc_traceback))
+                except_logger.error(
+                    f"{exc_type.__name__}: {exc_value}",
+                    exc_info=(exc_type, exc_value, exc_traceback),
+                )
 
         sys.excepthook = handle_exception
 
@@ -137,4 +166,3 @@ def logger(name: Optional[str] = None) -> Logger:
     :return: named logger
     """
     return getLogger(name)
-

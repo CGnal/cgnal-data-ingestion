@@ -3,7 +3,14 @@ import re
 import sys
 import cfg_load  # type: ignore
 
-from yaml import Loader, add_implicit_resolver, add_constructor, Node, FullLoader, UnsafeLoader
+from yaml import (
+    Loader,
+    add_implicit_resolver,
+    add_constructor,
+    Node,
+    FullLoader,
+    UnsafeLoader,
+)
 from typing import List, Optional, Any, Hashable, Union
 from cfg_load import Configuration
 from functools import reduce
@@ -15,17 +22,21 @@ from cgnal.utils.dict import union
 
 __this_dir__, __this_filename__ = os.path.split(__file__)
 
-path_matcher = re.compile(r'\$\{([^}^{]+)\}')
+path_matcher = re.compile(r"\$\{([^}^{]+)\}")
 
 
-def path_constructor(loader: Union[Loader, FullLoader, UnsafeLoader], node: Node) -> PathLike:
+def path_constructor(
+    loader: Union[Loader, FullLoader, UnsafeLoader], node: Node
+) -> PathLike:
     """
     Extract the matched value, expand env variable, and replace the match
     """
     value = node.value
     match = path_matcher.match(value)
-    env_var = match.group()[2:-1]  # TODO: make the solution work also when match is None
-    return os.environ.get(env_var) + value[match.end():]
+    env_var = match.group()[
+        2:-1
+    ]  # TODO: make the solution work also when match is None
+    return os.environ.get(env_var) + value[match.end() :]
 
 
 # define custom tag handler
@@ -35,9 +46,9 @@ def joinPath(loader: Union[Loader, FullLoader, UnsafeLoader], node: Node) -> Pat
 
 
 # register tag handlers
-add_implicit_resolver('!path', path_matcher)
-add_constructor('!path', path_constructor)
-add_constructor('!joinPath', joinPath)
+add_implicit_resolver("!path", path_matcher)
+add_constructor("!path", path_constructor)
+add_constructor("!joinPath", joinPath)
 
 
 def load(filename: PathLike) -> Configuration:
@@ -53,7 +64,9 @@ def load(filename: PathLike) -> Configuration:
         return cfg_load.load(filename)
 
 
-def get_all_configuration_file(application_file: PathLike = "application.yml", name_env: str = "CONFIG_FILE") -> List[str]:
+def get_all_configuration_file(
+    application_file: PathLike = "application.yml", name_env: str = "CONFIG_FILE"
+) -> List[str]:
     """
     Retrieve all configuration files from system path, including the one in environment variable
 
@@ -61,14 +74,19 @@ def get_all_configuration_file(application_file: PathLike = "application.yml", n
     :param name_env: environment variable specifying the path to a specific configuration file
     :return: list of retrieved paths
     """
-    confs = [os.path.join(path, application_file)
-             for path in sys.path if os.path.exists(os.path.join(path, application_file))]
+    confs = [
+        os.path.join(path, application_file)
+        for path in sys.path
+        if os.path.exists(os.path.join(path, application_file))
+    ]
     env = [] if name_env not in os.environ.keys() else os.environ[name_env].split(":")
     print(f"Using Configuration files: {', '.join(confs + env)}")
     return confs + env
 
 
-def merge_confs(filenames: List[PathLike], default: Optional[str] = "defaults.yml") -> Configuration:
+def merge_confs(
+    filenames: List[PathLike], default: Optional[str] = "defaults.yml"
+) -> Configuration:
     """
     Merge configurations in given files
 
@@ -86,7 +104,9 @@ class BaseConfig(object):
         self.config = config
 
     def sublevel(self, name: Hashable) -> Configuration:
-        return Configuration(self.config[name], self.config.meta, self.config.meta["load_remote"])
+        return Configuration(
+            self.config[name], self.config.meta, self.config.meta["load_remote"]
+        )
 
     def getValue(self, name: Hashable) -> Any:
         return self.config[name]
@@ -94,10 +114,17 @@ class BaseConfig(object):
     def safeGetValue(self, name: Hashable) -> Any:
         return self.config.get(name, None)
 
-    def update(self, my_dict: dict) -> 'BaseConfig':
+    def update(self, my_dict: dict) -> "BaseConfig":
 
-        meta = union(self.config.meta, {"updated_params": my_dict,
-                                        "modification_datetime": datetime.now().astimezone(tz=pytz.timezone('Europe/Rome'))})
+        meta = union(
+            self.config.meta,
+            {
+                "updated_params": my_dict,
+                "modification_datetime": datetime.now().astimezone(
+                    tz=pytz.timezone("Europe/Rome")
+                ),
+            },
+        )
         return type(self)(Configuration(union(dict(self.config), my_dict), meta))
 
 

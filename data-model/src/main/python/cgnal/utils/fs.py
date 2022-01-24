@@ -21,6 +21,11 @@ def create_dir_if_not_exists(directory: PathLike) -> PathLike:
 
 
 def get_lexicographic_dirname(dirpath: PathLike, first: bool = False) -> PathLike:
-    return sorted([os.path.join(dirpath, o).split("/")[-1] for o in os.listdir(dirpath)
-                   if os.path.isdir(os.path.join(dirpath, o))],
-                  key=str.lower)[0 if first else -1]
+    return sorted(
+        [
+            os.path.join(dirpath, o).split("/")[-1]
+            for o in os.listdir(dirpath)
+            if os.path.isdir(os.path.join(dirpath, o))
+        ],
+        key=str.lower,
+    )[0 if first else -1]

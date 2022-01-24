@@ -2,7 +2,13 @@ import unittest
 import os
 import pandas as pd
 
-from cgnal.data.model.core import Range, CompositeRange, CachedIterable, LazyIterable, IterGenerator
+from cgnal.data.model.core import (
+    Range,
+    CompositeRange,
+    CachedIterable,
+    LazyIterable,
+    IterGenerator,
+)
 from cgnal.logging.defaults import getDefaultLogger
 from cgnal.tests.core import logTest, TestCase
 from data import TMP_FOLDER
@@ -23,10 +29,8 @@ cached = CachedIterable([i for i in range(n)])
 
 
 class TestIterGenerator(TestCase):
-
     @logTest
     def test_iterator(self):
-
         def generator():
             for i in range(10):
                 yield i
@@ -36,7 +40,6 @@ class TestIterGenerator(TestCase):
 
 
 class TestLazyIterable(TestCase):
-
     @logTest
     def test_map(self):
 
@@ -68,7 +71,7 @@ class TestLazyIterable(TestCase):
     def test_filter(self):
 
         half = lazy.map(lambda x: x + 1).filter(lambda x: x % 2 == 0)
-        self.assertEqual([i for i in half.asCached], [2,4,6,8,10])
+        self.assertEqual([i for i in half.asCached], [2, 4, 6, 8, 10])
 
     @logTest
     def test_asCached(self):
@@ -92,16 +95,17 @@ class TestLazyIterable(TestCase):
             self.assertTrue(isinstance(batch, CachedIterable))
 
         batches = lazy.map(lambda x: x + 1).batch(batch_size)
-        self.assertEqual([i for i in next(batches)],[1,2])
-
+        self.assertEqual([i for i in next(batches)], [1, 2])
 
     @logTest
     def test_foreach(self):
         lst = []
+
         def f(x):
             lst.append(x + 2)
+
         lazy.foreach(f)
-        self.assertEqual(lst, [i+2 for i in lazy])
+        self.assertEqual(lst, [i + 2 for i in lazy])
 
     def test_cached(self):
         self.assertTrue(not lazy.cached)
@@ -112,7 +116,6 @@ class TestLazyIterable(TestCase):
 
 
 class TestCachedIterables(TestCase):
-
     @staticmethod
     def functionWithSideEffect(lst):
         def function(x):
@@ -120,7 +123,6 @@ class TestCachedIterables(TestCase):
             return x
 
         return function
-
 
     @logTest
     def test__len__(self):
@@ -164,7 +166,7 @@ class TestCachedIterables(TestCase):
             self.assertTrue(isinstance(batch, CachedIterable))
 
         batches = cached.map(lambda x: x + 1).batch(batch_size)
-        self.assertEqual([i for i in next(batches)], [1,2])
+        self.assertEqual([i for i in next(batches)], [1, 2])
 
     @logTest
     def test_asLazy(self):
@@ -202,17 +204,19 @@ class TestCachedIterables(TestCase):
     @logTest
     def test_foreach(self):
         lst = []
+
         def f(x):
             lst.append(x + 2)
+
         cached.foreach(f)
-        self.assertEqual(lst, [i+2 for i in cached])
+        self.assertEqual(lst, [i + 2 for i in cached])
+
 
 class TestRange(TestCase):
 
     firstRange = Range("2021-01-01", "2021-01-10")
     secondRange = Range("2021-01-08", "2021-01-15")
     thirdRange = Range("2021-01-13", "2021-01-15")
-
 
     @logTest
     def test_start_end(self):
@@ -224,7 +228,7 @@ class TestRange(TestCase):
     def test_range(self):
 
         self.assertEqual(len(self.firstRange.range("D")), 10)
-        self.assertEqual(len(self.firstRange.range("H")), 9*24 + 1)
+        self.assertEqual(len(self.firstRange.range("H")), 9 * 24 + 1)
         self.assertEqual(len(self.firstRange.range("B")), 6)
 
     @logTest
@@ -239,11 +243,25 @@ class TestRange(TestCase):
 
     def test__add__(self):
         self.assertTrue(isinstance(self.firstRange.__add__(self.secondRange), Range))
-        self.assertTrue(isinstance(self.firstRange.__add__(self.thirdRange), CompositeRange))
-        self.assertEqual(self.firstRange.__add__(self.secondRange).start, Range("2021-01-01", "2021-01-15").start)
-        self.assertEqual(self.firstRange.__add__(self.secondRange).end, Range("2021-01-01", "2021-01-15").end)
-        self.assertEqual(self.firstRange.__add__(self.thirdRange).start, CompositeRange([self.firstRange, self.thirdRange]).start)
-        self.assertEqual(self.firstRange.__add__(self.thirdRange).end, CompositeRange([self.firstRange, self.thirdRange]).end)
+        self.assertTrue(
+            isinstance(self.firstRange.__add__(self.thirdRange), CompositeRange)
+        )
+        self.assertEqual(
+            self.firstRange.__add__(self.secondRange).start,
+            Range("2021-01-01", "2021-01-15").start,
+        )
+        self.assertEqual(
+            self.firstRange.__add__(self.secondRange).end,
+            Range("2021-01-01", "2021-01-15").end,
+        )
+        self.assertEqual(
+            self.firstRange.__add__(self.thirdRange).start,
+            CompositeRange([self.firstRange, self.thirdRange]).start,
+        )
+        self.assertEqual(
+            self.firstRange.__add__(self.thirdRange).end,
+            CompositeRange([self.firstRange, self.thirdRange]).end,
+        )
 
     def test__iter__(self):
         self.assertTrue(isinstance(self.firstRange.__iter__(), Iterator))
@@ -267,8 +285,9 @@ class TestRange(TestCase):
 
     @logTest
     def test__str__(self):
-        self.assertEqual(self.firstRange.__str__(),
-                         '2021-01-01 00:00:00-2021-01-10 00:00:00')
+        self.assertEqual(
+            self.firstRange.__str__(), "2021-01-01 00:00:00-2021-01-10 00:00:00"
+        )
 
 
 class TestCompositeRange(TestCase):
@@ -288,24 +307,40 @@ class TestCompositeRange(TestCase):
     @logTest
     def test__iter__(self):
         self.assertTrue(isinstance(self.compositeRange.__iter__(), Iterator))
-        self.assertEqual([i for i in self.compositeRange.__iter__()][0].range(), self.firstRange.range())
-        self.assertEqual([i for i in self.compositeRange.__iter__()][1].range(), self.thirdRange.range())
+        self.assertEqual(
+            [i for i in self.compositeRange.__iter__()][0].range(),
+            self.firstRange.range(),
+        )
+        self.assertEqual(
+            [i for i in self.compositeRange.__iter__()][1].range(),
+            self.thirdRange.range(),
+        )
 
     @logTest
     def test__add__(self):
-        self.assertTrue(isinstance(self.compositeRange.__add__(self.firstRange), CompositeRange))
-        self.assertEqual(CompositeRange(
-            [Range('2021-01-01', "2021-01-15"), Range('2021-01-22', "2021-01-25")]).range(), CompositeRange(
-            [self.firstRange, self.secondRange]).__add__(self.fifthRange).range())
-        self.assertEqual(self.compositeRange.__add__(self.secondRange).range(),
-                         Range('2021-01-01', '2021-01-20').range())
+        self.assertTrue(
+            isinstance(self.compositeRange.__add__(self.firstRange), CompositeRange)
+        )
+        self.assertEqual(
+            CompositeRange(
+                [Range("2021-01-01", "2021-01-15"), Range("2021-01-22", "2021-01-25")]
+            ).range(),
+            CompositeRange([self.firstRange, self.secondRange])
+            .__add__(self.fifthRange)
+            .range(),
+        )
+        self.assertEqual(
+            self.compositeRange.__add__(self.secondRange).range(),
+            Range("2021-01-01", "2021-01-20").range(),
+        )
 
     @logTest
     def test_range(self):
         self.assertTrue(isinstance(self.compositeRange.range(), list))
-        pd_daterange = list(pd.date_range(self.firstRange.start, self.firstRange.end, freq='D')) + \
-                       list(pd.date_range(self.thirdRange.start, self.thirdRange.end, freq='D'))
-        self.assertEqual(self.compositeRange.range('D'), pd_daterange)
+        pd_daterange = list(
+            pd.date_range(self.firstRange.start, self.firstRange.end, freq="D")
+        ) + list(pd.date_range(self.thirdRange.start, self.thirdRange.end, freq="D"))
+        self.assertEqual(self.compositeRange.range("D"), pd_daterange)
 
     @logTest
     def test_overlaps(self):
@@ -321,7 +356,6 @@ class TestCompositeRange(TestCase):
     @logTest
     def test_sum(self):
 
-
         # This should result in a simple Range, since the two ranges are not disjoint
         self.assertTrue(isinstance(self.firstRange + self.secondRange, Range))
 
@@ -329,7 +363,9 @@ class TestCompositeRange(TestCase):
         self.assertTrue(isinstance(self.firstRange + self.thirdRange, CompositeRange))
 
         # This should result in a simple Range, since the three ranges are not disjoint when taken all together
-        self.assertTrue(isinstance(self.firstRange + self.secondRange + self.thirdRange, Range))
+        self.assertTrue(
+            isinstance(self.firstRange + self.secondRange + self.thirdRange, Range)
+        )
 
     @logTest
     def test_simplify(self):
@@ -361,11 +397,10 @@ class TestCompositeRange(TestCase):
 
     @logTest
     def test__str__(self):
-        self.assertEqual(self.compositeRange.__str__(),
-                         '2021-01-01 00:00:00-2021-01-10 00:00:00 // 2021-01-14 00:00:00-2021-01-20 00:00:00')
-
-
-
+        self.assertEqual(
+            self.compositeRange.__str__(),
+            "2021-01-01 00:00:00-2021-01-10 00:00:00 // 2021-01-14 00:00:00-2021-01-20 00:00:00",
+        )
 
 
 if __name__ == "__main__":

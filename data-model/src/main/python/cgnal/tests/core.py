@@ -7,7 +7,6 @@ from cgnal.logging.defaults import WithLogging
 
 
 class TestCase(CoreTestCase, WithLogging):
-
     def compareLists(self, first: list, second: list, strict: bool = False) -> None:
         if strict:
             for item1, item2 in zip(first, second):
@@ -24,7 +23,9 @@ class TestCase(CoreTestCase, WithLogging):
             else:
                 self.assertEqual(first[key], second[key])
 
-    def compareDataFrames(self, first: pd.DataFrame, second: pd.DataFrame, msg: str) -> None:
+    def compareDataFrames(
+        self, first: pd.DataFrame, second: pd.DataFrame, msg: str
+    ) -> None:
         try:
             pd.testing.assert_frame_equal(first, second)
         except AssertionError as e:
@@ -54,4 +55,5 @@ def logTest(test: Callable[[TestCase], None]) -> Callable[[TestCase], None]:
         obj.logger.info(f"Executing Test {str(test.__name__)}")
         test(obj)
         obj.logger.info(f"Execution Time: {time() - t0} secs")
+
     return wrap

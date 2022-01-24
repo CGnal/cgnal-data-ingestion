@@ -10,7 +10,6 @@ from cgnal.logging.defaults import WithLogging
 
 
 class Database(WithLogging, DatabaseABC):
-
     def __init__(self, name: PathLike, extension: str = ".p") -> None:
         """
         Class implementing standard read and write methods to pickle data sources
@@ -30,10 +29,14 @@ class Database(WithLogging, DatabaseABC):
 
         :return: pickle names with appropriate extensions
         """
-        return list(map(lambda x: os.path.basename(x)[:-len(self.extension)],
-                        glob(os.path.join(self.name, "*%s" % self.extension))))
+        return list(
+            map(
+                lambda x: os.path.basename(x)[: -len(self.extension)],
+                glob(os.path.join(self.name, "*%s" % self.extension)),
+            )
+        )
 
-    def __getitem__(self, table_name: str) -> 'Table':
+    def __getitem__(self, table_name: str) -> "Table":
         """
         Return table from the database
 
@@ -44,7 +47,7 @@ class Database(WithLogging, DatabaseABC):
         """
         return self.table(table_name)
 
-    def table(self, table_name: str) -> 'Table':
+    def table(self, table_name: str) -> "Table":
         """
         Table selector
 
@@ -60,7 +63,6 @@ class Database(WithLogging, DatabaseABC):
 
 
 class Table(WithLogging, TableABC):
-
     def __init__(self, db: Database, table_name: str) -> None:
         """
         Class implementing a constructor for tables using pickle file format
@@ -70,7 +72,9 @@ class Table(WithLogging, TableABC):
         """
 
         if not isinstance(db, Database):
-            raise ValueError(f"The db should an instance of {'.'.join([Database.__module__, Database.__name__])}")
+            raise ValueError(
+                f"The db should an instance of {'.'.join([Database.__module__, Database.__name__])}"
+            )
 
         self.db = db
         self.name = table_name
@@ -82,7 +86,7 @@ class Table(WithLogging, TableABC):
 
         :return: path to pickle file
         """
-        return os.path.join(self.db.name, '%s.p' % self.name)
+        return os.path.join(self.db.name, "%s.p" % self.name)
 
     def to_df(self, query: Optional[str] = None) -> pd.DataFrame:
         """

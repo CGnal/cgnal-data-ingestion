@@ -20,9 +20,10 @@ def loc(df: DataFrame, idx: Union[Index, List[Any]]):
         pos = [pos for pos, elem in enumerate(df.index) if elem in idx]
         return DataFrame.sparse.from_spmatrix(
             csr[pos, :],
-            index=idx[pos] if isinstance(idx, Index) else [elem for elem in df.index if elem in idx],
-            columns=df.columns)
+            index=idx[pos]
+            if isinstance(idx, Index)
+            else [elem for elem in df.index if elem in idx],
+            columns=df.columns,
+        )
     else:
         return df.loc[idx]
-
-

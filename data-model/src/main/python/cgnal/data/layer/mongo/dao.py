@@ -7,8 +7,8 @@ from cgnal.data.layer import DAO
 from cgnal.utils.dict import union
 from cgnal.data.model.text import Document
 
-K = TypeVar('K', Hashable, Hashable)
-V = TypeVar('V', Hashable, Hashable)
+K = TypeVar("K", Hashable, Hashable)
+V = TypeVar("V", Hashable, Hashable)
 
 
 class DocumentDAO(DAO, Generic[K, V]):

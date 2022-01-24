@@ -10,8 +10,14 @@ from cgnal.data.layer.mongo.dao import DocumentDAO, SeriesDAO
 
 
 class MongoArchiver(Archiver):
-    def __init__(self, collection: Union[Collection, MockCollection], dao: Union[DocumentDAO, SeriesDAO]) -> None:
-        if not isinstance(collection, Collection) and not isinstance(collection, MockCollection):
+    def __init__(
+        self,
+        collection: Union[Collection, MockCollection],
+        dao: Union[DocumentDAO, SeriesDAO],
+    ) -> None:
+        if not isinstance(collection, Collection) and not isinstance(
+            collection, MockCollection
+        ):
             raise TypeError(f"Collection {collection} is not a MongoDb collection")
 
         self.collection = collection
@@ -27,8 +33,11 @@ class MongoArchiver(Archiver):
         json = self.collection.find_one({"_id": ObjectId(uuid)})
         return self.dao.parse(json)
 
-    def retrieve(self, condition: Dict[str, Dict[str, Any]] = {},
-                 sort_by: Optional[Union[str, List[str]]] = None) -> Iterator[Union[Document, pd.Series]]:
+    def retrieve(
+        self,
+        condition: Dict[str, Dict[str, Any]] = {},
+        sort_by: Optional[Union[str, List[str]]] = None,
+    ) -> Iterator[Union[Document, pd.Series]]:
         """
         Retrieve documents satisfying condition, sorted according to given ordering
 
@@ -59,7 +68,9 @@ class MongoArchiver(Archiver):
         :param obj: document to archive
         :return: an instance of :class:`~pymongo.results.UpdateResult with update operation's results
         """
-        return self.collection.update_one(self.dao.computeKey(obj), {"$set": self.dao.get(obj)}, upsert=True)
+        return self.collection.update_one(
+            self.dao.computeKey(obj), {"$set": self.dao.get(obj)}, upsert=True
+        )
 
     def archiveMany(self, objs: IterableType[Document]) -> List[UpdateResult]:
         """
@@ -71,7 +82,9 @@ class MongoArchiver(Archiver):
         return [self.__insert__(obj) for obj in objs]
 
     # TODO this method's output type is not consistent with its' ancestor's return type (that should be 'MongoArchiver')
-    def archive(self, objs: Union[Document, IterableType[Document]]) -> Union[UpdateResult, List[UpdateResult]]:
+    def archive(
+        self, objs: Union[Document, IterableType[Document]]
+    ) -> Union[UpdateResult, List[UpdateResult]]:
         """
         Archive one or more documents in collection
 
@@ -91,8 +104,9 @@ class MongoArchiver(Archiver):
         json = self.collection.find_one()
         return self.dao.parse(json)
 
-    def aggregate(self, pipeline: List[Dict[str, Dict[str, Any]]],
-                  allowDiskUse: bool = True) -> Iterator[Union[pd.Series, Document]]:
+    def aggregate(
+        self, pipeline: List[Dict[str, Dict[str, Any]]], allowDiskUse: bool = True
+    ) -> Iterator[Union[pd.Series, Document]]:
         """
         Aggregate collection's documents using given aggregation steps
 

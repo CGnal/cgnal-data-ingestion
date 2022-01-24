@@ -10,10 +10,17 @@ from email.mime.application import MIMEApplication
 
 
 class EmailSender(WithLogging):
-    """ Email Sender Utility Class """
+    """Email Sender Utility Class"""
 
-    def __init__(self, email_address: str, username: str, password: str, smtp_address: str, auth_protocol: str = "None",
-                 port: Optional[int] = None) -> None:
+    def __init__(
+        self,
+        email_address: str,
+        username: str,
+        password: str,
+        smtp_address: str,
+        auth_protocol: str = "None",
+        port: Optional[int] = None,
+    ) -> None:
         """
         :param email_address: Sender email address
         :param username: Username for authentication
@@ -29,7 +36,13 @@ class EmailSender(WithLogging):
         self.auth_protocol = auth_protocol
         self.port = port
 
-    def send_mail(self, text: str, subject: str, destination: str, attachments: Optional[List[str]] = None) -> None:
+    def send_mail(
+        self,
+        text: str,
+        subject: str,
+        destination: str,
+        attachments: Optional[List[str]] = None,
+    ) -> None:
         """
         Send email
 
@@ -41,25 +54,24 @@ class EmailSender(WithLogging):
         """
 
         msg = MIMEMultipart()
-        msg['Subject'] = subject
-        msg['From'] = self.email_address
-        msg['To'] = destination
+        msg["Subject"] = subject
+        msg["From"] = self.email_address
+        msg["To"] = destination
         msg.attach(MIMEText(text))
         if attachments is not None:
             for f in attachments:
                 with open(f, "rb") as fil:
-                    part = MIMEApplication(
-                        fil.read(),
-                        Name=basename(f)
-                    )
+                    part = MIMEApplication(fil.read(), Name=basename(f))
                 # After the file is closed
-                part['Content-Disposition'] = 'attachment; filename="%s"' % basename(f)
+                part["Content-Disposition"] = 'attachment; filename="%s"' % basename(f)
                 msg.attach(part)
 
         try:
             if self.auth_protocol == "SSL":
                 port = 465 if self.port is None else self.port
-                server: Union[smtplib.SMTP_SSL, smtplib.SMTP] = smtplib.SMTP_SSL(self.smtp_address, port=port)
+                server: Union[smtplib.SMTP_SSL, smtplib.SMTP] = smtplib.SMTP_SSL(
+                    self.smtp_address, port=port
+                )
             elif self.auth_protocol == "TLS":
                 port = 587 if self.port is None else self.port
                 server = smtplib.SMTP(self.smtp_address, port=port)

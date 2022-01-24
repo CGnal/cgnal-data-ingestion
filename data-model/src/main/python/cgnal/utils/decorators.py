@@ -41,7 +41,7 @@ class Cached(object):
     __cache__: dict = {}
 
     @staticmethod
-    def cache(func: Callable[['Cached'], T]) -> property:
+    def cache(func: Callable[["Cached"], T]) -> property:
         """
         Decorator to cache function return values
 
@@ -50,13 +50,14 @@ class Cached(object):
         """
 
         @wraps(func)
-        def _wrap(obj: 'Cached'):
+        def _wrap(obj: "Cached"):
             try:
                 return obj.__cache__[func.__name__]
             except KeyError:
                 score = func(obj)
                 obj.__cache__[func.__name__] = score
                 return score
+
         return property(_wrap)
 
     def clear_cache(self) -> None:
@@ -105,7 +106,9 @@ class Cached(object):
         return None
 
     @staticmethod
-    def load_element(filename: PathLike) -> Union[Dict[str, pd.DataFrame], pd.DataFrame]:
+    def load_element(
+        filename: PathLike,
+    ) -> Union[Dict[str, pd.DataFrame], pd.DataFrame]:
         """
         Load pickle at given path (or all pickles in given folder)
 
@@ -113,8 +116,12 @@ class Cached(object):
         :return: content of the read pickle
         """
         if os.path.isdir(filename):
-            return {Cached.__reformat_name(path): Cached.load_element(os.path.splitext(path)[0])
-                    for path in glob(os.path.join(filename, "*"))}
+            return {
+                Cached.__reformat_name(path): Cached.load_element(
+                    os.path.splitext(path)[0]
+                )
+                for path in glob(os.path.join(filename, "*"))
+            }
         else:
             # TODO do we really want to force the file extension to be .p? Wouldn't it be better keep only filename?
             return pd.read_pickle(filename + ".p")  # type: ignore
@@ -139,37 +146,65 @@ def paramCheck(function: Callable[..., T], allow_none: bool = True) -> Callable[
 
         default_values = inspect.getfullargspec(function).defaults
         annotations = inspect.getfullargspec(function).annotations
-        _args = inspect.getfullargspec(function).args[:-len(default_values)] if default_values \
+        _args = (
+            inspect.getfullargspec(function).args[: -len(default_values)]
+            if default_values
             else inspect.getfullargspec(function).args
+        )
 
-        non_default_args = [arg for arg in _args if (arg in annotations.keys() and arg != 'self')]
-        default_args = inspect.getfullargspec(function).args[-len(default_values):] if default_values else []
+        non_default_args = [
+            arg for arg in _args if (arg in annotations.keys() and arg != "self")
+        ]
+        default_args = (
+            inspect.getfullargspec(function).args[-len(default_values) :]
+            if default_values
+            else []
+        )
 
-        arg_dict = union({argument: {'type': annotations[argument], 'value': None} for argument in non_default_args},
-                         {argument: {'type': annotations.get(argument) if annotations.get(argument)
-                         else type(default_values[index]), 'value': default_values[index]}
-                          for index, argument in enumerate(default_args)}
-                         )
+        arg_dict = union(
+            {
+                argument: {"type": annotations[argument], "value": None}
+                for argument in non_default_args
+            },
+            {
+                argument: {
+                    "type": annotations.get(argument)
+                    if annotations.get(argument)
+                    else type(default_values[index]),
+                    "value": default_values[index],
+                }
+                for index, argument in enumerate(default_args)
+            },
+        )
 
         NoneType = type(None)
 
         for index, arg in enumerate(inspect.getfullargspec(function).args):
 
-            if arg != 'self':
-                argIn = arguments[index] if index < len(arguments) else kwargs.get(arg, arg_dict[arg]['value'])
+            if arg != "self":
+                argIn = (
+                    arguments[index]
+                    if index < len(arguments)
+                    else kwargs.get(arg, arg_dict[arg]["value"])
+                )
                 if argIn is None:
                     if allow_none is False:
                         raise ValueError(f"{arg} cannot be None")
                 else:
-                    if (not isinstance(argIn, arg_dict[arg]['type'])) and (
-                            arg_dict[arg]['type'] != NoneType):
-                        raise TypeError(f"{arg} parameter must be of type {str(arg_dict[arg]['type'])}")
+                    if (not isinstance(argIn, arg_dict[arg]["type"])) and (
+                        arg_dict[arg]["type"] != NoneType
+                    ):
+                        raise TypeError(
+                            f"{arg} parameter must be of type {str(arg_dict[arg]['type'])}"
+                        )
 
         return function(*arguments, **kwargs)
 
     return check
 
 
-@deprecated("This decorator is deprecated and will be removed in future versions. Use typeguard library instead")
+@deprecated(
+    "This decorator is deprecated and will be removed in future versions. Use typeguard library instead"
+)
 def param_check(with_none: bool) -> Callable[..., Any]:
     return partial(paramCheck, allow_none=with_none)

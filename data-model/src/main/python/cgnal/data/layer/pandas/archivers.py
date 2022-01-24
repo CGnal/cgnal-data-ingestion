@@ -14,16 +14,19 @@ Daos = Union[DataFrameDAO, SeriesDAO, DocumentDAO]
 
 
 class PandasArchiver(Archiver, ABC):
+    @abstractmethod
+    def __read__(self) -> pd.DataFrame:
+        ...
 
     @abstractmethod
-    def __read__(self) -> pd.DataFrame: ...
-
-    @abstractmethod
-    def __write__(self) -> None: ...
+    def __write__(self) -> None:
+        ...
 
     def __init__(self, dao: Daos) -> None:
         if not isinstance(dao, DAO):
-            raise TypeError(f"Given dao is not an instance of {'.'.join([DAO.__module__, DAO.__name__])}")
+            raise TypeError(
+                f"Given dao is not an instance of {'.'.join([DAO.__module__, DAO.__name__])}"
+            )
         self.dao = dao
         self.__data__: Optional[pd.DataFrame] = None
 
@@ -37,7 +40,7 @@ class PandasArchiver(Archiver, ABC):
     def data(self, value: pd.DataFrame) -> None:
         self.__data__ = value
 
-    def commit(self) -> 'PandasArchiver':
+    def commit(self) -> "PandasArchiver":
         self.__write__()
         return self
 
@@ -45,29 +48,38 @@ class PandasArchiver(Archiver, ABC):
         row = self.data.loc[uuid]
         return self.dao.parse(row)
 
-    def retrieve(self, condition: Optional[Callable[[pd.DataFrame], pd.DataFrame]] = None,
-                 sort_by: Optional[Union[str, List[str]]] = None) -> Iterator[DataVal]:
+    def retrieve(
+        self,
+        condition: Optional[Callable[[pd.DataFrame], pd.DataFrame]] = None,
+        sort_by: Optional[Union[str, List[str]]] = None,
+    ) -> Iterator[DataVal]:
         rows = self.data if condition is None else condition(self.data)
         rows = rows.sort_values(sort_by) if sort_by is not None else rows
         return (self.dao.parse(row) for _, row in rows.iterrows())
 
-    def retrieveGenerator(self, condition: Optional[Callable[[pd.DataFrame], pd.DataFrame]] = None,
-                          sort_by: Optional[Union[str, List[str]]] = None) -> IterGenerator[DataVal]:
+    def retrieveGenerator(
+        self,
+        condition: Optional[Callable[[pd.DataFrame], pd.DataFrame]] = None,
+        sort_by: Optional[Union[str, List[str]]] = None,
+    ) -> IterGenerator[DataVal]:
         def __iterator__():
             return self.retrieve(condition=condition, sort_by=sort_by)
+
         return IterGenerator(__iterator__)
 
     def archiveOne(self, obj: DataVal):
         return self.archiveMany([obj])
 
-    def archiveMany(self, objs: IterableType[DataVal]) -> 'PandasArchiver':
+    def archiveMany(self, objs: IterableType[DataVal]) -> "PandasArchiver":
         def create_df(obj):
             s = self.dao.get(obj)
             s.name = self.dao.computeKey(obj)
             return s.to_frame().T
 
         new = pd.concat([create_df(obj) for obj in objs], sort=True)
-        self.data = pd.concat([self.data.loc[set(self.data.index).difference(new.index)], new], sort=True)
+        self.data = pd.concat(
+            [self.data.loc[set(self.data.index).difference(new.index)], new], sort=True
+        )
         return self
 
     def archive(self, objs: Union[IterableType[DataVal], DataVal]):
@@ -78,7 +90,6 @@ class PandasArchiver(Archiver, ABC):
 
 
 class CsvArchiver(PandasArchiver):
-
     def __init__(self, filename: PathLike, dao: Daos, sep: str = ";") -> None:
 
         super(CsvArchiver, self).__init__(dao)
@@ -101,7 +112,6 @@ class CsvArchiver(PandasArchiver):
 
 
 class PickleArchiver(PandasArchiver):
-
     def __init__(self, filename: PathLike, dao: Daos) -> None:
 
         super(PickleArchiver, self).__init__(dao)
@@ -119,7 +129,6 @@ class PickleArchiver(PandasArchiver):
 
 
 class TableArchiver(PandasArchiver):
-
     def __init__(self, table: Table, dao: Daos) -> None:
         super(TableArchiver, self).__init__(dao)
 

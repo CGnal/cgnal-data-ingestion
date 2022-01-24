@@ -25,7 +25,10 @@ class TestMongoConnection(TestCase):
 
     @logTest
     def test_mongo_archiver(self):
-        doc = Document(generate_random_uuid(), {"title": "This is a title", "text": "This is a text"})
+        doc = Document(
+            generate_random_uuid(),
+            {"title": "This is a title", "text": "This is a text"},
+        )
 
         archiver = MongoArchiver(db["documents"], DocumentDAO())
 

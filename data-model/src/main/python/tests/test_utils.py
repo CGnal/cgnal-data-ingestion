@@ -7,7 +7,15 @@ import pandas as pd
 from cgnal.logging.defaults import getDefaultLogger
 from cgnal.tests.core import logTest, TestCase
 from cgnal.utils.decorators import lazyproperty as lazy, Cached, param_check
-from cgnal.utils.dict import groupIterable, pairwise, union, flattenKeys, unflattenKeys, filterNones, groupBy
+from cgnal.utils.dict import (
+    groupIterable,
+    pairwise,
+    union,
+    flattenKeys,
+    unflattenKeys,
+    filterNones,
+    groupBy,
+)
 from cgnal.utils.fs import mkdir, create_dir_if_not_exists, get_lexicographic_dirname
 from cgnal.utils.pandas import is_sparse, loc
 
@@ -17,80 +25,98 @@ logger = getDefaultLogger()
 
 
 class TestUtilsDict(TestCase):
-
     @logTest
     def test_groupIterable(self):
-        self.assertEqual([el for el in groupIterable({"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6},
-                                                     batch_size=3)], [['a', 'b', 'c'], ['d', 'e', 'f']])
-        self.assertEqual([el for el in groupIterable({"a": 1, "b": 2, "c": 3, "d": 4, "e": 5},
-                                                     batch_size=3)], [['a', 'b', 'c'], ['d', 'e']])
-        self.assertEqual([el for el in groupIterable({"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6, "g": 7},
-                                                     batch_size=3)], [['a', 'b', 'c'], ['d', 'e', 'f'], ['g']])
+        self.assertEqual(
+            [
+                el
+                for el in groupIterable(
+                    {"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6}, batch_size=3
+                )
+            ],
+            [["a", "b", "c"], ["d", "e", "f"]],
+        )
+        self.assertEqual(
+            [
+                el
+                for el in groupIterable(
+                    {"a": 1, "b": 2, "c": 3, "d": 4, "e": 5}, batch_size=3
+                )
+            ],
+            [["a", "b", "c"], ["d", "e"]],
+        )
+        self.assertEqual(
+            [
+                el
+                for el in groupIterable(
+                    {"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6, "g": 7},
+                    batch_size=3,
+                )
+            ],
+            [["a", "b", "c"], ["d", "e", "f"], ["g"]],
+        )
 
     @logTest
     def test_pairwise(self):
-        self.assertEqual([el for el in pairwise({"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6})],
-                         [('a', 'b'), ('b', 'c'), ('c', 'd'), ('d', 'e'), ('e', 'f')])
+        self.assertEqual(
+            [el for el in pairwise({"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6})],
+            [("a", "b"), ("b", "c"), ("c", "d"), ("d", "e"), ("e", "f")],
+        )
         self.assertEqual([el for el in pairwise({"a": 1})], [])
 
     @logTest
     def test_union(self):
         self.assertEqual(
             union({"1": {"a": 1}}, filterNones({"1": {"a": None}, "b": 1})),
-            {"1": {"a": 1}, "b": 1}
+            {"1": {"a": 1}, "b": 1},
         )
 
         self.assertEqual(
             union({"1": {"a": 1}}, filterNones({"1": {"a": 2}, "b": None})),
-            {"1": {"a": 2}}
+            {"1": {"a": 2}},
         )
 
         self.assertEqual(
             union({"1": None}, {"1": 1, "2": 3}, {"1": {"1a": 1, "1b": 2}, "3": 4}),
-            {'1': {'1a': 1, '1b': 2}, '2': 3, '3': 4}
+            {"1": {"1a": 1, "1b": 2}, "2": 3, "3": 4},
         )
 
     @logTest
     def test_flattenKeys(self):
         self.assertEqual(
-            flattenKeys({"a": {"b": {"c": 2}}, "d": 2, "e": 3}, sep='.'),
-            {'a.b.c': 2, 'd': 2, 'e': 3}
+            flattenKeys({"a": {"b": {"c": 2}}, "d": 2, "e": 3}, sep="."),
+            {"a.b.c": 2, "d": 2, "e": 3},
         )
 
         self.assertEqual(
-            flattenKeys({"a": {"b": {"c": 2}}, "a": 2, "e": 3}),
-            {'a': 2, 'e': 3}
+            flattenKeys({"a": {"b": {"c": 2}}, "a": 2, "e": 3}), {"a": 2, "e": 3}
         )
 
     @logTest
     def test_unflattenKeys(self):
         self.assertEqual(
-            unflattenKeys({'a.b.c': 2, 'd': 2, 'e': 3}, sep="."),
-            {'a': {'b': {'c': 2}}, 'd': 2, 'e': 3}
+            unflattenKeys({"a.b.c": 2, "d": 2, "e": 3}, sep="."),
+            {"a": {"b": {"c": 2}}, "d": 2, "e": 3},
         )
 
         self.assertEqual(
-            unflattenKeys({'a.b.c': 2, 'd': 2, 'e': 3}, sep="_"),
-            {'a.b.c': 2, 'd': 2, 'e': 3}
+            unflattenKeys({"a.b.c": 2, "d": 2, "e": 3}, sep="_"),
+            {"a.b.c": 2, "d": 2, "e": 3},
         )
 
     @logTest
     def test_filterNones(self):
-        self.assertEqual(
-            filterNones({"a": 1, "b": None}),
-            {"a": 1}
-        )
+        self.assertEqual(filterNones({"a": 1, "b": None}), {"a": 1})
 
     @logTest
     def test_groupBy(self):
         self.assertEqual(
             [(k, v) for k, v in groupBy(["abc", "ab", "bcd", "c"], key=len)],
-            [(1, ['c']), (2, ['ab']), (3, ['abc', 'bcd'])]
+            [(1, ["c"]), (2, ["ab"]), (3, ["abc", "bcd"])],
         )
 
 
 class TestUtilsFs(TestCase):
-
     @logTest
     def test_mkdir(self):
         directory = os.path.join("/tmp", "test_utils_fs")
@@ -116,35 +142,90 @@ class TestUtilsFs(TestCase):
 
 
 class TestPandas(TestCase):
-
     @logTest
     def test_is_sparse(self):
-        self.assertTrue(is_sparse(pd.DataFrame({'v1': pd.arrays.SparseArray([0, 0, 0, 0, 1]),
-                                                'v2': pd.arrays.SparseArray([1, 0, 0, 0, 1]),
-                                                'v3': pd.arrays.SparseArray([1, 0, 0, 0, 0])})))
+        self.assertTrue(
+            is_sparse(
+                pd.DataFrame(
+                    {
+                        "v1": pd.arrays.SparseArray([0, 0, 0, 0, 1]),
+                        "v2": pd.arrays.SparseArray([1, 0, 0, 0, 1]),
+                        "v3": pd.arrays.SparseArray([1, 0, 0, 0, 0]),
+                    }
+                )
+            )
+        )
 
-        self.assertFalse(is_sparse(pd.DataFrame({'v1': [0, 0, 0, 0, 1],
-                                                 'v2': pd.arrays.SparseArray([1, 0, 0, 0, 1]),
-                                                 'v3': pd.arrays.SparseArray([1, 0, 0, 0, 0])})))
+        self.assertFalse(
+            is_sparse(
+                pd.DataFrame(
+                    {
+                        "v1": [0, 0, 0, 0, 1],
+                        "v2": pd.arrays.SparseArray([1, 0, 0, 0, 1]),
+                        "v3": pd.arrays.SparseArray([1, 0, 0, 0, 0]),
+                    }
+                )
+            )
+        )
 
     @logTest
     def test_loc(self):
-        res = pd.DataFrame({'v1': [0], 'v2': [1], 'v3': [1]})
-        self.assertTrue((loc(pd.DataFrame({'v1': [0, 0, 0, 0, 1],
-                                           'v2': pd.arrays.SparseArray([1, 0, 0, 0, 1]),
-                                           'v3': pd.arrays.SparseArray([1, 0, 0, 0, 0])}), [0]) == res).all().all())
+        res = pd.DataFrame({"v1": [0], "v2": [1], "v3": [1]})
+        self.assertTrue(
+            (
+                loc(
+                    pd.DataFrame(
+                        {
+                            "v1": [0, 0, 0, 0, 1],
+                            "v2": pd.arrays.SparseArray([1, 0, 0, 0, 1]),
+                            "v3": pd.arrays.SparseArray([1, 0, 0, 0, 0]),
+                        }
+                    ),
+                    [0],
+                )
+                == res
+            )
+            .all()
+            .all()
+        )
 
         # TODO: manca scipy nei requirements ?
-        self.assertTrue((loc(pd.DataFrame({'v1': pd.arrays.SparseArray([0, 0, 0, 0, 1]),
-                                           'v2': pd.arrays.SparseArray([1, 0, 0, 0, 1]),
-                                           'v3': pd.arrays.SparseArray([1, 0, 0, 0, 0])}), [0]) == res).all().all())
-        self.assertTrue(is_sparse(loc(pd.DataFrame({'v1': pd.arrays.SparseArray([0, 0, 0, 0, 1]),
-                                                    'v2': pd.arrays.SparseArray([1, 0, 0, 0, 1]),
-                                                    'v3': pd.arrays.SparseArray([1, 0, 0, 0, 0])}), [0])))
+        self.assertTrue(
+            (
+                loc(
+                    pd.DataFrame(
+                        {
+                            "v1": pd.arrays.SparseArray([0, 0, 0, 0, 1]),
+                            "v2": pd.arrays.SparseArray([1, 0, 0, 0, 1]),
+                            "v3": pd.arrays.SparseArray([1, 0, 0, 0, 0]),
+                        }
+                    ),
+                    [0],
+                )
+                == res
+            )
+            .all()
+            .all()
+        )
+        self.assertTrue(
+            is_sparse(
+                loc(
+                    pd.DataFrame(
+                        {
+                            "v1": pd.arrays.SparseArray([0, 0, 0, 0, 1]),
+                            "v2": pd.arrays.SparseArray([1, 0, 0, 0, 1]),
+                            "v3": pd.arrays.SparseArray([1, 0, 0, 0, 0]),
+                        }
+                    ),
+                    [0],
+                )
+            )
+        )
+
 
 @typechecked
 class MyTestClass:
-    def __init__(self, param: str = 'test'):
+    def __init__(self, param: str = "test"):
         self.param = param
 
     @lazy
@@ -156,7 +237,7 @@ class MyTestClass:
 
 
 class MyClass:
-    def __init__(self, param: str = 'test'):
+    def __init__(self, param: str = "test"):
         self.param = param
 
     @lazy
@@ -172,39 +253,48 @@ class MyClass:
 
 
 class TestDecorators(TestCase):
-
     @logTest
     def test_lazyproperty(self):
         ex = MyClass()
 
-        self.assertEqual(ex.__dict__, {'param': 'test'})
+        self.assertEqual(ex.__dict__, {"param": "test"})
 
         info = f"Testing lazyproperty decorator. Let's try to call the list_param={ex.list_param} attribute."
         logger.info(info)
 
-        self.assertEqual(ex.__dict__, {'param': 'test', 'list_param': [1, 2, 3]})
+        self.assertEqual(ex.__dict__, {"param": "test", "list_param": [1, 2, 3]})
 
     @logTest
     def test_param_check(self):
         ex = MyClass()
 
-        self.assertEqual(ex.dict_constructor(k_vals=['a', 'b', 'c'], v_vals=[[1, 2, 3], [4, 5, 6], [7, 8, 9]]),
-                         {'a': [1, 2, 3], 'b': [4, 5, 6], 'c': [7, 8, 9]})
-        self.assertRaises(TypeError, ex.dict_constructor, k_vals='a', v_vals=[1, 2, 3])
-        self.assertRaises(ValueError, ex.dict_constructor, k_vals=None, v_vals=[1, 2, 3])
-
+        self.assertEqual(
+            ex.dict_constructor(
+                k_vals=["a", "b", "c"], v_vals=[[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+            ),
+            {"a": [1, 2, 3], "b": [4, 5, 6], "c": [7, 8, 9]},
+        )
+        self.assertRaises(TypeError, ex.dict_constructor, k_vals="a", v_vals=[1, 2, 3])
+        self.assertRaises(
+            ValueError, ex.dict_constructor, k_vals=None, v_vals=[1, 2, 3]
+        )
 
     @logTest
     def test_param_check_with_typeguard(self):
         ex = MyTestClass()
 
-        self.assertEqual(ex.dict_constructor(k_vals=['a', 'b', 'c'], v_vals=[[1, 2, 3], [4, 5, 6], [7, 8, 9]]),
-                         {'a': [1, 2, 3], 'b': [4, 5, 6], 'c': [7, 8, 9]})
-        self.assertRaises(TypeError, ex.dict_constructor, k_vals='a', v_vals=[1, 2, 3])
+        self.assertEqual(
+            ex.dict_constructor(
+                k_vals=["a", "b", "c"], v_vals=[[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+            ),
+            {"a": [1, 2, 3], "b": [4, 5, 6], "c": [7, 8, 9]},
+        )
+        self.assertRaises(TypeError, ex.dict_constructor, k_vals="a", v_vals=[1, 2, 3])
         self.assertRaises(TypeError, ex.dict_constructor, k_vals=None, v_vals=[1, 2, 3])
 
     def test_cache_io(self):
         from cgnal.utils.decorators import Cached
+
         # from time import sleep
 
         class A(Cached):

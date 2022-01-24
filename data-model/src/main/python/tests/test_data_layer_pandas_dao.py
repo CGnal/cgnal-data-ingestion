@@ -19,7 +19,7 @@ logger = getDefaultLogger()
 class TestDocumentDAO(TestCase):
 
     dict_doc = {"name": "Bob", "languages": ["English", "Fench"]}
-    key_doc = '123'
+    key_doc = "123"
     doc = Document(key_doc, dict_doc)
     series_doc = pd.Series(dict_doc, name=key_doc)
 
@@ -33,13 +33,13 @@ class TestDocumentDAO(TestCase):
 
     @logTest
     def test_parse(self):
-        self.assertTrue(isinstance(DocumentDAO().parse(self.series_doc),Document))
+        self.assertTrue(isinstance(DocumentDAO().parse(self.series_doc), Document))
         self.assertTrue(DocumentDAO().parse(self.series_doc).data == self.doc.data)
 
 
 class TestDataFrameDAO(TestCase):
 
-    df1 = pd.DataFrame([[1, 2, 3], [6, 5, 4]], columns = ['a', 'b', 'c'])
+    df1 = pd.DataFrame([[1, 2, 3], [6, 5, 4]], columns=["a", "b", "c"])
     key_df1 = hash(json.dumps({str(k): str(v) for k, v in df1.to_dict().items()}))
     index = [
         np.array(["a", "a", "b", "b", "c", "c"]),
@@ -51,7 +51,7 @@ class TestDataFrameDAO(TestCase):
     def test_computeKey(self):
         self.assertEqual(DataFrameDAO().computeKey(self.df1), self.key_df1)
         df2 = self.df1.copy()
-        df2.name = 'df2_name'
+        df2.name = "df2_name"
         self.assertEqual(DataFrameDAO().computeKey(df2), df2.name)
 
     @logTest
@@ -67,13 +67,14 @@ class TestDataFrameDAO(TestCase):
     @logTest
     def test_addName(self):
         df3 = self.df1.copy()
-        DataFrameDAO().addName(df3, 'df1_name')
-        self.assertEqual(df3.name, 'df1_name')
+        DataFrameDAO().addName(df3, "df1_name")
+        self.assertEqual(df3.name, "df1_name")
+
 
 class TestSeriesDAO(TestCase):
 
-    name_s1 = 'test_series'
-    s1 = pd.Series(np.ones(5), index = range(5), name = name_s1)
+    name_s1 = "test_series"
+    s1 = pd.Series(np.ones(5), index=range(5), name=name_s1)
     s2 = pd.Series(np.zeros(5), index=range(5))
 
     @logTest
@@ -91,6 +92,6 @@ class TestSeriesDAO(TestCase):
         self.assertTrue(isinstance(SeriesDAO().get(self.s1), pd.Series))
         self.assertEqual(SeriesDAO().parse(self.s1), self.s1)
 
+
 if __name__ == "__main__":
     unittest.main()
-

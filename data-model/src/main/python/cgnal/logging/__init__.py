@@ -4,7 +4,9 @@ from typing_extensions import Literal, TypedDict
 from cgnal.typing import PathLike
 from cgnal.config import BaseConfig
 
-LevelTypes = Literal["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG", "NOTSET", 50, 40, 30, 20, 10, 0]
+LevelTypes = Literal[
+    "CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG", "NOTSET", 50, 40, 30, 20, 10, 0
+]
 StrLevelTypes = Literal["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG", "NOTSET"]
 
 
@@ -21,7 +23,6 @@ DEFAULT_LOG_LEVEL: StrLevelTypes = "INFO"
 
 
 class WithLoggingABC(ABC):
-
     @property
     @abstractmethod
     def logger(self) -> Logger:

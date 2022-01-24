@@ -20,17 +20,17 @@ from typing import Generic, Callable, Sequence
 
 
 class Serializable(ABC):
-
     @abstractmethod
-    def write(self, filaname: PathLike) -> None: ...
+    def write(self, filaname: PathLike) -> None:
+        ...
 
     @classmethod
     @abstractmethod
-    def load(cls, filename: PathLike) -> 'Serializable': ...
+    def load(cls, filename: PathLike) -> "Serializable":
+        ...
 
 
 class PickleSerialization(Serializable):
-
     def write(self, filename: PathLike) -> None:
         """
         Write instance as pickle
@@ -39,23 +39,22 @@ class PickleSerialization(Serializable):
 
         :return: None
         """
-        with open(filename, 'wb') as fid:
+        with open(filename, "wb") as fid:
             pickle.dump(self, fid)
 
     @classmethod
-    def load(cls, filename: PathLike) -> 'PickleSerialization':
+    def load(cls, filename: PathLike) -> "PickleSerialization":
         """
         Load instance from pickle
 
         :param filename: Name of the file to be read
         :return: Instance of the read Model
         """
-        with open(filename, 'rb') as fid:
+        with open(filename, "rb") as fid:
             return pickle.load(fid)
 
 
 class DillSerialization(Serializable):
-
     def write(self, filename: PathLike) -> None:
         """
         Write instance as pickle
@@ -64,18 +63,18 @@ class DillSerialization(Serializable):
 
         :return: None
         """
-        with open(filename, 'wb') as fid:
+        with open(filename, "wb") as fid:
             dill.dump(self, fid)
 
     @classmethod
-    def load(cls, filename: PathLike) -> 'DillSerialization':
+    def load(cls, filename: PathLike) -> "DillSerialization":
         """
         Load instance from file
 
         :param filename: Name of the file to be read
         :return: Instance of the read Model
         """
-        with open(filename, 'rb') as fid:
+        with open(filename, "rb") as fid:
             return dill.load(fid)
 
 
@@ -89,7 +88,6 @@ class IterGenerator(Generic[T]):
 
 
 class BaseIterable(Generic[T], ABC):
-
     @property
     @abstractmethod
     def items(self) -> Iterable[T]:
@@ -101,15 +99,15 @@ class BaseIterable(Generic[T], ABC):
         raise NotImplementedError
 
     @property
-    def __lazyType__(self) -> 'Type[LazyIterable]':
+    def __lazyType__(self) -> "Type[LazyIterable]":
         return LazyIterable
 
     @property
-    def __cachedType__(self) -> 'Type[CachedIterable]':
+    def __cachedType__(self) -> "Type[CachedIterable]":
         return CachedIterable
 
     @property
-    def asLazy(self) -> 'LazyIterable':
+    def asLazy(self) -> "LazyIterable":
         def generator():
             for item in self:
                 yield item
@@ -117,13 +115,13 @@ class BaseIterable(Generic[T], ABC):
         return self.__lazyType__(IterGenerator(generator))
 
     @property
-    def asCached(self) -> 'CachedIterable':
+    def asCached(self) -> "CachedIterable":
         return self.__cachedType__(list(self.items))
 
-    def take(self, size: int) -> 'Iterable[T]':
+    def take(self, size: int) -> "Iterable[T]":
         return self.__cachedType__(list(islice(self, size)))
 
-    def filter(self, f: Callable[[T], T_co]) -> 'LazyIterable[T_co]':
+    def filter(self, f: Callable[[T], T_co]) -> "LazyIterable[T_co]":
         def generator():
             for item in self:
                 if f(item):
@@ -135,11 +133,11 @@ class BaseIterable(Generic[T], ABC):
         for item in self.items:
             yield item
 
-    def batch(self, size: int = 100) -> 'Iterator[CachedIterable[T]]':
+    def batch(self, size: int = 100) -> "Iterator[CachedIterable[T]]":
         for batch in groupIterable(self.items, batch_size=size):
             yield self.__cachedType__(batch)
 
-    def map(self, f: Callable[[T], T_co]) -> 'LazyIterable[T_co]':
+    def map(self, f: Callable[[T], T_co]) -> "LazyIterable[T_co]":
         def generator():
             for item in self:
                 yield f(item)
@@ -152,11 +150,12 @@ class BaseIterable(Generic[T], ABC):
 
 
 class LazyIterable(BaseIterable, Generic[T]):
-
     def __init__(self, items: IterGenerator):
         if not isinstance(items, IterGenerator):
-            raise TypeError("For lazy iterables the input must be an IterGenerator(object). Input of type %s passed"
-                            % type(items))
+            raise TypeError(
+                "For lazy iterables the input must be an IterGenerator(object). Input of type %s passed"
+                % type(items)
+            )
         self.__items__ = items
 
     @property
@@ -169,7 +168,6 @@ class LazyIterable(BaseIterable, Generic[T]):
 
 
 class CachedIterable(BaseIterable, Generic[T], DillSerialization):
-
     def __init__(self, items: Sequence[T]):
         self.__items__ = list(items)
 
@@ -212,16 +210,20 @@ class BaseRange(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def __iter__(self) -> Iterator['Range']: ...
+    def __iter__(self) -> Iterator["Range"]:
+        ...
 
     @abstractmethod
-    def __add__(self, other: 'BaseRange') -> 'BaseRange': ...
+    def __add__(self, other: "BaseRange") -> "BaseRange":
+        ...
 
     @abstractmethod
-    def overlaps(self, other: 'BaseRange') -> bool: ...
+    def overlaps(self, other: "BaseRange") -> bool:
+        ...
 
     @abstractmethod
-    def range(self, freq="H") -> List[Timestamp]: ...
+    def range(self, freq="H") -> List[Timestamp]:
+        ...
 
     def __str__(self) -> str:
         return " // ".join([f"{r.start}-{r.end}" for r in self])
@@ -255,7 +257,6 @@ class BaseRange(ABC):
 
 
 class Range(BaseRange):
-
     def __init__(self, start: DatetimeScalar, end: DatetimeScalar) -> None:
         """
         Simple Range Class
@@ -267,7 +268,9 @@ class Range(BaseRange):
         self.__end__ = pd.to_datetime(end)
 
         if self.start > self.end:
-            raise ValueError("Start and End values should be consequential: start < end")
+            raise ValueError(
+                "Start and End values should be consequential: start < end"
+            )
 
     @property
     def start(self) -> Timestamp:
@@ -277,17 +280,18 @@ class Range(BaseRange):
     def end(self) -> Timestamp:
         return self.__end__
 
-    def __iter__(self) -> Iterator['Range']:
+    def __iter__(self) -> Iterator["Range"]:
         yield Range(self.start, self.end)
 
     def range(self, freq="H") -> List[Timestamp]:
         return pd.date_range(self.start, self.end, freq=freq).tolist()
 
-    def __overlaps_range__(self, other: 'Range') -> bool:
+    def __overlaps_range__(self, other: "Range") -> bool:
         return ((self.start < other.start) and (self.end > other.start)) or (
-                (other.start < self.start) and (other.end > self.start))
+            (other.start < self.start) and (other.end > self.start)
+        )
 
-    def overlaps(self, other: 'BaseRange') -> bool:
+    def overlaps(self, other: "BaseRange") -> bool:
         """
         Returns whether two ranges overlaps
 
@@ -296,10 +300,12 @@ class Range(BaseRange):
         """
         return any([self.__overlaps_range__(r) for r in other])
 
-    def __add__(self, other: BaseRange) -> Union['CompositeRange', 'Range']:
+    def __add__(self, other: BaseRange) -> Union["CompositeRange", "Range"]:
         if not isinstance(other, Range):
-            raise ValueError(f"add operator not defined for argument of type {type(other)}. Argument should be of "
-                             f"type Range")
+            raise ValueError(
+                f"add operator not defined for argument of type {type(other)}. Argument should be of "
+                f"type Range"
+            )
         if isinstance(other, Range) and self.overlaps(other):
             return Range(min(self.start, other.start), max(self.end, other.end))
         else:
@@ -307,7 +313,6 @@ class Range(BaseRange):
 
 
 class CompositeRange(BaseRange):
-
     def __init__(self, ranges: List[Range]) -> None:
         """
         Ranges made up of multiple ranges
@@ -316,7 +321,7 @@ class CompositeRange(BaseRange):
         """
         self.ranges = ranges
 
-    def simplify(self) -> Union['CompositeRange', Range]:
+    def simplify(self) -> Union["CompositeRange", Range]:
         """
         Simplifies the list into disjoint Range objects, aggregating non-disjoint ranges. If only one range would be
         present, a simple Range object is returned
@@ -326,7 +331,9 @@ class CompositeRange(BaseRange):
         ranges = sorted(self.ranges, key=lambda r: r.start)
 
         # check overlapping ranges
-        overlaps = [first.overlaps(second) for first, second in zip(ranges[:-1], ranges[1:])]
+        overlaps = [
+            first.overlaps(second) for first, second in zip(ranges[:-1], ranges[1:])
+        ]
 
         def merge(agg: List[Range], item: Tuple[int, bool]) -> List[Range]:
             ith, overlap = item
@@ -348,21 +355,27 @@ class CompositeRange(BaseRange):
     def end(self) -> Timestamp:
         return max([range.end for range in self.ranges])
 
-    def __iter__(self) -> Iterator['Range']:
+    def __iter__(self) -> Iterator["Range"]:
         for range in self.ranges:
             yield range
 
     def range(self, freq="H") -> List[Timestamp]:
-        items = np.unique([
-            item for range in self.ranges for item in pd.date_range(range.start, range.end, freq=freq)
-        ])
+        items = np.unique(
+            [
+                item
+                for range in self.ranges
+                for item in pd.date_range(range.start, range.end, freq=freq)
+            ]
+        )
         return sorted(items)
 
     def __add__(self, other: BaseRange) -> BaseRange:
         if not isinstance(other, BaseRange):
-            raise ValueError(f"add operator not defined for argument of type {type(other)}. Argument should be of "
-                             f"type BaseRange")
+            raise ValueError(
+                f"add operator not defined for argument of type {type(other)}. Argument should be of "
+                f"type BaseRange"
+            )
         return CompositeRange(self.ranges + list(other)).simplify()
 
-    def overlaps(self, other: 'BaseRange') -> bool:
+    def overlaps(self, other: "BaseRange") -> bool:
         return any([r.overlaps(other) for r in self])

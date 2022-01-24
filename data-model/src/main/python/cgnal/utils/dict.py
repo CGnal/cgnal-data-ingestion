@@ -1,4 +1,5 @@
 import sys
+
 if sys.version_info[0] < 3:
     from itertools import izip as zip
 else:
@@ -26,7 +27,7 @@ def pairwise(iterable: Iterable[T]) -> zip:
 
 def union(*dicts: dict) -> dict:
     def __dict_merge(dct: dict, merge_dct: dict):
-        """ Recursive dict merge. Inspired by :meth:``dict.update()``, instead of
+        """Recursive dict merge. Inspired by :meth:``dict.update()``, instead of
         updating only top-level keys, dict_merge recurses down into dicts nested
         to an arbitrary depth, updating keys. The ``merge_dct`` is merged into
         ``dct``.
@@ -36,8 +37,11 @@ def union(*dicts: dict) -> dict:
         """
         merged = copy(dct)
         for k, v in merge_dct.items():
-            if (k in dct and isinstance(dct[k], dict)
-                    and isinstance(merge_dct[k], Mapping)):
+            if (
+                k in dct
+                and isinstance(dct[k], dict)
+                and isinstance(merge_dct[k], Mapping)
+            ):
                 merged[k] = __dict_merge(dct[k], merge_dct[k])
             else:
                 merged[k] = merge_dct[k]
@@ -49,9 +53,16 @@ def union(*dicts: dict) -> dict:
 def flattenKeys(input_dict: Dict[str, T], sep: str = ".") -> Dict[str, T]:
     def _flatten_(key: str, value: T) -> List[Tuple[str, T]]:
         if isinstance(value, dict) and (len(value) > 0):
-            return reduce(add, [_flatten_(sep.join([key, name]), item) for name, item in value.items()])
+            return reduce(
+                add,
+                [
+                    _flatten_(sep.join([key, name]), item)
+                    for name, item in value.items()
+                ],
+            )
         else:
             return [(key, value)]
+
     return union(*[dict(_flatten_(key, value)) for key, value in input_dict.items()])
 
 
@@ -62,6 +73,7 @@ def unflattenKeys(input_dict: Dict[str, Any], sep: str = ".") -> Dict[str, Any]:
         for level in reversed(levels):
             out = {level: out}
         return out
+
     return union(*[__translate(key, value) for key, value in input_dict.items()])
 
 
@@ -79,6 +91,8 @@ def filterNones(_dict: Dict[T, Any]) -> Dict[T, Any]:
     return agg
 
 
-def groupBy(lst: Iterable[T], key: Callable[[T], SupportsLessThan]) -> Iterator[Tuple[SupportsLessThan, List[T]]]:
+def groupBy(
+    lst: Iterable[T], key: Callable[[T], SupportsLessThan]
+) -> Iterator[Tuple[SupportsLessThan, List[T]]]:
     for k, it in groupby(sorted(lst, key=key), key=key):
         yield k, list(it)
