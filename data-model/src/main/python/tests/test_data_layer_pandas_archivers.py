@@ -186,8 +186,8 @@ class TestPickleArchiver(TestCase):
 
     @logTest
     def test__write__read__(self):
-        self.df1.to_pickle(TMP_FOLDER + '/df1.pkl')
-        a = PickleArchiver(TMP_FOLDER + "/df1.pkl", SeriesDAO())
+        self.df1.to_pickle(os.path.join(TMP_FOLDER, "df1.pkl"))
+        a = PickleArchiver(os.path.join(TMP_FOLDER, "df1.pkl"), SeriesDAO())
         a.archive([self.s1]).__write__()
         self.assertEqual(a.__read__(), a.data)
 
@@ -197,6 +197,10 @@ class TestPickleArchiver(TestCase):
         a = PickleArchiver(TMP_FOLDER + "/df1.pkl", SeriesDAO())
         a.archiveOne(self.s1).commit()
         self.assertEqual(a.data, a.__read__())
+
+        b = PickleArchiver(os.path.join(TMP_FOLDER, "df2.pkl"), SeriesDAO())
+        b.archiveOne(self.s1).commit()
+        self.assertTrue(os.path.exists(os.path.join(TMP_FOLDER, "df2.pkl")))
 
     @logTest
     def test_retrieve(self):

@@ -205,7 +205,11 @@ class PickleArchiver(PandasArchiver[T]):
 
         :return: pandas Dataframe
         """
-        return pd.read_pickle(self.filename)
+        try:
+            output = pd.read_pickle(self.filename)
+        except FileNotFoundError:
+            output = pd.DataFrame()
+        return output
 
 
 class TableArchiver(PandasArchiver[T]):
